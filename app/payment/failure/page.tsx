@@ -16,7 +16,7 @@ export default function PaymentFailurePage() {
         <Card className="text-center">
           <CardContent className="p-8">
             <div className="mb-6">
-              <XCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
+              <XCircle className="h-16 w-16 text-red-500 mx-auto mb-4"/>
               <h1 className="text-3xl font-bold text-gray-900 mb-2">
                 Booking Failed
               </h1>
@@ -35,14 +35,14 @@ export default function PaymentFailurePage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
               <div className="flex items-center justify-center p-4 bg-gray-50 rounded-lg">
-                <CreditCard className="h-6 w-6 text-gray-600 mr-3" />
+                <CreditCard className="h-6 w-6 text-gray-600 mr-3"/>
                 <div className="text-left">
                   <p className="font-medium text-gray-900">Check Payment Info</p>
                   <p className="text-sm text-gray-600">Verify card details</p>
                 </div>
               </div>
               <div className="flex items-center justify-center p-4 bg-gray-50 rounded-lg">
-                <HelpCircle className="h-6 w-6 text-gray-600 mr-3" />
+                <HelpCircle className="h-6 w-6 text-gray-600 mr-3"/>
                 <div className="text-left">
                   <p className="font-medium text-gray-900">Need Help?</p>
                   <p className="text-sm text-gray-600">Contact our support</p>
@@ -75,7 +75,7 @@ export default function PaymentFailurePage() {
 
               <div className="mt-6 p-4 bg-teal-50 rounded-lg">
                 <div className="flex items-center justify-center mb-2">
-                  <Phone className="h-5 w-5 text-teal-600 mr-2" />
+                  <Phone className="h-5 w-5 text-teal-600 mr-2"/>
                   <span className="font-medium text-teal-800">24/7 Support Available</span>
                 </div>
                 <p className="text-sm text-teal-700">

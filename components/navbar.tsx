@@ -56,7 +56,7 @@ export function Navbar() {
                 placeholder="Search services..."
                 className="pl-10 pr-4"
               />
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4"/>
             </div>
           </div>
 
@@ -68,12 +68,12 @@ export function Navbar() {
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center space-x-4">
             <Button variant="ghost" size="icon">
-              <Heart className="h-5 w-5" />
+              <Heart className="h-5 w-5"/>
             </Button>
             <AuthPopover />
             <Link href="/cart">
               <Button variant="ghost" size="icon" className="relative">
-                <Calendar className="h-5 w-5" />
+                <Calendar className="h-5 w-5"/>
                 {state.items.length > 0 && (
                   <Badge className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs">
                     {state.items.reduce((sum, item) => sum + item.quantity, 0)}
@@ -88,7 +88,7 @@ export function Navbar() {
             <ThemeToggle />
             <Link href="/cart">
               <Button variant="ghost" size="icon" className="relative">
-                <Calendar className="h-5 w-5" />
+                <Calendar className="h-5 w-5"/>
                 {state.items.length > 0 && (
                   <Badge className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs">
                     {state.items.reduce((sum, item) => sum + item.quantity, 0)}
@@ -99,7 +99,7 @@ export function Navbar() {
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon">
-                  <Menu className="h-8 w-8" />
+                  <Menu className="h-8 w-8"/>
                 </Button>
               </SheetTrigger>
               <SheetContent side="right" className="w-[300px] sm:w-[400px]">
@@ -110,7 +110,7 @@ export function Navbar() {
                       placeholder="Search services..."
                       className="pl-10 pr-4"
                     />
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4"/>
                   </div>
                   {navigation.map((item) => (
                     <div key={item.name}>
@@ -151,7 +151,7 @@ function AuthPopover() {
     <Popover>
       <PopoverTrigger asChild>
         <Button variant="ghost" size="icon" aria-label="Account">
-          <User className="h-6 w-6" />
+          <User className="h-6 w-6"/>
         </Button>
       </PopoverTrigger>
       <PopoverContent align="end" className="w-40 p-2">

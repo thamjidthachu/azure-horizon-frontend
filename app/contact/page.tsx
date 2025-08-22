@@ -27,7 +27,7 @@ export default function ContactPage() {
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center mb-4">
-                  <Mail className="h-6 w-6 text-teal-600 mr-3" />
+                  <Mail className="h-6 w-6 text-teal-600 mr-3"/>
                   <div>
                     <h3 className="font-semibold">Email Us</h3>
                     <p className="text-gray-600">info@azurehorizon.com</p>
@@ -40,7 +40,7 @@ export default function ContactPage() {
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center mb-4">
-                  <Phone className="h-6 w-6 text-teal-600 mr-3" />
+                  <Phone className="h-6 w-6 text-teal-600 mr-3"/>
                   <div>
                     <h3 className="font-semibold">Call Us</h3>
                     <p className="text-gray-600">+960 123-4567</p>
@@ -53,7 +53,7 @@ export default function ContactPage() {
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center mb-4">
-                  <MapPin className="h-6 w-6 text-teal-600 mr-3" />
+                  <MapPin className="h-6 w-6 text-teal-600 mr-3"/>
                   <div>
                     <h3 className="font-semibold">Visit Us</h3>
                     <p className="text-gray-600">
@@ -68,7 +68,7 @@ export default function ContactPage() {
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center mb-4">
-                  <Clock className="h-6 w-6 text-teal-600 mr-3" />
+                  <Clock className="h-6 w-6 text-teal-600 mr-3"/>
                   <div>
                     <h3 className="font-semibold">Resort Hours</h3>
                     <p className="text-gray-600">
@@ -84,7 +84,7 @@ export default function ContactPage() {
             <Card className="bg-gradient-to-br from-teal-50 to-blue-50 dark:from-teal-900 dark:to-blue-900">
               <CardContent className="p-6">
                 <div className="flex items-center mb-4">
-                  <Waves className="h-6 w-6 text-teal-600 mr-3" />
+                  <Waves className="h-6 w-6 text-teal-600 mr-3"/>
                   <div>
                     <h3 className="font-semibold text-teal-800 dark:text-black">Getting Here</h3>
                     <p className="text-teal-700 text-sm dark:text-gray-400">

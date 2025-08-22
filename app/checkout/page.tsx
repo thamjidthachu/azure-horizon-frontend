@@ -90,7 +90,7 @@ export default function CheckoutPage() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center">
-                    <User className="h-5 w-5 mr-2" />
+                    <User className="h-5 w-5 mr-2"/>
                     Guest Information
                   </CardTitle>
                 </CardHeader>
@@ -138,18 +138,18 @@ export default function CheckoutPage() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center">
-                    <CreditCard className="h-5 w-5 mr-2" />
+                    <CreditCard className="h-5 w-5 mr-2"/>
                     Payment Information
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod}>
                     <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="card" id="card" />
+                      <RadioGroupItem value="card" id="card"/>
                       <Label htmlFor="card">Credit/Debit Card</Label>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="paypal" id="paypal" />
+                      <RadioGroupItem value="paypal" id="paypal"/>
                       <Label htmlFor="paypal">PayPal</Label>
                     </div>
                   </RadioGroup>
@@ -192,7 +192,7 @@ export default function CheckoutPage() {
               <Card className="sticky top-4">
                 <CardHeader>
                   <CardTitle className="flex items-center">
-                    <Calendar className="h-5 w-5 mr-2" />
+                    <Calendar className="h-5 w-5 mr-2"/>
                     Booking Summary
                   </CardTitle>
                 </CardHeader>

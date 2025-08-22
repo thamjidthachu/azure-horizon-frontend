@@ -50,7 +50,7 @@ export default function ProfilePage() {
           />
           <h2 className="text-2xl font-bold mb-1">{profile.full_name || profile.username}</h2>
           <div className="text-gray-500 mb-4">@{profile.username}</div>
-          <Separator className="my-4" />
+          <Separator className="my-4"/>
           <div className="w-full space-y-2 text-center">
             <div><span className="font-medium">Email:</span>&nbsp;{profile.email}</div>
             <div><span className="font-medium">Phone:</span>&nbsp;{profile.phone}</div>

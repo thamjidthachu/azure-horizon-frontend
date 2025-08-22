@@ -34,9 +34,16 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
   }
 
   const addToCart = () => {
-    for (let i = 0; i < quantity; i++) {
-      dispatch({ type: 'ADD_ITEM', payload: product })
-    }
+    dispatch({
+      type: 'ADD_ITEM',
+      payload: {
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        quantity: quantity
+      }
+    })
+    
     toast({
       title: "Added to cart",
       description: `${quantity} ${product.name}(s) added to your cart.`,
@@ -168,11 +175,11 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
                   className="flex-1"
                   size="lg"
                 >
-                  <ShoppingCart className="h-5 w-5 mr-2" />
+                  <ShoppingCart className="h-5 w-5 mr-2"/>
                   {product.inStock ? 'Add to Cart' : 'Out of Stock'}
                 </Button>
                 <Button variant="outline" size="lg" className="flex-1">
-                  <Heart className="h-5 w-5 mr-2" />
+                  <Heart className="h-5 w-5 mr-2"/>
                   Add to Wishlist
                 </Button>
               </div>
@@ -183,15 +190,15 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
             {/* Shipping Info */}
             <div className="space-y-4">
               <div className="flex items-center space-x-3">
-                <Truck className="h-5 w-5 text-green-600" />
+                <Truck className="h-5 w-5 text-green-600"/>
                 <span className="text-sm text-gray-600">Free shipping on orders over $50</span>
               </div>
               <div className="flex items-center space-x-3">
-                <Shield className="h-5 w-5 text-blue-600" />
+                <Shield className="h-5 w-5 text-blue-600"/>
                 <span className="text-sm text-gray-600">2-year warranty included</span>
               </div>
               <div className="flex items-center space-x-3">
-                <RotateCcw className="h-5 w-5 text-purple-600" />
+                <RotateCcw className="h-5 w-5 text-purple-600"/>
                 <span className="text-sm text-gray-600">30-day return policy</span>
               </div>
             </div>

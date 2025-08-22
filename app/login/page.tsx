@@ -60,14 +60,14 @@ export default function LoginPage() {
             <div>
               <Label htmlFor="username">Username</Label>
               <div className="flex items-center gap-2">
-                <User className="h-5 w-5 text-teal-500" />
+                <User className="h-5 w-5 text-teal-500"/>
                 <Input id="username" name="username" value={form.username} onChange={handleChange} required autoFocus />
               </div>
             </div>
             <div>
               <Label htmlFor="password">Password</Label>
               <div className="flex items-center gap-2">
-                <Lock className="h-5 w-5 text-teal-500" />
+                <Lock className="h-5 w-5 text-teal-500"/>
                 <Input id="password" name="password" type="password" value={form.password} onChange={handleChange} required />
               </div>
             </div>
@@ -75,7 +75,7 @@ export default function LoginPage() {
               {loading ? "Logging in..." : "Login"}
             </Button>
           </form>
-          <Separator className="my-6" />
+          <Separator className="my-6"/>
           <div className="text-center text-sm">
             Don't have an account? <a href="/register" className="text-teal-600 hover:underline">Register</a>
           </div>

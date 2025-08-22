@@ -32,7 +32,7 @@ export default function ContactForm() {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center">
-          <Palmtree className="h-5 w-5 mr-2 text-teal-600" />
+          <Palmtree className="h-5 w-5 mr-2 text-teal-600"/>
           Send us a Message
         </CardTitle>
       </CardHeader>
@@ -56,14 +56,14 @@ export default function ContactForm() {
 
           <div>
             <Label htmlFor="phone">Phone Number</Label>
-            <Input id="phone" type="tel" />
+            <Input id="phone" type="tel"/>
           </div>
 
           <div>
             <Label htmlFor="subject">Subject</Label>
             <Select required>
               <SelectTrigger>
-                <SelectValue placeholder="Select a subject" />
+                <SelectValue placeholder="Select a subject"/>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="booking">New Booking Inquiry</SelectItem>
@@ -79,14 +79,14 @@ export default function ContactForm() {
 
           <div>
             <Label htmlFor="dates">Preferred Dates (Optional)</Label>
-            <Input id="dates" placeholder="e.g., March 15-20, 2024" />
+            <Input id="dates" placeholder="e.g., March 15-20, 2024"/>
           </div>
 
           <div>
             <Label htmlFor="guests">Number of Guests (Optional)</Label>
             <Select>
               <SelectTrigger>
-                <SelectValue placeholder="Select number of guests" />
+                <SelectValue placeholder="Select number of guests"/>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="1">1 Guest</SelectItem>

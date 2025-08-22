@@ -47,7 +47,7 @@ export default function CartPage() {
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="text-center">
-            <Calendar className="h-24 w-24 text-gray-400 mx-auto mb-4" />
+            <Calendar className="h-24 w-24 text-gray-400 mx-auto mb-4"/>
             <h1 className="text-2xl font-bold text-gray-900 mb-2">No bookings yet</h1>
             <p className="text-gray-600 mb-8">Start exploring our services to create your perfect getaway</p>
             <Link href="/services">
@@ -106,7 +106,7 @@ export default function CartPage() {
                             size="sm"
                             onClick={() => updateQuantity(item.id, item.quantity - 1)}
                           >
-                            <Minus className="h-4 w-4" />
+                            <Minus className="h-4 w-4"/>
                           </Button>
                           <span className="px-4 py-2 text-center min-w-[60px]">
                             {item.quantity} guest{item.quantity > 1 ? 's' : ''}
@@ -116,7 +116,7 @@ export default function CartPage() {
                             size="sm"
                             onClick={() => updateQuantity(item.id, item.quantity + 1)}
                           >
-                            <Plus className="h-4 w-4" />
+                            <Plus className="h-4 w-4"/>
                           </Button>
                         </div>
                         
@@ -126,7 +126,7 @@ export default function CartPage() {
                           onClick={() => removeService(item.id)}
                           className="text-red-600 hover:text-red-700"
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Trash2 className="h-4 w-4"/>
                         </Button>
                       </div>
                     </div>

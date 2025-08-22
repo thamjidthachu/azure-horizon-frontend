@@ -133,15 +133,15 @@ export default function ServiceDetailPage() {
               </div>
               <div className="flex items-center space-x-6 mb-6 text-gray-600">
                 <div className="flex items-center">
-                  <Clock className="h-5 w-5 mr-2" />
+                  <Clock className="h-5 w-5 mr-2"/>
                   {service.time || 0} hours
                 </div>
                 <div className="flex items-center">
-                  <Users className="h-5 w-5 mr-2" />
+                  <Users className="h-5 w-5 mr-2"/>
                   Up to {service.max_people || 0} guests
                 </div>
                 <div className="flex items-center">
-                  <MapPin className="h-5 w-5 mr-2" />
+                  <MapPin className="h-5 w-5 mr-2"/>
                   {service.location || "Location not specified"}
                 </div>
               </div>
@@ -217,7 +217,7 @@ export default function ServiceDetailPage() {
                 className="w-full"
                 size="lg"
               >
-                <Calendar className="h-5 w-5 mr-2" />
+                <Calendar className="h-5 w-5 mr-2"/>
                 Book Now - ${service.price ?? 0 * quantity}
               </Button>
             </div>

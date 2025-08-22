@@ -144,7 +144,7 @@ export default function ServicesPage() {
           <div className="flex flex-col sm:flex-row gap-4 mb-6">
             <Select value={filterBy} onValueChange={setFilterBy}>
               <SelectTrigger className="w-full sm:w-48">
-                <SelectValue placeholder="Filter by category" />
+                <SelectValue placeholder="Filter by category"/>
               </SelectTrigger>
               <SelectContent>
                 {categories.map(category => (
@@ -156,7 +156,7 @@ export default function ServicesPage() {
             </Select>
             <Select value={sortBy} onValueChange={setSortBy}>
               <SelectTrigger className="w-full sm:w-48">
-                <SelectValue placeholder="Sort by" />
+                <SelectValue placeholder="Sort by"/>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="name">Name</SelectItem>
@@ -205,7 +205,7 @@ export default function ServicesPage() {
                   <span className="text-sm text-gray-500 ml-2">({service.review_count ?? 20})</span>
                 </div>
                 <div className="flex items-center mb-3 text-sm text-gray-600">
-                  <Clock className="h-4 w-4 mr-1" />
+                  <Clock className="h-4 w-4 mr-1"/>
                   {service.time ?? 0} hours
                 </div>
                 <p className="text-gray-600 text-sm mb-4 line-clamp-2">
@@ -231,7 +231,7 @@ export default function ServicesPage() {
                     onClick={() => bookService(service)}
                     className="flex-1"
                   >
-                    <Calendar className="h-4 w-4 mr-2" />
+                    <Calendar className="h-4 w-4 mr-2"/>
                     Book Now
                   </Button>
                 </div>

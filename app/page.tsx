@@ -96,7 +96,7 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center">
               <div className="bg-teal-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Sparkles className="h-8 w-8 text-teal-600" />
+                <Sparkles className="h-8 w-8 text-teal-600"/>
               </div>
               <h3 className="text-xl font-semibold mb-2">Luxury Spa</h3>
               <p className="text-gray-600">
@@ -105,7 +105,7 @@ export default function HomePage() {
             </div>
             <div className="text-center">
               <div className="bg-teal-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Utensils className="h-8 w-8 text-teal-600" />
+                <Utensils className="h-8 w-8 text-teal-600"/>
               </div>
               <h3 className="text-xl font-semibold mb-2">Fine Dining</h3>
               <p className="text-gray-600">
@@ -114,7 +114,7 @@ export default function HomePage() {
             </div>
             <div className="text-center">
               <div className="bg-teal-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Waves className="h-8 w-8 text-teal-600" />
+                <Waves className="h-8 w-8 text-teal-600"/>
               </div>
               <h3 className="text-xl font-semibold mb-2">Water Adventures</h3>
               <p className="text-gray-600">

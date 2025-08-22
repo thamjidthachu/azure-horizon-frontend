@@ -69,7 +69,7 @@ export default function ProductsPage() {
           <div className="flex flex-col sm:flex-row gap-4 mb-6">
             <Select value={filterBy} onValueChange={setFilterBy}>
               <SelectTrigger className="w-full sm:w-48">
-                <SelectValue placeholder="Filter by category" />
+                <SelectValue placeholder="Filter by category"/>
               </SelectTrigger>
               <SelectContent>
                 {categories.map(category => (
@@ -82,7 +82,7 @@ export default function ProductsPage() {
 
             <Select value={sortBy} onValueChange={setSortBy}>
               <SelectTrigger className="w-full sm:w-48">
-                <SelectValue placeholder="Sort by" />
+                <SelectValue placeholder="Sort by"/>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="name">Name</SelectItem>

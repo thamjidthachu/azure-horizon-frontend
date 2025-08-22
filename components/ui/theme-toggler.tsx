@@ -23,7 +23,7 @@ export default function ThemeToggle() {
         checked={theme === 'dark'}
         onChange={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
       />
-      <div className="sunmoon" />
+      <div className="sunmoon"/>
       <div className="clouds">
         <Image 
           src="/cloud_1.svg" 
