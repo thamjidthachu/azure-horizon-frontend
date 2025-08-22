@@ -127,10 +127,10 @@
   --switch-width: 50px;
   --switch-height: 25px;
   --switch-round: 20px;
-  --switch-padding-x: 3px;
+  --switch-padding-x: 2.5px;
   --sunmoon-size: 20px;
-  --cloud-size: 12.5px;
-  --stars-size: 18px;
+  --cloud-size: 15px;
+  --stars-size: 25px;
 }
 
 /* Switch base styles */
