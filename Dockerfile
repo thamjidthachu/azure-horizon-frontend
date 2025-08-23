@@ -1,4 +1,4 @@
-# Use Node.js LTS version
+# Use Node.js LTS image
 FROM node:20-alpine
 
 # Set working directory
@@ -7,7 +7,7 @@ WORKDIR /app
 # Copy package files
 COPY package.json pnpm-lock.yaml ./
 
-# Install pnpm
+# Install pnpm globally
 RUN npm install -g pnpm
 
 # Install dependencies
@@ -16,11 +16,11 @@ RUN pnpm install --frozen-lockfile
 # Copy project files
 COPY . .
 
-# Build the application
+# Build Next.js app
 RUN pnpm build
 
-# Expose the port the app runs on
+# Expose port
 EXPOSE 3000
 
-# Start the application
+# Start the app
 CMD ["pnpm", "start"]
