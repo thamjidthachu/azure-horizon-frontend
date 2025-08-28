@@ -79,7 +79,11 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (form.password !== form.password2) {
-      toast({ title: "Passwords do not match", variant: "destructive" })
+      toast({ 
+        title: "Passwords do not match", 
+        variant: "destructive",
+        duration: 3000
+      })
       return
     }
     setLoading(true)
@@ -99,6 +103,8 @@ export default function RegisterPage() {
       toast({
         title: "Registration successful!",
         description: "You have successfully registered. Redirecting to login...",
+        variant: "success",
+        duration: 3000
       })
       setTimeout(() => {
         router.push("/login")
@@ -120,7 +126,12 @@ export default function RegisterPage() {
         const err = await res.json()
         errMsg = err.detail || errMsg
       } catch {}
-      toast({ title: "Registration failed", description: errMsg, variant: "destructive" })
+      toast({ 
+        title: "Registration failed", 
+        description: errMsg, 
+        variant: "destructive",
+        duration: 3000
+      })
     }
     setLoading(false)
   }

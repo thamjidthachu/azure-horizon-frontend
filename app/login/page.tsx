@@ -39,27 +39,20 @@ export default function LoginPage() {
       localStorage.setItem("access_token", data.access)
       localStorage.setItem("refresh_token", data.refresh)
       toast({ 
-        title: "✅ Login successful!", 
+        title: "Login successful!", 
         description: "Welcome back!",
-        style: {
-          backgroundColor: '#22c55e',
-          color: 'white',
-          border: '1px solid #16a34a'
-        }
+        variant: "success",
+        duration: 3000
       })
       // Redirect to profile or home
       router.push("/")
     } else {
       const err = await res.json()
       toast({ 
-        title: "❌ Login failed", 
+        title: "Login failed", 
         description: err.detail || "Invalid credentials.", 
         variant: "destructive",
-        style: {
-          backgroundColor: '#ef4444',
-          color: 'white',
-          border: '1px solid #dc2626'
-        }
+        duration: 3000
       })
     }
     setLoading(false)
@@ -76,7 +69,7 @@ export default function LoginPage() {
             <p className="text-gray-500 mb-6 text-center">Sign in to your account</p>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <Label htmlFor="username">Username</Label>
+              <Label htmlFor="username">Email</Label>
               <div className="flex items-center gap-2">
                 <Input id="username" name="username" value={form.username} onChange={handleChange} required autoFocus />
                 <User className="h-5 w-5 text-teal-500"/>
@@ -101,9 +94,7 @@ export default function LoginPage() {
       </Card>
     </div>
     <Footer />
-    <div style={{ position: 'fixed', top: '400px', left: '50%', transform: 'translateX(-50%)', zIndex: 9999 }}>
-      <Toaster />
-    </div>
+    <Toaster />
     </div>
   )
 }
