@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { useToast } from "@/components/ui/use-toast"
+import { Toaster } from "@/components/ui/toaster"
 import { User, Lock } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { Navbar } from "@/components/navbar"
@@ -37,12 +38,29 @@ export default function LoginPage() {
       // Save tokens
       localStorage.setItem("access_token", data.access)
       localStorage.setItem("refresh_token", data.refresh)
-      toast({ title: "Login successful!", description: "Welcome back!" })
+      toast({ 
+        title: "✅ Login successful!", 
+        description: "Welcome back!",
+        style: {
+          backgroundColor: '#22c55e',
+          color: 'white',
+          border: '1px solid #16a34a'
+        }
+      })
       // Redirect to profile or home
       router.push("/")
     } else {
       const err = await res.json()
-      toast({ title: "Login failed", description: err.detail || "Invalid credentials.", variant: "destructive" })
+      toast({ 
+        title: "❌ Login failed", 
+        description: err.detail || "Invalid credentials.", 
+        variant: "destructive",
+        style: {
+          backgroundColor: '#ef4444',
+          color: 'white',
+          border: '1px solid #dc2626'
+        }
+      })
     }
     setLoading(false)
   }
@@ -60,15 +78,15 @@ export default function LoginPage() {
             <div>
               <Label htmlFor="username">Username</Label>
               <div className="flex items-center gap-2">
-                <User className="h-5 w-5 text-teal-500"/>
                 <Input id="username" name="username" value={form.username} onChange={handleChange} required autoFocus />
+                <User className="h-5 w-5 text-teal-500"/>
               </div>
             </div>
             <div>
               <Label htmlFor="password">Password</Label>
               <div className="flex items-center gap-2">
-                <Lock className="h-5 w-5 text-teal-500"/>
                 <Input id="password" name="password" type="password" value={form.password} onChange={handleChange} required />
+                <Lock className="h-5 w-5 text-teal-500"/>
               </div>
             </div>
             <Button type="submit" className="w-full mt-2" disabled={loading}>
@@ -82,7 +100,10 @@ export default function LoginPage() {
         </CardContent>
       </Card>
     </div>
-    < Footer />
+    <Footer />
+    <div style={{ position: 'fixed', top: '400px', left: '50%', transform: 'translateX(-50%)', zIndex: 9999 }}>
+      <Toaster />
+    </div>
     </div>
   )
 }
