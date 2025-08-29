@@ -43,7 +43,7 @@ export default function ContactPage() {
                   <Phone className="h-6 w-6 text-teal-600 mr-3"/>
                   <div>
                     <h3 className="font-semibold">Call Us</h3>
-                    <p className="text-gray-600">+960 123-4567</p>
+                    <p className="text-gray-600">+971 527627117</p>
                     <p className="text-sm text-gray-500">24/7 Concierge Service</p>
                   </div>
                 </div>
