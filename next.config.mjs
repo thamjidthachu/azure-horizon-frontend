@@ -17,12 +17,24 @@ const nextConfig = {
         aggregateTimeout: 300,
         ignored: /node_modules/,
       };
-      // Optimize for faster builds
+      
+      // Enable hot module replacement
+      config.cache = false;
+      
+      // Optimize for faster builds and better HMR
       config.optimization = {
         ...config.optimization,
         removeAvailableModules: false,
         removeEmptyChunks: false,
         splitChunks: false,
+      };
+      
+      // Add fallback for better module resolution
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
       };
     }
     return config;
@@ -36,9 +48,16 @@ const nextConfig = {
         mocha: { browser: 'mocha/browser-entry.js' },
       },
     },
+    // Enable faster refresh
+    esmExternals: true,
   },
-  // Faster builds in development
-  swcMinify: true,
+  // Development optimizations
+  onDemandEntries: {
+    // period (in ms) where the server will keep pages in the buffer
+    maxInactiveAge: 25 * 1000,
+    // number of pages that should be kept simultaneously without being disposed
+    pagesBufferLength: 2,
+  },
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
   },

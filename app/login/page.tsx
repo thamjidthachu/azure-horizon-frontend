@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -9,7 +9,7 @@ import { Separator } from "@/components/ui/separator"
 import { useToast } from "@/components/ui/use-toast"
 import { Toaster } from "@/components/ui/toaster"
 import { User, Lock } from "lucide-react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Navbar } from "@/components/navbar"
 import { TrendingHeader } from "@/components/trending-header"
 import { Footer } from "@/components/footer"
@@ -20,7 +20,11 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const { toast } = useToast()
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { checkAuth } = useAuth()
+  
+  // Get redirect URL from query params
+  const redirectUrl = searchParams.get('redirect') || '/'
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm(f => ({ ...f, [e.target.name]: e.target.value }))
@@ -50,8 +54,9 @@ export default function LoginPage() {
         variant: "success",
         duration: 3000
       })
-      // Redirect to profile or home
-      router.push("/")
+      
+      // Redirect to the original page or home
+      router.push(redirectUrl)
     } else {
       const err = await res.json()
       toast({ 

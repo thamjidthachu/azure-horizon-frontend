@@ -182,7 +182,7 @@ export default function HomePage() {
                       {service.name}
                     </h3>
                     <p className="text-gray-600">{service.synopsis}</p>
-                    <Link href={`/services/${service.id}`}>
+                    <Link href={`/services/${service.slug}`}>
                       <Button variant="outline">View Details</Button>
                     </Link>
                   </CardContent>

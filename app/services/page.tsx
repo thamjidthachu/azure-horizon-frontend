@@ -13,7 +13,7 @@ import { TrendingHeader } from '@/components/trending-header'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { useBooking } from '@/components/booking-provider'
-import { useToast } from '@/hooks/use-toast'
+import { useToast } from '@/components/ui/use-toast'
 
 interface ServiceFile {
   id: number

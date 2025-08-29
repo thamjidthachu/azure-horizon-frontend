@@ -13,7 +13,7 @@ import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { products } from '@/lib/products'
 import { useCart } from '@/components/cart-provider'
-import { useToast } from '@/hooks/use-toast'
+import { useToast } from '@/components/ui/use-toast'
 import ProductsList from "./products-list"
 
 export default function ProductsPage() {

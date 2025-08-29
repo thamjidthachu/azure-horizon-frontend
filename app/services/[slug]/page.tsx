@@ -12,7 +12,7 @@ import { TrendingHeader } from "@/components/trending-header"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
 import { useBooking } from "@/components/booking-provider"
-import { useToast } from "@/hooks/use-toast"
+import { useToast } from "@/components/ui/use-toast"
 import { useParams } from "next/navigation"
 import { ReviewSection } from "@/components/ui/review-section"
 import { authFetch } from "@/utils/authFetch"
@@ -97,7 +97,7 @@ export default function ServiceDetailPage() {
             <div className="relative">
               <Image
                 src={service.files?.[0]?.images || "/placeholder.svg"}
-                alt={service.name}
+                alt={service.name || "Service-Image"}
                 width={600}
                 height={400}
                 className="w-full h-96 lg:h-[500px] object-cover rounded-lg"
@@ -230,7 +230,7 @@ export default function ServiceDetailPage() {
           </div>
           <Separator /> 
           {/* Reviews Section */}
-          <div className="mt-8">
+          <div id="reviews" className="mt-8">
   <h3 className="text-lg font-semibold mb-4">Rate this service</h3>
     <ReviewSection serviceSlug={service.slug} />
     </div>

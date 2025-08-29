@@ -1,22 +1,40 @@
 // components/api-call-component.tsx
-import useApiResponseHandler from '@/components/ui/toast';
-import { useToast } from '@/hooks/use-toast'
+import { useToast } from '@/components/ui/use-toast'
 
 const ApiCallComponent = () => {
-  const { handleApiResponse } = useApiResponseHandler();
   const { toast } = useToast();
 
   const fetchData = async () => {
     try {
       const response = await fetch('/api/endpoint');
       const data = await response.json();
-      handleApiResponse(data);
+      
+      // Handle API response based on status
+      if (response.ok) {
+        // Success response - show success toast
+        toast({
+          title: 'Success!',
+          description: data.message || 'API call completed successfully.',
+          variant: 'success',
+          duration: 3000
+        });
+      } else {
+        // API error response - show error toast
+        toast({
+          title: 'API Error',
+          description: data.error || data.message || `Request failed with status ${response.status}`,
+          variant: 'destructive',
+          duration: 3000
+        });
+      }
     } catch (error) {
-      console.error(error);
+      // Network/connection error - show error toast
+      console.error('API call failed:', error);
       toast({
-        title: 'Error',
-        description: 'An error occurred while making the API call.',
+        title: 'Connection Error',
+        description: 'Unable to connect to the server. Please check your internet connection.',
         variant: 'destructive',
+        duration: 3000
       });
     }
   };
