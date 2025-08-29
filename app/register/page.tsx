@@ -205,8 +205,8 @@ export default function RegisterPage() {
                   <input
                     type="radio"
                     name="gender"
-                    value="male"
-                    checked={form.gender === "male"}
+                    value="M"
+                    checked={form.gender === "M"}
                     onChange={handleChange}
                     className="accent-teal-500"
                   />
@@ -216,8 +216,8 @@ export default function RegisterPage() {
                   <input
                     type="radio"
                     name="gender"
-                    value="female"
-                    checked={form.gender === "female"}
+                    value="M"
+                    checked={form.gender === "F"}
                     onChange={handleChange}
                     className="accent-teal-500"
                   />
