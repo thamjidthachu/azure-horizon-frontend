@@ -5,22 +5,19 @@ FROM node:20-alpine
 WORKDIR /app
 
 # Copy package files
-COPY package.json pnpm-lock.yaml ./
-
-# Install pnpm globally
-RUN npm install -g pnpm
+COPY package.json yarn.lock ./
 
 # Install dependencies
-RUN pnpm install --frozen-lockfile
+RUN yarn install --frozen-lockfile --production=false
 
 # Copy project files
 COPY . .
 
 # Build Next.js app
-RUN pnpm build
+RUN yarn build
 
 # Expose port
 EXPOSE 3000
 
 # Start the app
-CMD ["pnpm", "start"]
+CMD ["yarn", "start"]
