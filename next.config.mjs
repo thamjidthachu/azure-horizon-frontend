@@ -9,6 +9,11 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  // Force dynamic rendering for pages with search params
+  experimental: {
+    dynamicRoutes: true,
+    serverComponentsExternalPackages: [],
+  },
   // Enable fast refresh and hot reload
   webpack: (config, { dev, isServer }) => {
     if (dev) {
