@@ -140,7 +140,7 @@ export default function RegisterPage() {
     <div>
       <Navbar />
       <TrendingHeader />
-    <div className="flex justify-center py-12 px-4">
+    <div className="flex justify-center py-12">
       <Card className="w-full max-w-md shadow-xl animate-fade-in">
         <CardContent className="p-8">
           <h2 className="text-2xl font-bold mb-2 text-center">Create Account</h2>
@@ -216,7 +216,7 @@ export default function RegisterPage() {
                   <input
                     type="radio"
                     name="gender"
-                    value="F"
+                    value="M"
                     checked={form.gender === "F"}
                     onChange={handleChange}
                     className="accent-teal-500"

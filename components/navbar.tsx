@@ -2,12 +2,14 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { Menu, Calendar, Search, User, Heart } from "lucide-react"
+import { Menu, Calendar, Search, User, Heart, LogOut } from "lucide-react"
 import ThemeToggle from "@/components/ui/theme-toggler"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useBooking } from "@/components/booking-provider"
+import { useAuth } from "@/hooks/useAuth"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Separator } from "@/components/ui/separator"
@@ -15,6 +17,7 @@ import { Separator } from "@/components/ui/separator"
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
   const { state } = useBooking()
+  const { user, loading, isAuthenticated, logout } = useAuth()
 
   const navigation = [
     { name: "Home", href: "/" },
@@ -70,7 +73,16 @@ export function Navbar() {
             <Button variant="ghost" size="icon">
               <Heart className="h-5 w-5"/>
             </Button>
-            <AuthPopover />
+            
+            {/* Authenticated User Display or Auth Popover */}
+            {!loading && (
+              isAuthenticated && user ? (
+                <UserProfileSection user={user} onLogout={logout} />
+              ) : (
+                <AuthPopover />
+              )
+            )}
+            
             <Link href="/cart">
               <Button variant="ghost" size="icon" className="relative">
                 <Calendar className="h-5 w-5"/>
@@ -125,16 +137,25 @@ export function Navbar() {
                     </div>
                   ))}
                   <div className="absolute bottom-8 left-5 right-5 flex flex-col gap-2">
-                    <Link href="/login">
-                      <Button variant="outline" className="w-full hover:text-teal-600 dark:hover:text-teal-400">
-                        Login
-                      </Button>
-                    </Link>
-                    <Link href="/register">
-                      <Button variant="default" className="w-full hover:text-teal-600 dark:hover:text-teal-400">
-                        Register
-                      </Button>
-                    </Link>
+                    {!loading && (
+                      isAuthenticated && user ? (
+                        <MobileUserSection user={user} onLogout={logout} onClose={() => setIsOpen(false)} />
+                      ) : (
+                        <>
+                          <Link href="/login">
+                            <Button variant="outline" className="w-full hover:text-teal-600 dark:hover:text-teal-400">
+                              Login
+                            </Button>
+                          </Link>
+                          <Link href="/register">
+                            <Button variant="default" className="w-full hover:text-teal-600 dark:hover:text-teal-400">
+                              Register
+                            </Button>
+                          </Link>
+                        </>
+                      )
+                    )
+                    }
                   </div>
                 </div>
               </SheetContent>
@@ -143,6 +164,76 @@ export function Navbar() {
         </div>
       </div>
     </nav>
+  )
+}
+
+function UserProfileSection({ user, onLogout }: { user: any, onLogout: () => void }) {
+  return (
+    <div className="flex items-center space-x-3">
+      <span className="text-sm font-medium text-foreground">
+        Hey! <span className="text-primary font-semibold">{user.username}</span>
+      </span>
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button variant="ghost" size="icon" className="relative">
+            <Avatar className="h-8 w-8">
+              <AvatarImage 
+                src={user.avatar ? `${process.env.NEXT_PUBLIC_API_BASE_URL}${user.avatar}` : undefined} 
+                alt={user.username} 
+              />
+              <AvatarFallback className="bg-primary text-primary-foreground">
+                {user.username.charAt(0).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent align="end" className="w-48 p-2">
+          <div className="flex flex-col gap-2">
+            <div className="px-2 py-1 text-sm">
+              <div className="font-medium">{user.full_name || user.username}</div>
+              <div className="text-muted-foreground text-xs">{user.email}</div>
+            </div>
+            <Separator />
+            <Link href="/profile">
+              <Button variant="ghost" className="w-full justify-start">
+                <User className="h-4 w-4 mr-2" />
+                Profile
+              </Button>
+            </Link>
+            <Button variant="ghost" className="w-full justify-start text-destructive hover:text-destructive" onClick={onLogout}>
+              <LogOut className="h-4 w-4 mr-2" />
+              Logout
+            </Button>
+          </div>
+        </PopoverContent>
+      </Popover>
+    </div>
+  )
+}
+
+function MobileUserSection({ user, onLogout, onClose }: { user: any, onLogout: () => void, onClose: () => void }) {
+  return (
+    <div className="space-y-2">
+      <div className="px-3 py-2 bg-muted rounded-md">
+        <div className="text-sm font-medium">Hey! {user.username}</div>
+        <div className="text-xs text-muted-foreground">{user.email}</div>
+      </div>
+      <Link href="/profile" onClick={onClose}>
+        <Button variant="outline" className="w-full justify-start">
+          <User className="h-4 w-4 mr-2" />
+          Profile
+        </Button>
+      </Link>
+      <div className="h-2"></div> {/* Added gap */}
+      <Button 
+        variant="destructive" 
+        className="w-full justify-start" 
+        onClick={() => { onLogout(); onClose(); }}
+      >
+        <LogOut className="h-4 w-4 mr-2" />
+        Logout
+      </Button>
+    </div>
   )
 }
 
@@ -171,4 +262,3 @@ function AuthPopover() {
     </Popover>
   )
 }
-<AuthPopover />

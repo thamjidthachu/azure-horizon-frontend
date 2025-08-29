@@ -13,12 +13,14 @@ import { useRouter } from "next/navigation"
 import { Navbar } from "@/components/navbar"
 import { TrendingHeader } from "@/components/trending-header"
 import { Footer } from "@/components/footer"
+import { useAuth } from "@/hooks/useAuth"
 
 export default function LoginPage() {
   const [form, setForm] = useState({ username: "", password: "" })
   const [loading, setLoading] = useState(false)
   const { toast } = useToast()
   const router = useRouter()
+  const { checkAuth } = useAuth()
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm(f => ({ ...f, [e.target.name]: e.target.value }))
@@ -38,6 +40,10 @@ export default function LoginPage() {
       // Save tokens
       localStorage.setItem("access_token", data.access)
       localStorage.setItem("refresh_token", data.refresh)
+      
+      // Re-check auth to update navbar
+      await checkAuth()
+      
       toast({ 
         title: "Login successful!", 
         description: "Welcome back!",
@@ -62,7 +68,7 @@ export default function LoginPage() {
     <div>
       <Navbar />
       <TrendingHeader />
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-100 to-white">
+      <div className="flex justify-center py-12 px-4">
         <Card className="w-full max-w-md shadow-xl animate-fade-in">
           <CardContent className="p-8">
             <h2 className="text-2xl font-bold mb-2 text-center">Login</h2>

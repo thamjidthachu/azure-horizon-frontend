@@ -242,6 +242,57 @@
   color: var(--foreground);
 }
 
+/* Input field styling for better dark mode visibility */
+:is(.dark) input[type="text"],
+:is(.dark) input[type="email"],
+:is(.dark) input[type="password"],
+:is(.dark) input[type="tel"],
+:is(.dark) input[type="file"],
+:is(.dark) textarea {
+  background-color: rgb(55, 65, 81) !important; /* gray-700 */
+  border-color: rgb(75, 85, 99) !important; /* gray-600 */
+  color: var(--foreground) !important;
+}
+
+:is(.dark) input[type="text"]:focus,
+:is(.dark) input[type="email"]:focus,
+:is(.dark) input[type="password"]:focus,
+:is(.dark) input[type="tel"]:focus,
+:is(.dark) input[type="file"]:focus,
+:is(.dark) textarea:focus {
+  background-color: rgb(75, 85, 99) !important; /* gray-600 */
+  border-color: rgb(14, 165, 233) !important; /* blue-500 */
+  box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.2) !important;
+}
+
+:is(.dark) input[type="text"]:hover,
+:is(.dark) input[type="email"]:hover,
+:is(.dark) input[type="password"]:hover,
+:is(.dark) input[type="tel"]:hover,
+:is(.dark) input[type="file"]:hover,
+:is(.dark) textarea:hover {
+  background-color: rgb(75, 85, 99) !important; /* gray-600 */
+  border-color: rgb(107, 114, 128) !important; /* gray-500 */
+}
+
+/* Error state for dark mode inputs */
+:is(.dark) input.border-red-500 {
+  background-color: rgb(55, 65, 81) !important; /* gray-700 */
+  border-color: rgb(239, 68, 68) !important; /* red-500 */
+}
+
+:is(.dark) input.border-red-500:focus {
+  background-color: rgb(75, 85, 99) !important; /* gray-600 */
+  border-color: rgb(239, 68, 68) !important; /* red-500 */
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2) !important;
+}
+
+/* Placeholder text in dark mode */
+:is(.dark) input::placeholder,
+:is(.dark) textarea::placeholder {
+  color: rgb(156, 163, 175) !important; /* gray-400 */
+}
+
 /* Ensure proper dark mode styles for components */
 :is(.dark) .bg-white {
   background-color: var(--background);
