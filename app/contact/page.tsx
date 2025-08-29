@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { TrendingHeader } from '@/components/trending-header'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
+import { Toaster } from '@/components/ui/toaster'
 import ContactForm from '@/components/contact-form'
 
 export default function ContactPage() {
@@ -104,6 +105,7 @@ export default function ContactPage() {
       </div>
 
       <Footer />
+      <Toaster />
     </div>
   )
 }

@@ -109,11 +109,6 @@ export default function ContactForm() {
     e.preventDefault()
     
     if (!validateForm()) {
-      toast({
-        title: "Please fix the errors",
-        description: "Please correct the highlighted fields and try again.",
-        variant: "destructive"
-      })
       return
     }
     
@@ -149,6 +144,7 @@ export default function ContactForm() {
         toast({
           title: "Message sent!",
           description: responseData.message || "Our concierge team will get back to you within 2 hours.",
+          variant: "success",
         })
         
         // Reset form
