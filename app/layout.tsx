@@ -4,7 +4,6 @@ import './globals.css'
 import { BookingProvider } from '@/components/booking-provider'
 import { CartProvider } from '@/components/cart-provider'
 import { ThemeProvider } from '@/components/theme-provider'
-import { HotReloadTest } from '@/components/hot-reload-test'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -30,7 +29,6 @@ export default function RootLayout({
             <CartProvider>
               <main className="min-h-screen bg-background font-sans antialiased">
                 {children}
-                {process.env.NODE_ENV === 'development' && <HotReloadTest />}
               </main>
             </CartProvider>
           </BookingProvider>

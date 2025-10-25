@@ -86,7 +86,7 @@ const Toast = React.forwardRef<
       duration={duration}
       {...props}
     >
-      <div className="flex items-center space-x-3 flex-1">
+      <div className="flex items-center space-x-3 flex-1 pr-8">
         {getIcon()}
         <div className="flex-1">
           {props.children}
@@ -132,7 +132,7 @@ const ToastClose = React.forwardRef<
   <ToastPrimitives.Close
     ref={ref}
     className={cn(
-      "rounded-sm p-1 text-gray-400 hover:text-gray-600 transition-colors",
+      "absolute top-2 right-2 rounded-sm p-1 text-gray-400 hover:text-gray-600 transition-colors",
       className
     )}
     toast-close=""

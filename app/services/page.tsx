@@ -14,6 +14,8 @@ import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { useBooking } from '@/components/booking-provider'
 import { useToast } from '@/components/ui/use-toast'
+import { BookingModal } from '@/components/booking-modal'
+import { BookingConflictModal } from '@/components/booking-conflict-modal'
 
 interface ServiceFile {
   id: number
@@ -21,6 +23,7 @@ interface ServiceFile {
 }
 
 interface Service {
+  id: number // Add the numeric ID field
   slug: string
   name: string
   synopsis: string
@@ -39,16 +42,55 @@ export default function ServicesPage() {
   const [error, setError] = useState<string | null>(null)
   const [sortBy, setSortBy] = useState('name')
   const [filterBy, setFilterBy] = useState('all')
-  const { dispatch } = useBooking()
+  const [selectedService, setSelectedService] = useState<Service | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isConflictModalOpen, setIsConflictModalOpen] = useState(false)
+  const [conflictData, setConflictData] = useState<{
+    existingBookings: Array<{
+      itemIndex: number
+      selectedDate: string
+      selectedTime: string
+      quantity: number
+    }>
+    newBookingData: {
+      selectedDate: string
+      selectedTime: string
+      quantity: number
+    }
+  } | null>(null)
+  const { dispatch, state } = useBooking()
   const { toast } = useToast()
 
   useEffect(() => {
     const fetchServices = async () => {
       try {
         setLoading(true)
-        const res = await authFetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/services/list/`)
+        const apiUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/services/list/`
+        console.log('🌐 Attempting to fetch services from:', apiUrl)
+        console.log('🔧 API Base URL:', process.env.NEXT_PUBLIC_API_BASE_URL)
+        
+        // First test if the API is reachable
+        try {
+          const testRes = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/`)
+          console.log('🔍 Backend API health check:', testRes.status)
+        } catch (testError) {
+          console.error('❌ Backend API not reachable:', testError)
+          throw new Error('Backend API server is not running or not accessible')
+        }
+        
+        const res = await authFetch(apiUrl)
+        console.log('📡 Services API response status:', res.status, res.statusText)
+        
         if (!res.ok) throw new Error('Failed to fetch services')
         const data = await res.json()
+        console.log('📊 Services API response:', data)
+        
+        if (process.env.NODE_ENV === 'development' && data.length > 0) {
+          console.log('🏨 First service from list API:', data[0])
+          console.log('🔍 Service keys:', Object.keys(data[0]))
+          console.log('🆔 Service ID fields:', { id: data[0].id, pk: data[0].pk, slug: data[0].slug })
+        }
+        
         setServices(data)
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load services')
@@ -84,12 +126,139 @@ export default function ServicesPage() {
       }
     })
 
-  const bookService = (service: any) => {
-    dispatch({ type: 'ADD_SERVICE', payload: service })
+  const handleQuickBook = (service: any) => {
+    setSelectedService(service)
+    setIsModalOpen(true)
+  }
+
+  const handleModalConfirm = (bookingData: {
+    selectedDate: string
+    selectedTime: string
+    quantity: number
+  }) => {
+    if (!selectedService) return
+
+    // Check if this service already exists in cart
+    const existingBookings = state.items
+      .filter(item => item.id === selectedService.slug)
+      .map(item => ({
+        itemIndex: item.itemIndex!,
+        selectedDate: item.selectedDate!,
+        selectedTime: item.selectedTime!,
+        quantity: item.quantity
+      }))
+
+    if (existingBookings.length > 0) {
+      // Conflict detected - show conflict resolution modal
+      setConflictData({
+        existingBookings,
+        newBookingData: bookingData
+      })
+      setIsConflictModalOpen(true)
+      setIsModalOpen(false)
+      return
+    }
+
+    // No conflict - proceed with normal addition
+    addServiceToCart(bookingData)
+  }
+
+  const addServiceToCart = (bookingData: {
+    selectedDate: string
+    selectedTime: string
+    quantity: number
+  }) => {
+    if (!selectedService) return
+
+    // Transform service to match cart format (preserve both slug and numeric ID)
+    const cartService = {
+      // Use spread first, then override specific fields
+      ...selectedService,
+      id: selectedService.slug, // Override: Use slug as string ID for cart operations (required by booking provider)
+      service_id: selectedService.id, // Store the actual numeric ID from API for backend
+      price: selectedService.price ?? 0,
+      category: selectedService.category ?? 'General',
+      image: selectedService.files?.[0]?.images || '/placeholder.svg',
+      duration: `${selectedService.time ?? 0} hours`,
+      description: selectedService.synopsis || 'No description available',
+      selectedDate: bookingData.selectedDate,
+      selectedTime: bookingData.selectedTime,
+      quantity: bookingData.quantity
+    }
+    
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🏨 Services page adding service to cart via modal:', {
+        original: selectedService,
+        transformed: cartService,
+        bookingData
+      })
+    }
+    
+    dispatch({ type: 'ADD_SERVICE_WITH_QUANTITY', payload: cartService })
     toast({
       title: "Service added to cart",
-      description: `${service.name} has been added to your bookings.`,
+      description: `${bookingData.quantity}x ${selectedService.name} added for ${bookingData.selectedDate} at ${bookingData.selectedTime}.`,
     })
+
+    // Close modals
+    setIsModalOpen(false)
+    setSelectedService(null)
+  }
+
+  const handleModalClose = () => {
+    setIsModalOpen(false)
+    setSelectedService(null)
+  }
+
+  const handleConflictCreateNew = (bookingData: {
+    selectedDate: string
+    selectedTime: string
+    quantity: number
+  }) => {
+    addServiceToCart(bookingData)
+    setIsConflictModalOpen(false)
+    setConflictData(null)
+  }
+
+  const handleConflictAddToExisting = (itemIndex: number, additionalQuantity: number) => {
+    dispatch({ 
+      type: 'ADD_TO_EXISTING_BOOKING', 
+      payload: { itemIndex, additionalQuantity } 
+    })
+    
+    toast({
+      title: "Added to existing booking",
+      description: `${additionalQuantity} guest${additionalQuantity > 1 ? 's' : ''} added to your existing booking.`,
+    })
+    
+    setIsConflictModalOpen(false)
+    setConflictData(null)
+    setSelectedService(null)
+  }
+
+  const handleConflictEditExisting = (itemIndex: number, newBookingData: {
+    selectedDate: string
+    selectedTime: string
+    quantity: number
+  }) => {
+    dispatch({ 
+      type: 'EDIT_EXISTING_BOOKING', 
+      payload: { itemIndex, ...newBookingData } 
+    })
+    
+    toast({
+      title: "Booking updated",
+      description: `Booking updated to ${newBookingData.selectedDate} at ${newBookingData.selectedTime} for ${newBookingData.quantity} guest${newBookingData.quantity > 1 ? 's' : ''}.`,
+    })
+    
+    setIsConflictModalOpen(false)
+    setConflictData(null)
+    setSelectedService(null)
+  }
+
+  const handleConflictClose = () => {
+    setIsConflictModalOpen(false)
+    setConflictData(null)
   }
 
   if (loading) {
@@ -228,7 +397,7 @@ export default function ServicesPage() {
                     </Button>
                   </Link>
                   <Button
-                    onClick={() => bookService(service)}
+                    onClick={() => handleQuickBook(service)}
                     className="flex-1"
                   >
                     <Calendar className="h-4 w-4 mr-2"/>
@@ -241,6 +410,26 @@ export default function ServicesPage() {
         </div>
       </div>
       <Footer />
+      
+      {/* Booking Modal */}
+      <BookingModal
+        isOpen={isModalOpen}
+        onClose={handleModalClose}
+        onConfirm={handleModalConfirm}
+        service={selectedService}
+      />
+
+      {/* Booking Conflict Modal */}
+      <BookingConflictModal
+        isOpen={isConflictModalOpen}
+        onClose={handleConflictClose}
+        onCreateNew={handleConflictCreateNew}
+        onAddToExisting={handleConflictAddToExisting}
+        onEditExisting={handleConflictEditExisting}
+        service={selectedService}
+        existingBookings={conflictData?.existingBookings || []}
+        newBookingData={conflictData?.newBookingData || null}
+      />
     </div>
   )
 }

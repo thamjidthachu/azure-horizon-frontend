@@ -13,6 +13,7 @@ import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
 import { useBooking } from "@/components/booking-provider"
 import { useToast } from "@/components/ui/use-toast"
+import { BookingConflictModal } from "@/components/booking-conflict-modal"
 import { useParams } from "next/navigation"
 import { ReviewSection } from "@/components/ui/review-section"
 import { authFetch } from "@/utils/authFetch"
@@ -24,14 +25,98 @@ export default function ServiceDetailPage() {
   const [quantity, setQuantity] = useState(1)
   const [selectedDate, setSelectedDate] = useState('')
   const [selectedTime, setSelectedTime] = useState('')
-  const { dispatch } = useBooking()
+  const [isAddingToCart, setIsAddingToCart] = useState(false)
+  const [isConflictModalOpen, setIsConflictModalOpen] = useState(false)
+  const [conflictData, setConflictData] = useState<{
+    existingBookings: Array<{
+      itemIndex: number
+      selectedDate: string
+      selectedTime: string
+      quantity: number
+    }>
+    newBookingData: {
+      selectedDate: string
+      selectedTime: string
+      quantity: number
+    }
+  } | null>(null)
+  const bookingContext = useBooking()
+  const { dispatch, state } = bookingContext
   const { toast } = useToast()
+  
+  // Auto-set date and time for testing in development
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      // Set tomorrow's date for testing
+      const tomorrow = new Date()
+      tomorrow.setDate(tomorrow.getDate() + 1)
+      setSelectedDate(tomorrow.toISOString().split('T')[0])
+      setSelectedTime('10:00 AM')
+    }
+  }, [])
+
+  const handleConflictCreateNew = (bookingData: {
+    selectedDate: string
+    selectedTime: string
+    quantity: number
+  }) => {
+    addServiceToCart(bookingData)
+    setIsConflictModalOpen(false)
+    setConflictData(null)
+  }
+
+  const handleConflictAddToExisting = (itemIndex: number, additionalQuantity: number) => {
+    dispatch({ 
+      type: 'ADD_TO_EXISTING_BOOKING', 
+      payload: { itemIndex, additionalQuantity } 
+    })
+    
+    toast({
+      title: "Added to existing booking",
+      description: `${additionalQuantity} guest${additionalQuantity > 1 ? 's' : ''} added to your existing booking.`,
+    })
+    
+    setIsConflictModalOpen(false)
+    setConflictData(null)
+    setIsAddingToCart(false)
+  }
+
+  const handleConflictEditExisting = (itemIndex: number, newBookingData: {
+    selectedDate: string
+    selectedTime: string
+    quantity: number
+  }) => {
+    dispatch({ 
+      type: 'EDIT_EXISTING_BOOKING', 
+      payload: { itemIndex, ...newBookingData } 
+    })
+    
+    toast({
+      title: "Booking updated",
+      description: `Booking updated to ${newBookingData.selectedDate} at ${newBookingData.selectedTime} for ${newBookingData.quantity} guest${newBookingData.quantity > 1 ? 's' : ''}.`,
+    })
+    
+    setIsConflictModalOpen(false)
+    setConflictData(null)
+    setIsAddingToCart(false)
+  }
+
+  const handleConflictClose = () => {
+    setIsConflictModalOpen(false)
+    setConflictData(null)
+    setIsAddingToCart(false)
+  }
 
   useEffect(() => {
     if (!params?.slug) return
     authFetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/services/${params.slug}/`)
       .then(res => res.json())
       .then(data => {
+        if (process.env.NODE_ENV === 'development') {
+          console.log('🏨 Service data from API:', data)
+          console.log('🔍 Service keys:', Object.keys(data))
+          console.log('🆔 Service ID fields:', { id: data.id, pk: data.pk, slug: data.slug })
+        }
         setService(data)
         setLoading(false)
       })
@@ -55,7 +140,16 @@ export default function ServiceDetailPage() {
   }
 
   const bookService = () => {
+    // Prevent double clicks
+    if (isAddingToCart) {
+      console.log('🚫 Already adding to cart, ignoring duplicate call')
+      return
+    }
+    
+    setIsAddingToCart(true)
+    
     if (!selectedDate || !selectedTime) {
+      setIsAddingToCart(false)
       toast({
         title: "Please select date and time",
         description: "Date and time selection is required for booking.",
@@ -63,20 +157,81 @@ export default function ServiceDetailPage() {
       })
       return
     }
-    for (let i = 0; i < quantity; i++) {
-      dispatch({
-        type: 'ADD_SERVICE',
-        payload: {
-          ...service,
-          selectedDate,
-          selectedTime
-        }
-      })
+
+    const bookingData = {
+      selectedDate,
+      selectedTime,
+      quantity
     }
-    toast({
-      title: "Service booked!",
-      description: `${quantity} ${service.name} booking added to your cart.`,
-    })
+
+    // Check if this service already exists in cart
+    const existingBookings = state.items
+      .filter(item => item.id === service.slug)
+      .map(item => ({
+        itemIndex: item.itemIndex!,
+        selectedDate: item.selectedDate!,
+        selectedTime: item.selectedTime!,
+        quantity: item.quantity
+      }))
+
+    if (existingBookings.length > 0) {
+      // Conflict detected - show conflict resolution modal
+      setConflictData({
+        existingBookings,
+        newBookingData: bookingData
+      })
+      setIsConflictModalOpen(true)
+      setIsAddingToCart(false)
+      return
+    }
+
+    // No conflict - proceed with normal addition
+    addServiceToCart(bookingData)
+  }
+
+  const addServiceToCart = (bookingData: {
+    selectedDate: string
+    selectedTime: string
+    quantity: number
+  }) => {
+    // Transform service to match cart format (preserve both slug and numeric ID)
+    const cartService = {
+      ...service,
+      id: service.slug, // Use slug as string ID for cart operations (required by booking provider)
+      service_id: service.id, // Store the actual numeric ID from API for backend
+      price: service.price ?? 0,
+      category: service.category ?? 'General',
+      image: service.files?.[0]?.images || '/placeholder.svg',
+      duration: `${service.time ?? 0} hours`,
+      description: service.synopsis || 'No description available',
+      selectedDate: bookingData.selectedDate,
+      selectedTime: bookingData.selectedTime,
+      quantity: bookingData.quantity
+    }
+    
+    try {
+      dispatch({
+        type: 'ADD_SERVICE_WITH_QUANTITY',
+        payload: cartService
+      })
+      
+      toast({
+        title: "Service added to cart!",
+        description: `${bookingData.quantity}x ${service.name} added to your cart.`,
+      })
+    } catch (error) {
+      console.error('❌ Error during dispatch:', error)
+      toast({
+        title: "Error",
+        description: "Failed to add service to cart. Please try again.",
+        variant: "destructive"
+      })
+    } finally {
+      // Reset loading state after a short delay to prevent rapid clicking
+      setTimeout(() => {
+        setIsAddingToCart(false)
+      }, 500)
+    }
   }
 
   const timeSlots = [
@@ -214,11 +369,12 @@ export default function ServiceDetailPage() {
               </div>
               <Button
                 onClick={bookService}
+                disabled={isAddingToCart}
                 className="w-full"
                 size="lg"
               >
                 <Calendar className="h-5 w-5 mr-2"/>
-                Book Now - ${service.price ?? 0 * quantity}
+                {isAddingToCart ? 'Adding to Cart...' : `Add to Cart - $${(service.price ?? 0) * quantity}`}
               </Button>
             </div>
             <Separator />
@@ -237,6 +393,18 @@ export default function ServiceDetailPage() {
     </div>
       </div>
       <Footer />
+      
+      {/* Booking Conflict Modal */}
+      <BookingConflictModal
+        isOpen={isConflictModalOpen}
+        onClose={handleConflictClose}
+        onCreateNew={handleConflictCreateNew}
+        onAddToExisting={handleConflictAddToExisting}
+        onEditExisting={handleConflictEditExisting}
+        service={service ? { name: service.name, price: service.price } : null}
+        existingBookings={conflictData?.existingBookings || []}
+        newBookingData={conflictData?.newBookingData || null}
+      />
     </div>
   )
 }

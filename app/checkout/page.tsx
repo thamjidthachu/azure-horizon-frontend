@@ -9,17 +9,19 @@ import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Checkbox } from '@/components/ui/checkbox'
+import { Textarea } from '@/components/ui/textarea'
 import { CreditCard, User, Calendar } from 'lucide-react'
 import { TrendingHeader } from '@/components/trending-header'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { useBooking } from '@/components/booking-provider'
-import { useCart } from "@/components/cart-provider"
+import { useToast } from '@/components/ui/use-toast'
+import { BookingAPIService } from '@/lib/booking-api'
 
 export default function CheckoutPage() {
-  const { state, dispatch } = useBooking()
+  const { state, dispatch, createBooking, processPayment } = useBooking()
   const router = useRouter()
-  const { items } = useCart()
+  const { toast } = useToast()
   const [isClient, setIsClient] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
   const [paymentMethod, setPaymentMethod] = useState('card')
@@ -32,32 +34,68 @@ export default function CheckoutPage() {
 
   useEffect(() => {
     setMounted(true)
+  }, [])
+
+  useEffect(() => {
     // Only redirect after component is mounted on client
-    if (!items || items.length === 0) {
+    if (mounted && state.items.length === 0) {
       router.push("/cart")
     }
-  }, [items, router])
+  }, [state.items, router, mounted])
 
   useEffect(() => {
     setIsClient(true)
   }, [])
 
-  const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
+    console.log('🎯 Checkout handleSubmit called!')
     e.preventDefault()
     setIsProcessing(true)
     
-    // Simulate payment processing
-    setTimeout(() => {
-      // Simulate random success/failure for demo
-      const success = Math.random() > 0.3 // 70% success rate
+    try {
+      const formData = new FormData(e.target as HTMLFormElement)
       
-      if (success) {
-        dispatch({ type: 'CLEAR_CART' })
-        router.push('/payment/success')
-      } else {
-        router.push('/payment/failure')
+      // Extract guest information from form
+      const guestInfo = {
+        firstName: formData.get('firstName') as string,
+        lastName: formData.get('lastName') as string,
+        email: formData.get('email') as string,
+        phone: formData.get('phone') as string,
       }
-    }, 2000)
+
+      const additionalInfo = {
+        specialRequests: formData.get('specialRequests') as string || undefined,
+      }
+
+      // Validate required fields
+      if (!guestInfo.firstName || !guestInfo.lastName || !guestInfo.email || !guestInfo.phone) {
+        throw new Error('Please fill in all required guest information fields')
+      }
+
+      // Format booking data from cart items
+      const bookingData = BookingAPIService.formatBookingFromCart(
+        state.items,
+        guestInfo,
+        additionalInfo
+      )
+
+      // Create the booking
+      const booking = await createBooking(bookingData)
+      
+      if (booking) {
+        // Process payment immediately after booking creation
+        await processPayment(booking.booking_number)
+        // Note: processPayment will redirect to Stripe, so code after this won't execute
+      }
+    } catch (error: any) {
+      console.error('Checkout error:', error)
+      toast({
+        title: "Checkout Failed",
+        description: error.message || "Failed to process your booking. Please try again.",
+        variant: "destructive"
+      })
+      setIsProcessing(false)
+    }
   }
 
   // Show loading or placeholder during SSR
@@ -98,38 +136,24 @@ export default function CheckoutPage() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="firstName">First Name</Label>
-                      <Input id="firstName" required />
+                      <Input id="firstName" name="firstName" required />
                     </div>
                     <div>
                       <Label htmlFor="lastName">Last Name</Label>
-                      <Input id="lastName" required />
+                      <Input id="lastName" name="lastName" required />
                     </div>
                   </div>
                   <div>
                     <Label htmlFor="email">Email</Label>
-                    <Input id="email" type="email" required />
+                    <Input id="email" name="email" type="email" required />
                   </div>
                   <div>
                     <Label htmlFor="phone">Phone Number</Label>
-                    <Input id="phone" type="tel" required />
+                    <Input id="phone" name="phone" type="tel" required />
                   </div>
                   <div>
-                    <Label htmlFor="address">Address</Label>
-                    <Input id="address" required />
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div>
-                      <Label htmlFor="city">City</Label>
-                      <Input id="city" required />
-                    </div>
-                    <div>
-                      <Label htmlFor="state">State</Label>
-                      <Input id="state" required />
-                    </div>
-                    <div>
-                      <Label htmlFor="zip">ZIP Code</Label>
-                      <Input id="zip" required />
-                    </div>
+                    <Label htmlFor="specialRequests">Special Requests (Optional)</Label>
+                    <Textarea id="specialRequests" name="specialRequests" placeholder="Any special requests or requirements..." rows={3} />
                   </div>
                 </CardContent>
               </Card>
@@ -143,44 +167,17 @@ export default function CheckoutPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod}>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="card" id="card"/>
-                      <Label htmlFor="card">Credit/Debit Card</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="paypal" id="paypal"/>
-                      <Label htmlFor="paypal">PayPal</Label>
-                    </div>
-                  </RadioGroup>
-
-                  {paymentMethod === 'card' && (
-                    <div className="space-y-4">
-                      <div>
-                        <Label htmlFor="cardNumber">Card Number</Label>
-                        <Input id="cardNumber" placeholder="1234 5678 9012 3456" required />
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <Label htmlFor="expiry">Expiry Date</Label>
-                          <Input id="expiry" placeholder="MM/YY" required />
-                        </div>
-                        <div>
-                          <Label htmlFor="cvv">CVV</Label>
-                          <Input id="cvv" placeholder="123" required />
-                        </div>
-                      </div>
-                      <div>
-                        <Label htmlFor="cardName">Name on Card</Label>
-                        <Input id="cardName" required />
-                      </div>
-                    </div>
-                  )}
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <h3 className="font-medium text-blue-900 mb-2">Secure Payment Processing</h3>
+                    <p className="text-sm text-blue-700">
+                      After confirming your booking details, you'll be redirected to our secure payment processor (Stripe) to complete your payment. We accept all major credit cards and digital payment methods.
+                    </p>
+                  </div>
 
                   <div className="flex items-center space-x-2">
                     <Checkbox id="terms" required />
                     <Label htmlFor="terms" className="text-sm">
-                      I agree to the terms and conditions and cancellation policy
+                      I agree to the <a href="/terms" className="text-blue-600 hover:underline">terms and conditions</a> and cancellation policy
                     </Label>
                   </div>
                 </CardContent>
@@ -199,8 +196,8 @@ export default function CheckoutPage() {
                 <CardContent className="space-y-4">
                   {/* Booking Items */}
                   <div className="space-y-3">
-                    {state.items.map((item) => (
-                      <div key={item.id} className="flex justify-between items-start">
+                    {state.items.map((item, index) => (
+                      <div key={`${item.id}-${item.selectedDate}-${item.selectedTime}-${index}`} className="flex justify-between items-start">
                         <div className="flex-1">
                           <p className="font-medium">{item.name}</p>
                           <p className="text-sm text-gray-600">

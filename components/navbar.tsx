@@ -22,6 +22,7 @@ export function Navbar() {
   const navigation = [
     { name: "Home", href: "/" },
     { name: "Services", href: "/services" },
+    ...(isAuthenticated ? [{ name: "My Bookings", href: "/bookings" }] : []),
     { name: "Contact", href: "/contact" },
   ]
 
@@ -198,6 +199,12 @@ function UserProfileSection({ user, onLogout }: { user: any, onLogout: () => voi
               <Button variant="ghost" className="w-full justify-start">
                 <User className="h-4 w-4 mr-2" />
                 Profile
+              </Button>
+            </Link>
+            <Link href="/bookings">
+              <Button variant="ghost" className="w-full justify-start">
+                <Calendar className="h-4 w-4 mr-2" />
+                My Bookings
               </Button>
             </Link>
             <Button variant="ghost" className="w-full justify-start text-destructive hover:text-destructive" onClick={onLogout}>

@@ -20,12 +20,12 @@ export default function CartPage() {
     setMounted(true)
   }, [])
 
-  const updateQuantity = (id: string, quantity: number) => {
-    dispatch({ type: 'UPDATE_QUANTITY', payload: { id, quantity } })
+  const updateQuantity = (itemIndex: number, quantity: number) => {
+    dispatch({ type: 'UPDATE_QUANTITY', payload: { itemIndex, quantity } })
   }
 
-  const removeService = (id: string) => {
-    dispatch({ type: 'REMOVE_SERVICE', payload: id })
+  const removeService = (itemIndex: number) => {
+    dispatch({ type: 'REMOVE_SERVICE', payload: itemIndex })
   }
 
   if (!mounted) {
@@ -74,8 +74,8 @@ export default function CartPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Booking Items */}
           <div className="lg:col-span-2 space-y-4">
-            {state.items.map((item) => (
-              <Card key={item.id}>
+            {state.items.map((item, index) => (
+              <Card key={`${item.id}-${item.selectedDate}-${item.selectedTime}-${index}`}>
                 <CardContent className="p-6">
                   <div className="flex flex-col sm:flex-row gap-4">
                     <Image
@@ -104,7 +104,7 @@ export default function CartPage() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                            onClick={() => updateQuantity(item.itemIndex!, item.quantity - 1)}
                           >
                             <Minus className="h-4 w-4"/>
                           </Button>
@@ -114,7 +114,7 @@ export default function CartPage() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                            onClick={() => updateQuantity(item.itemIndex!, item.quantity + 1)}
                           >
                             <Plus className="h-4 w-4"/>
                           </Button>
@@ -123,7 +123,7 @@ export default function CartPage() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => removeService(item.id)}
+                          onClick={() => removeService(item.itemIndex!)}
                           className="text-red-600 hover:text-red-700"
                         >
                           <Trash2 className="h-4 w-4"/>

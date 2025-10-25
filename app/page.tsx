@@ -10,6 +10,7 @@ import { Footer } from "@/components/footer"
 import { TrendingHeader } from "@/components/trending-header"
 import { Sparkles, Utensils, Waves, Calendar } from "lucide-react"
 import { authFetch } from "@/utils/authFetch"
+import { HotReloadTest } from "@/components/hot-reload-test"
 
 type Service = {
   id: number
@@ -76,8 +77,8 @@ export default function HomePage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Link href="/services">
-                <Button variant="outline" className="w-full text-gray-700 hover:text-teal-600">
-                  Explore Services
+                <Button className="w-full bg-teal-600 hover:bg-teal-700 text-white">
+                  Book Now
                 </Button>
               </Link>
               <Link href="/services">
@@ -219,6 +220,7 @@ export default function HomePage() {
       </section>
 
       <Footer />
+      <HotReloadTest />
     </div>
   )
 }

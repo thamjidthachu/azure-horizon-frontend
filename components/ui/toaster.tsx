@@ -23,7 +23,6 @@ export function Toaster() {
               <ToastDescription>{description}</ToastDescription>
             )}
             {action}
-            <ToastClose />
           </Toast>
         )
       })}

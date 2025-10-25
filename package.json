@@ -4,11 +4,17 @@
   "private": true,
   "scripts": {
     "build": "next build",
-    "dev": "next dev --turbo",
-    "dev:fast": "next dev --turbo --port 3000",
-    "dev:debug": "NODE_OPTIONS='--inspect' next dev --turbo",
+    "dev": "next dev",
+    "dev:turbo": "next dev --turbo",
+    "dev:fast": "next dev --port 3000",
+    "dev:debug": "NODE_OPTIONS='--inspect' next dev",
     "lint": "next lint",
-    "start": "next start"
+    "start": "next start",
+    "fullstack": "./dev-start.sh start",
+    "fullstack:stop": "./dev-start.sh stop",
+    "fullstack:status": "./dev-start.sh status",
+    "fullstack:logs": "./dev-start.sh logs",
+    "test:api": "node test-api-connection.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

@@ -1,12 +1,27 @@
+"use client"
+
+import { useEffect, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { XCircle, CreditCard, HelpCircle, Phone } from 'lucide-react'
+import { XCircle, CreditCard, ArrowLeft, AlertTriangle, HelpCircle, Phone } from 'lucide-react'
 import { TrendingHeader } from '@/components/trending-header'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
+import { StripePaymentService } from '@/lib/stripe-payment'
 
 export default function PaymentFailurePage() {
+  const searchParams = useSearchParams()
+  const [errorDetails, setErrorDetails] = useState<{
+    bookingNumber?: string
+    error?: string
+  }>({})
+
+  useEffect(() => {
+    const details = StripePaymentService.handlePaymentFailure()
+    setErrorDetails(details)
+  }, [searchParams])
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-black">
       <Navbar />
@@ -28,9 +43,13 @@ export default function PaymentFailurePage() {
             <div className="bg-red-50 rounded-lg p-6 mb-6">
               <h2 className="text-lg font-semibold text-red-900 mb-2">What happened?</h2>
               <p className="text-red-700 text-sm">
-                Your payment was declined. This could be due to insufficient funds, 
-                an expired card, or your bank's security measures.
+                {errorDetails.error || 'Your payment was declined. This could be due to insufficient funds, an expired card, or your bank\'s security measures.'}
               </p>
+              {errorDetails.bookingNumber && (
+                <p className="text-red-600 text-sm mt-2">
+                  Booking Reference: {errorDetails.bookingNumber}
+                </p>
+              )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
