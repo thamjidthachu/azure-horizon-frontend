@@ -242,31 +242,41 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
     setIsLoading(true)
     setError(null)
-    
     try {
-      const order = await CartAPIService.checkoutCart(guestInfo)
-      
-      // Refresh cart after checkout (should be cleared or new one created)
-      await refreshCart()
-      
+      // Use authFetch to include the token
+      const response = await (await import('@/utils/authFetch')).authFetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'}/api/cart/cart/checkout/`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(guestInfo)
+        }
+      );
+      const data = await response.json();
+      if (response.status === 201 && data.stripe_checkout_url) {
+        window.location.href = data.stripe_checkout_url;
+        return null;
+      }
+      await refreshCart();
       toast({
         title: "Checkout Successful",
-        description: `Order ${order.order_number} has been created successfully.`,
+        description: data.order_number ? `Order ${data.order_number} has been created successfully.` : 'Order created.',
         variant: "default"
-      })
-      
-      return order
+      });
+      return data;
     } catch (err: any) {
-      console.error('Failed to checkout:', err)
-      setError(err.message)
+      console.error('Failed to checkout:', err);
+      setError(err.message);
       toast({
         title: "Checkout Failed",
         description: err.message,
         variant: "destructive"
-      })
-      return null
+      });
+      return null;
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   }
 

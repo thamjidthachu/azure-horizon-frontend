@@ -208,23 +208,24 @@ export class BookingAPIService {
    */
   static async verifyPayment(sessionId: string): Promise<{ booking: Booking, message: string }> {
     try {
-      const response = await authFetch(`${API_BASE_URL}/bookings/verify-payment/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ session_id: sessionId }),
-      })
+      const params = new URLSearchParams({ session_id: sessionId });
+      // Accept bookingNumber as an optional second argument
+      if (typeof arguments[1] === 'string' && arguments[1]) {
+        params.append('booking_number', arguments[1]);
+      }
+      const response = await authFetch(`${API_BASE_URL}/bookings/verify-payment/?${params.toString()}`, {
+        method: 'GET',
+      });
 
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.message || `Failed to verify payment: ${response.status}`)
+        const errorData = await response.json();
+        throw new Error(errorData.message || `Failed to verify payment: ${response.status}`);
       }
 
-      return await response.json()
+      return await response.json();
     } catch (error) {
-      console.error('Error verifying payment:', error)
-      throw error
+      console.error('Error verifying payment:', error);
+      throw error;
     }
   }
 

@@ -305,16 +305,16 @@ export default function MyBookingsPage() {
                       <div className="space-y-2 text-sm">
                         <div className="flex justify-between">
                           <span>Subtotal:</span>
-                          <span>${booking.subtotal.toFixed(2)}</span>
+                          <span>${(typeof booking.subtotal === 'number' ? booking.subtotal : parseFloat(booking.subtotal)).toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between">
                           <span>Vat:</span>
-                          <span>${booking.vat.toFixed(2)}</span>
+                          <span>${(typeof booking.vat === 'number' ? booking.vat : parseFloat(booking.vat)).toFixed(2)}</span>
                         </div>
                         <Separator />
                         <div className="flex justify-between font-bold">
                           <span>Total:</span>
-                          <span>${booking.total_amount.toFixed(2)}</span>
+                          <span>${(typeof booking.total_amount === 'number' ? booking.total_amount : parseFloat(booking.total_amount)).toFixed(2)}</span>
                         </div>
                       </div>
                     </div>
