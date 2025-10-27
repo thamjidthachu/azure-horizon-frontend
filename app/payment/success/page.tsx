@@ -152,7 +152,7 @@ function PaymentSuccessContent() {
                 Booking Number: <span className="font-mono font-medium">{booking.booking_number}</span>
               </p>
               <p className="text-gray-600 mb-1">
-                Guest: <span className="font-medium">{booking.guest_name}</span>
+                Guest: <span className="font-medium">{booking.customer_name}</span>
               </p>
               <p className="text-gray-600 mb-1">
                 Date: <span className="font-medium">{new Date(booking.booking_date).toLocaleDateString()}</span>
@@ -160,7 +160,7 @@ function PaymentSuccessContent() {
               <p className="text-gray-600 mb-1">
                 Total: <span className="font-medium">${booking.total_amount.toFixed(2)}</span>
               </p>
-              <p className="text-gray-600">Confirmation email sent to {booking.guest_email}</p>
+              <p className="text-gray-600">Confirmation email sent to {booking.customer_email}</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">

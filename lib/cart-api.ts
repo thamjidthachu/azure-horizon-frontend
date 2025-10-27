@@ -1,6 +1,8 @@
+
 import { authFetch } from '@/utils/authFetch'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
+
 
 export interface CartItem {
   id: number
@@ -57,6 +59,32 @@ export interface OrderDetail {
 }
 
 export class CartAPIService {
+
+  /**
+   * Cancel a booking by booking number
+   */
+  static async cancelBooking(bookingNumber: string, reason?: string): Promise<any> {
+    console.log('🛒 CartAPI: Cancelling booking:', bookingNumber, reason)
+    try {
+      const response = await authFetch(`${API_BASE_URL}/api/cart/orders/${bookingNumber}/cancel/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ reason }),
+      })
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.detail || errorData.error || `Failed to cancel booking: ${response.status}`)
+      }
+      const result = await response.json()
+      console.log('✅ CartAPI: Booking cancelled:', result)
+      return result
+    } catch (error: any) {
+      console.error('❌ CartAPI: Error cancelling booking:', error)
+      throw new Error(`Failed to cancel booking: ${error.message}`)
+    }
+  }
   /**
    * Get or create active cart for the current user
    */
@@ -202,9 +230,9 @@ export class CartAPIService {
    * Checkout cart and create order
    */
   static async checkoutCart(guestInfo: {
-    guest_name: string
-    guest_email: string
-    guest_phone: string
+    customer_name: string
+    customer_email: string
+    customer_phone: string
     special_requests?: string
   }): Promise<OrderDetail> {
     console.log('🛒 CartAPI: Checking out cart:', guestInfo)

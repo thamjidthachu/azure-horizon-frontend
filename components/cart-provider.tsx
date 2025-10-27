@@ -26,9 +26,9 @@ interface CartContextType {
   
   // Checkout
   checkoutCart: (guestInfo: {
-    guest_name: string
-    guest_email: string
-    guest_phone: string
+    customer_name: string
+    customer_email: string
+    customer_phone: string
     special_requests?: string
   }) => Promise<OrderDetail | null>
   
@@ -226,9 +226,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }
 
   const checkoutCart = async (guestInfo: {
-    guest_name: string
-    guest_email: string
-    guest_phone: string
+    customer_name: string
+    customer_email: string
+    customer_phone: string
     special_requests?: string
   }): Promise<OrderDetail | null> => {
     if (!isAuthenticated || !cart) {

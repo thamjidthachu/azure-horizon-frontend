@@ -77,10 +77,10 @@ function LoginForm() {
       <Card className="w-full max-w-md shadow-xl animate-fade-in">
         <CardContent className="p-8">
           <h2 className="text-2xl font-bold mb-2 text-center">Login</h2>
-          <p className="text-gray-500 mb-6 text-center">Sign in to your account</p>
+          <p className="text-gray-500 mb-6 text-cen ter">Sign in to your account</p>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label htmlFor="username">Email</Label>
+            <Label htmlFor="username">Username/Email</Label>
             <div className="flex items-center gap-2">
               <Input id="username" name="username" value={form.username} onChange={handleChange} required autoFocus />
               <User className="h-5 w-5 text-teal-500"/>

@@ -287,20 +287,20 @@ export default function BookingDetailPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <p className="text-sm text-gray-500">Full Name</p>
-                    <p className="font-medium">{booking.guest_name}</p>
+                    <p className="font-medium">{booking.customer_name}</p>
                   </div>
                   <div className="flex items-center">
                     <Mail className="h-4 w-4 text-gray-400 mr-2"/>
                     <div>
                       <p className="text-sm text-gray-500">Email</p>
-                      <p className="font-medium">{booking.guest_email}</p>
+                      <p className="font-medium">{booking.customer_email}</p>
                     </div>
                   </div>
                   <div className="flex items-center">
                     <Phone className="h-4 w-4 text-gray-400 mr-2"/>
                     <div>
                       <p className="text-sm text-gray-500">Phone</p>
-                      <p className="font-medium">{booking.guest_phone}</p>
+                      <p className="font-medium">{booking.customer_phone}</p>
                     </div>
                   </div>
                 </div>

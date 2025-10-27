@@ -13,9 +13,9 @@ export interface BookingService {
 }
 
 export interface BookingData {
-  guest_name: string
-  guest_email: string
-  guest_phone: string
+  customer_name: string
+  customer_email: string
+  customer_phone: string
   booking_date: string
   booking_time?: string
   number_of_guests: number
@@ -26,9 +26,9 @@ export interface BookingData {
 export interface Booking {
   id: number
   booking_number: string
-  guest_name: string
-  guest_email: string
-  guest_phone: string
+  customer_name: string
+  customer_email: string
+  customer_phone: string
   booking_date: string
   booking_time?: string
   number_of_guests: number
@@ -381,9 +381,9 @@ export class BookingAPIService {
     const convertedTime = convertTimeTo24Hour(primaryBookingTime)
 
     return {
-      guest_name: `${guestInfo.firstName} ${guestInfo.lastName}`,
-      guest_email: guestInfo.email,
-      guest_phone: guestInfo.phone,
+      customer_name: `${guestInfo.firstName} ${guestInfo.lastName}`,
+      customer_email: guestInfo.email,
+      customer_phone: guestInfo.phone,
       booking_date: primaryDate,
       booking_time: convertedTime,
       number_of_guests: totalGuests,

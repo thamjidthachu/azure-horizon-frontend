@@ -28,6 +28,42 @@ import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 
 export default function MyBookingsPage() {
+  // Redirect to payment page for the booking
+  const handlePayNow = (bookingNumber: string) => {
+    window.location.href = `/checkout?booking_number=${bookingNumber}`;
+  };
+
+  // Cancel the booking and update state
+  const confirmCancellation = async (bookingNumber: string) => {
+    setCancellingBooking(bookingNumber);
+    try {
+      setIsLoading(true);
+      setError(null);
+      const { CartAPIService } = await import('@/lib/cart-api');
+      await CartAPIService.cancelBooking(bookingNumber, cancelReason);
+      setBookings((prev) =>
+        prev.map((b) =>
+          b.booking_number === bookingNumber ? { ...b, status: 'cancelled' } : b
+        )
+      );
+      toast({
+        title: 'Booking Cancelled',
+        description: `Booking #${bookingNumber} has been cancelled.`,
+        variant: 'default',
+      });
+    } catch (err: any) {
+      setError(err.message || 'Failed to cancel booking.');
+      toast({
+        title: 'Cancellation Failed',
+        description: err.message || 'Failed to cancel booking.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+      setCancellingBooking(null);
+      setCancelReason('');
+    }
+  };
   const { user, isAuthenticated, loading: authLoading } = useAuth()
   const { toast } = useToast()
   const [mounted, setMounted] = useState(false)
@@ -221,15 +257,15 @@ export default function MyBookingsPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                       <div>
                         <span className="text-gray-500">Name: </span>
-                        <span className="font-medium">{booking.guest_name}</span>
+                        <span className="font-medium">{booking.customer_name}</span>
                       </div>
                       <div>
                         <span className="text-gray-500">Email: </span>
-                        <span className="font-medium">{booking.guest_email}</span>
+                        <span className="font-medium">{booking.customer_email}</span>
                       </div>
                       <div>
                         <span className="text-gray-500">Phone: </span>
-                        <span className="font-medium">{booking.guest_phone}</span>
+                        <span className="font-medium">{booking.customer_phone}</span>
                       </div>
                     </div>
                   </div>
@@ -334,7 +370,7 @@ export default function MyBookingsPage() {
                                 Keep Booking
                               </AlertDialogCancel>
                               <AlertDialogAction 
-                                onClick={() => confirmCancellation()}
+                                onClick={() => confirmCancellation(booking.booking_number)}
                                 className="bg-red-600 hover:bg-red-700"
                               >
                                 Cancel Booking

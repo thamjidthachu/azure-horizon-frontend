@@ -40,16 +40,16 @@ export default function CheckoutPage() {
     setIsProcessing(true)
     try {
       const formData = new FormData(e.target as HTMLFormElement)
-      const guest_name = `${formData.get('firstName') as string} ${formData.get('lastName') as string}`
-      const guest_email = formData.get('email') as string
-      const guest_phone = formData.get('phone') as string
+      const customer_name = `${formData.get('firstName') as string} ${formData.get('lastName') as string}`
+      const customer_email = formData.get('email') as string
+      const customer_phone = formData.get('phone') as string
       const special_requests = formData.get('specialRequests') as string || undefined
 
-      if (!guest_name.trim() || !guest_email || !guest_phone) {
+      if (!customer_name.trim() || !customer_email || !customer_phone) {
         throw new Error('Please fill in all required guest information fields')
       }
 
-      const order = await checkoutCart({ guest_name, guest_email, guest_phone, special_requests })
+      const order = await checkoutCart({ customer_name, customer_email, customer_phone, special_requests })
       // If backend returns a payment_url, redirect; otherwise, show success toast
       if (order && (order as any).payment_url) {
         window.location.href = (order as any).payment_url
