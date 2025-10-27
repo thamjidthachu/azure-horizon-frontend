@@ -28,7 +28,7 @@ export default function ProductsPage() {
 
   if (!isClient) return null
 
-  const { addItem } = useCart()
+  const { addToCart } = useCart()
   const { toast } = useToast()
 
   const categories = ['all', ...Array.from(new Set(products.map(p => p.category)))]
@@ -48,8 +48,12 @@ export default function ProductsPage() {
       }
     })
 
-  const addToCart = (product: any) => {
-    addItem(product)
+
+  const handleAddToCart = (product: any) => {
+    addToCart({
+      service_id: product.id,
+      quantity: 1
+    })
     toast({
       title: "Added to cart",
       description: `${product.name} has been added to your cart.`,

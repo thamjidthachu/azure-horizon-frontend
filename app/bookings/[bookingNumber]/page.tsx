@@ -370,8 +370,8 @@ export default function BookingDetailPage() {
                     <span>${booking.subtotal.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Tax:</span>
-                    <span>${booking.tax.toFixed(2)}</span>
+                    <span>Vat:</span>
+                    <span>${booking.vat.toFixed(2)}</span>
                   </div>
                   <Separator />
                   <div className="flex justify-between font-bold text-base">

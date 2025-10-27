@@ -1,19 +1,20 @@
 "use client"
 
+
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useBooking } from '@/components/booking-provider'
+import { useCart } from './cart-provider'
 
 export function HotReloadTest() {
   const [count, setCount] = useState(0)
   const router = useRouter()
-  const { state } = useBooking()
+  const { items } = useCart()
   
   return (
     <div className="fixed bottom-4 right-4 bg-green-600 text-white p-4 rounded-lg shadow-lg z-50 w-48">
       <h3 className="text-sm font-bold mb-2">✅ Hot Reload Active</h3>
       <p className="text-xs mb-2">Clicks: {count}</p>
-      <p className="text-xs mb-2">Cart Items: {state.items.length}</p>
+  <p className="text-xs mb-2">Cart Items: {items.length}</p>
       <div className="space-y-2">
         <button 
           onClick={() => setCount(count + 1)}

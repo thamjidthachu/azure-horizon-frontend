@@ -12,7 +12,8 @@ import { Star, Calendar, Clock } from 'lucide-react'
 import { TrendingHeader } from '@/components/trending-header'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
-import { useBooking } from '@/components/booking-provider'
+import { useCart } from '@/components/cart-provider'
+import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/components/ui/use-toast'
 import { BookingModal } from '@/components/booking-modal'
 import { BookingConflictModal } from '@/components/booking-conflict-modal'
@@ -37,6 +38,16 @@ interface Service {
 }
 
 export default function ServicesPage() {
+  // Helper to convert 12-hour time (e.g., '10:00 AM') to 24-hour format ('10:00')
+  function to24Hour(time12h: string): string {
+    if (!time12h) return '09:00';
+    const [time, period] = time12h.split(' ');
+    let [hours, minutes] = time.split(':');
+    let h = parseInt(hours, 10);
+    if (period?.toUpperCase() === 'PM' && h !== 12) h += 12;
+    if (period?.toUpperCase() === 'AM' && h === 12) h = 0;
+    return `${h.toString().padStart(2, '0')}:${minutes || '00'}`;
+  }
   const [services, setServices] = useState<Service[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -58,7 +69,8 @@ export default function ServicesPage() {
       quantity: number
     }
   } | null>(null)
-  const { dispatch, state } = useBooking()
+  const { addToCart, items: cartItems, updateCartItem } = useCart()
+  const { isAuthenticated } = useAuth()
   const { toast } = useToast()
 
   useEffect(() => {
@@ -138,13 +150,13 @@ export default function ServicesPage() {
   }) => {
     if (!selectedService) return
 
-    // Check if this service already exists in cart
-    const existingBookings = state.items
-      .filter(item => item.id === selectedService.slug)
+    // Check if this service already exists in cart (API-based)
+    const existingBookings = cartItems
+      .filter(item => item.service_id === selectedService.id)
       .map(item => ({
-        itemIndex: item.itemIndex!,
-        selectedDate: item.selectedDate!,
-        selectedTime: item.selectedTime!,
+        itemIndex: item.id, // Use cart item id from backend
+        selectedDate: item.booking_date || '',
+        selectedTime: item.booking_time || '',
         quantity: item.quantity
       }))
 
@@ -163,44 +175,42 @@ export default function ServicesPage() {
     addServiceToCart(bookingData)
   }
 
-  const addServiceToCart = (bookingData: {
+  const addServiceToCart = async (bookingData: {
     selectedDate: string
     selectedTime: string
     quantity: number
   }) => {
     if (!selectedService) return
+    
+    if (!isAuthenticated) {
+      toast({
+        title: "Login Required",
+        description: "Please log in to add services to your cart.",
+        variant: "destructive"
+      })
+      return
+    }
 
-    // Transform service to match cart format (preserve both slug and numeric ID)
-    const cartService = {
-      // Use spread first, then override specific fields
-      ...selectedService,
-      id: selectedService.slug, // Override: Use slug as string ID for cart operations (required by booking provider)
-      service_id: selectedService.id, // Store the actual numeric ID from API for backend
-      price: selectedService.price ?? 0,
-      category: selectedService.category ?? 'General',
-      image: selectedService.files?.[0]?.images || '/placeholder.svg',
-      duration: `${selectedService.time ?? 0} hours`,
-      description: selectedService.synopsis || 'No description available',
-      selectedDate: bookingData.selectedDate,
-      selectedTime: bookingData.selectedTime,
-      quantity: bookingData.quantity
+    // Prepare cart data for API
+    const cartData = {
+      service_id: Number(selectedService.id), // Ensure numeric
+      quantity: bookingData.quantity,
+      booking_date: bookingData.selectedDate,
+      booking_time: to24Hour(bookingData.selectedTime)
     }
     
     if (process.env.NODE_ENV === 'development') {
-      console.log('🏨 Services page adding service to cart via modal:', {
+      console.log('🏨 Services page adding service to cart via API:', {
         original: selectedService,
-        transformed: cartService,
+        cartData,
         bookingData
       })
     }
     
-    dispatch({ type: 'ADD_SERVICE_WITH_QUANTITY', payload: cartService })
-    toast({
-      title: "Service added to cart",
-      description: `${bookingData.quantity}x ${selectedService.name} added for ${bookingData.selectedDate} at ${bookingData.selectedTime}.`,
-    })
+    // Use the cart API to add the item
+    await addToCart(cartData)
 
-    // Close modals
+    // Close modals on success (addToCart will handle error toasts)
     setIsModalOpen(false)
     setSelectedService(null)
   }
@@ -215,22 +225,21 @@ export default function ServicesPage() {
     selectedTime: string
     quantity: number
   }) => {
-    addServiceToCart(bookingData)
-    setIsConflictModalOpen(false)
-    setConflictData(null)
+  addServiceToCart(bookingData)
+  setIsConflictModalOpen(false)
+  setConflictData(null)
   }
 
   const handleConflictAddToExisting = (itemIndex: number, additionalQuantity: number) => {
-    dispatch({ 
-      type: 'ADD_TO_EXISTING_BOOKING', 
-      payload: { itemIndex, additionalQuantity } 
-    })
-    
-    toast({
-      title: "Added to existing booking",
-      description: `${additionalQuantity} guest${additionalQuantity > 1 ? 's' : ''} added to your existing booking.`,
-    })
-    
+    // Update the cart item quantity using the API
+    const cartItem = cartItems.find(item => item.id === itemIndex)
+    if (cartItem) {
+      updateCartItem(itemIndex, cartItem.quantity + additionalQuantity)
+      toast({
+        title: "Added to existing booking",
+        description: `${additionalQuantity} guest${additionalQuantity > 1 ? 's' : ''} added to your existing booking.`,
+      })
+    }
     setIsConflictModalOpen(false)
     setConflictData(null)
     setSelectedService(null)
@@ -241,16 +250,16 @@ export default function ServicesPage() {
     selectedTime: string
     quantity: number
   }) => {
-    dispatch({ 
-      type: 'EDIT_EXISTING_BOOKING', 
-      payload: { itemIndex, ...newBookingData } 
-    })
-    
+    updateCartItem(
+      itemIndex,
+      newBookingData.quantity,
+      newBookingData.selectedDate,
+      to24Hour(newBookingData.selectedTime)
+    )
     toast({
       title: "Booking updated",
       description: `Booking updated to ${newBookingData.selectedDate} at ${newBookingData.selectedTime} for ${newBookingData.quantity} guest${newBookingData.quantity > 1 ? 's' : ''}.`,
     })
-    
     setIsConflictModalOpen(false)
     setConflictData(null)
     setSelectedService(null)
@@ -360,16 +369,17 @@ export default function ServicesPage() {
                 </h3>
                 <div className="flex items-center mb-2">
                   <div className="flex items-center">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`h-4 w-4 ${
-                          i < Math.floor(service.rating ?? 0)
-                            ? 'text-yellow-400 fill-current'
-                            : 'text-gray-300'
-                        }`}
-                      />
-                    ))}
+                    {[...Array(5)].map((_, i) => {
+                      const isFilled = i < Math.floor(service.rating ?? 0)
+                      return (
+                        <Star
+                          key={i}
+                          className={
+                            'h-4 w-4 ' + (isFilled ? 'text-yellow-400 fill-current' : 'text-gray-300')
+                          }
+                        />
+                      )
+                    })}
                   </div>
                   <span className="text-sm text-gray-500 ml-2">({service.review_count ?? 20})</span>
                 </div>
@@ -391,10 +401,12 @@ export default function ServicesPage() {
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <Link href={`/services/${service.slug}`} className="flex-1">
-                    <Button variant="outline" className="w-full">
-                      View Details
-                    </Button>
+                  <Link href={`/services/${service.slug}`}>
+                    <div className="w-full flex-1">
+                      <Button variant="outline" className="w-full">
+                        View Details
+                      </Button>
+                    </div>
                   </Link>
                   <Button
                     onClick={() => handleQuickBook(service)}

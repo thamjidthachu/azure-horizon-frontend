@@ -19,7 +19,7 @@ import {
 import { TrendingHeader } from '@/components/trending-header'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
-import { useBooking } from '@/components/booking-provider'
+// import { useBooking } from '@/components/booking-provider'
 import { useAuth } from '@/hooks/useAuth'
 import { BookingAPIService, type Booking } from '@/lib/booking-api'
 import { useToast } from '@/components/ui/use-toast'
@@ -28,17 +28,31 @@ import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 
 export default function MyBookingsPage() {
-  const { state, getUserBookings, cancelBooking, processPayment } = useBooking()
   const { user, isAuthenticated, loading: authLoading } = useAuth()
   const { toast } = useToast()
   const [mounted, setMounted] = useState(false)
   const [cancellingBooking, setCancellingBooking] = useState<string | null>(null)
   const [cancelReason, setCancelReason] = useState('')
+  const [bookings, setBookings] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     setMounted(true)
     if (isAuthenticated && user) {
-      getUserBookings()
+      setIsLoading(true)
+      setError(null)
+      import('@/lib/cart-api').then(({ CartAPIService }) => {
+        CartAPIService.getUserOrders()
+          .then((orders) => {
+            setBookings(orders)
+            setIsLoading(false)
+          })
+          .catch((err) => {
+            setError(err.message)
+            setIsLoading(false)
+          })
+      })
     }
   }, [isAuthenticated, user])
 
@@ -83,35 +97,7 @@ export default function MyBookingsPage() {
     )
   }
 
-  const handleCancelBooking = async (bookingNumber: string) => {
-    setCancellingBooking(bookingNumber)
-  }
-
-  const confirmCancellation = async () => {
-    if (!cancellingBooking) return
-
-    try {
-      const success = await cancelBooking(cancellingBooking, cancelReason)
-      if (success) {
-        setCancellingBooking(null)
-        setCancelReason('')
-        toast({
-          title: "Booking Cancelled",
-          description: "Your booking has been cancelled successfully.",
-        })
-      }
-    } catch (error) {
-      console.error('Error cancelling booking:', error)
-    }
-  }
-
-  const handlePayNow = async (bookingNumber: string) => {
-    try {
-      await processPayment(bookingNumber)
-    } catch (error) {
-      console.error('Error processing payment:', error)
-    }
-  }
+// ...existing code...
 
   const getStatusColor = (status: string) => {
     const statusInfo = BookingAPIService.formatBookingStatus(status)
@@ -139,7 +125,7 @@ export default function MyBookingsPage() {
           </Link>
         </div>
 
-        {state.isLoading ? (
+  {isLoading ? (
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
               <Card key={i} className="animate-pulse">
@@ -153,7 +139,7 @@ export default function MyBookingsPage() {
               </Card>
             ))}
           </div>
-        ) : (!state.userBookings || state.userBookings.length === 0) ? (
+  ) : (!bookings || bookings.length === 0) ? (
           <Card className="text-center">
             <CardContent className="p-8">
               <Calendar className="h-16 w-16 text-gray-400 mx-auto mb-4"/>
@@ -168,7 +154,7 @@ export default function MyBookingsPage() {
           </Card>
         ) : (
           <div className="space-y-6">
-            {(state.userBookings || []).map((booking) => (
+            {(bookings || []).map((booking) => (
               <Card key={booking.id} className="overflow-hidden">
                 <CardHeader className="bg-gradient-to-r from-teal-50 to-blue-50">
                   <div className="flex justify-between items-start">
@@ -286,8 +272,8 @@ export default function MyBookingsPage() {
                           <span>${booking.subtotal.toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span>Tax:</span>
-                          <span>${booking.tax.toFixed(2)}</span>
+                          <span>Vat:</span>
+                          <span>${booking.vat.toFixed(2)}</span>
                         </div>
                         <Separator />
                         <div className="flex justify-between font-bold">
@@ -365,10 +351,10 @@ export default function MyBookingsPage() {
           </div>
         )}
 
-        {state.error && (
+  {error && (
           <Card className="mt-6 border-red-200 bg-red-50">
             <CardContent className="p-4">
-              <p className="text-red-600 text-center">{state.error}</p>
+              <p className="text-red-600 text-center">{error}</p>
             </CardContent>
           </Card>
         )}

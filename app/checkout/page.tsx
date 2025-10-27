@@ -14,78 +14,45 @@ import { CreditCard, User, Calendar } from 'lucide-react'
 import { TrendingHeader } from '@/components/trending-header'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
-import { useBooking } from '@/components/booking-provider'
 import { useToast } from '@/components/ui/use-toast'
-import { BookingAPIService } from '@/lib/booking-api'
+import { useCart } from '@/components/cart-provider'
 
 export default function CheckoutPage() {
-  const { state, dispatch, createBooking, processPayment } = useBooking()
   const router = useRouter()
   const { toast } = useToast()
-  const [isClient, setIsClient] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
   const [paymentMethod, setPaymentMethod] = useState('card')
   const [mounted, setMounted] = useState(false)
-
-  const subtotal = state.total
-  const resortFee = subtotal * 0.1
-  const tax = subtotal * 0.08
-  const total = subtotal + resortFee + tax
+  const { items, subtotal, total, vat, checkoutCart, isLoading } = useCart()
 
   useEffect(() => {
     setMounted(true)
   }, [])
 
   useEffect(() => {
-    // Only redirect after component is mounted on client
-    if (mounted && state.items.length === 0) {
+    if (mounted && items.length === 0) {
       router.push("/cart")
     }
-  }, [state.items, router, mounted])
+  }, [items, router, mounted])
 
-  useEffect(() => {
-    setIsClient(true)
-  }, [])
-
-    const handleSubmit = async (e: React.FormEvent) => {
-    console.log('🎯 Checkout handleSubmit called!')
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsProcessing(true)
-    
     try {
       const formData = new FormData(e.target as HTMLFormElement)
-      
-      // Extract guest information from form
-      const guestInfo = {
-        firstName: formData.get('firstName') as string,
-        lastName: formData.get('lastName') as string,
-        email: formData.get('email') as string,
-        phone: formData.get('phone') as string,
-      }
+      const guest_name = `${formData.get('firstName') as string} ${formData.get('lastName') as string}`
+      const guest_email = formData.get('email') as string
+      const guest_phone = formData.get('phone') as string
+      const special_requests = formData.get('specialRequests') as string || undefined
 
-      const additionalInfo = {
-        specialRequests: formData.get('specialRequests') as string || undefined,
-      }
-
-      // Validate required fields
-      if (!guestInfo.firstName || !guestInfo.lastName || !guestInfo.email || !guestInfo.phone) {
+      if (!guest_name.trim() || !guest_email || !guest_phone) {
         throw new Error('Please fill in all required guest information fields')
       }
 
-      // Format booking data from cart items
-      const bookingData = BookingAPIService.formatBookingFromCart(
-        state.items,
-        guestInfo,
-        additionalInfo
-      )
-
-      // Create the booking
-      const booking = await createBooking(bookingData)
-      
-      if (booking) {
-        // Process payment immediately after booking creation
-        await processPayment(booking.booking_number)
-        // Note: processPayment will redirect to Stripe, so code after this won't execute
+      const order = await checkoutCart({ guest_name, guest_email, guest_phone, special_requests })
+      // If backend returns a payment_url, redirect; otherwise, show success toast
+      if (order && (order as any).payment_url) {
+        window.location.href = (order as any).payment_url
       }
     } catch (error: any) {
       console.error('Checkout error:', error)
@@ -101,13 +68,8 @@ export default function CheckoutPage() {
   // Show loading or placeholder during SSR
   if (!mounted) {
     return (
-      <div className="container mx-auto py-8">
-        <Card className="p-6">
-          <div className="animate-pulse">
-            <div className="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
-            <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-          </div>
-        </Card>
+      <div className="min-h-screen bg-gray-50 dark:bg-black flex items-center justify-center">
+        <span>Loading...</span>
       </div>
     )
   }
@@ -196,20 +158,20 @@ export default function CheckoutPage() {
                 <CardContent className="space-y-4">
                   {/* Booking Items */}
                   <div className="space-y-3">
-                    {state.items.map((item, index) => (
-                      <div key={`${item.id}-${item.selectedDate}-${item.selectedTime}-${index}`} className="flex justify-between items-start">
+                    {items.map((item, index) => (
+                      <div key={`${item.id}-${item.booking_date}-${item.booking_time}-${index}`} className="flex justify-between items-start">
                         <div className="flex-1">
-                          <p className="font-medium">{item.name}</p>
+                          <p className="font-medium">{item.service_name}</p>
                           <p className="text-sm text-gray-600">
-                            {item.quantity} guest{item.quantity > 1 ? 's' : ''} • {item.duration}
+                            {item.quantity} guest{item.quantity > 1 ? 's' : ''}{item.service_duration ? ` • ${item.service_duration}` : ''}
                           </p>
-                          {item.selectedDate && (
+                          {item.booking_date && (
                             <p className="text-sm text-teal-600">
-                              📅 {item.selectedDate} at {item.selectedTime}
+                              📅 {item.booking_date}{item.booking_time ? ` at ${item.booking_time}` : ''}
                             </p>
                           )}
                         </div>
-                        <p className="font-medium">${(item.price * item.quantity).toFixed(2)}</p>
+                        <p className="font-medium">${(parseFloat(item.service_price) * item.quantity).toFixed(2)}</p>
                       </div>
                     ))}
                   </div>
@@ -223,16 +185,9 @@ export default function CheckoutPage() {
                       <span>${subtotal.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>Resort fee (10%)</span>
-                      <span>${resortFee.toFixed(2)}</span>
+                      <span>Vat</span>
+                      <span>${vat.toFixed(2)}</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span>Tax (8%)</span>
-                      <span>${tax.toFixed(2)}</span>
-                    </div>
-                    
-                    <Separator />
-                    
                     <div className="flex justify-between text-lg font-semibold">
                       <span>Total</span>
                       <span>${total.toFixed(2)}</span>

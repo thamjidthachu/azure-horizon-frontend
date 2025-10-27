@@ -4,7 +4,7 @@ import { useCart } from "@/components/cart-provider"
 import { useState, useEffect } from "react"
 
 export default function ProductsList() {
-  const { addItem } = useCart()
+  const { addToCart } = useCart()
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
@@ -25,6 +25,8 @@ export default function ProductsList() {
     )
   }
 
+  // Example usage: Replace/add this logic in your product card/button
+  // <Button onClick={() => addToCart({ service_id: product.id, quantity: 1 })}>Add to Cart</Button>
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       {/* ...existing products grid and UI... */}

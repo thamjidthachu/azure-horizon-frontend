@@ -11,12 +11,11 @@ import { Star, Calendar, Clock, Users, MapPin } from "lucide-react"
 import { TrendingHeader } from "@/components/trending-header"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
-import { useBooking } from "@/components/booking-provider"
 import { useToast } from "@/components/ui/use-toast"
-import { BookingConflictModal } from "@/components/booking-conflict-modal"
 import { useParams } from "next/navigation"
 import { ReviewSection } from "@/components/ui/review-section"
 import { authFetch } from "@/utils/authFetch"
+import { useCart } from '@/components/cart-provider'
 
 export default function ServiceDetailPage() {
   const params = useParams<{ slug: string }>()
@@ -40,9 +39,8 @@ export default function ServiceDetailPage() {
       quantity: number
     }
   } | null>(null)
-  const bookingContext = useBooking()
-  const { dispatch, state } = bookingContext
   const { toast } = useToast()
+  const { addToCart, items, isLoading } = useCart()
   
   // Auto-set date and time for testing in development
   useEffect(() => {
@@ -55,57 +53,7 @@ export default function ServiceDetailPage() {
     }
   }, [])
 
-  const handleConflictCreateNew = (bookingData: {
-    selectedDate: string
-    selectedTime: string
-    quantity: number
-  }) => {
-    addServiceToCart(bookingData)
-    setIsConflictModalOpen(false)
-    setConflictData(null)
-  }
 
-  const handleConflictAddToExisting = (itemIndex: number, additionalQuantity: number) => {
-    dispatch({ 
-      type: 'ADD_TO_EXISTING_BOOKING', 
-      payload: { itemIndex, additionalQuantity } 
-    })
-    
-    toast({
-      title: "Added to existing booking",
-      description: `${additionalQuantity} guest${additionalQuantity > 1 ? 's' : ''} added to your existing booking.`,
-    })
-    
-    setIsConflictModalOpen(false)
-    setConflictData(null)
-    setIsAddingToCart(false)
-  }
-
-  const handleConflictEditExisting = (itemIndex: number, newBookingData: {
-    selectedDate: string
-    selectedTime: string
-    quantity: number
-  }) => {
-    dispatch({ 
-      type: 'EDIT_EXISTING_BOOKING', 
-      payload: { itemIndex, ...newBookingData } 
-    })
-    
-    toast({
-      title: "Booking updated",
-      description: `Booking updated to ${newBookingData.selectedDate} at ${newBookingData.selectedTime} for ${newBookingData.quantity} guest${newBookingData.quantity > 1 ? 's' : ''}.`,
-    })
-    
-    setIsConflictModalOpen(false)
-    setConflictData(null)
-    setIsAddingToCart(false)
-  }
-
-  const handleConflictClose = () => {
-    setIsConflictModalOpen(false)
-    setConflictData(null)
-    setIsAddingToCart(false)
-  }
 
   useEffect(() => {
     if (!params?.slug) return
@@ -139,15 +87,9 @@ export default function ServiceDetailPage() {
     )
   }
 
-  const bookService = () => {
-    // Prevent double clicks
-    if (isAddingToCart) {
-      console.log('🚫 Already adding to cart, ignoring duplicate call')
-      return
-    }
-    
+  const bookService = async () => {
+    if (isAddingToCart) return
     setIsAddingToCart(true)
-    
     if (!selectedDate || !selectedTime) {
       setIsAddingToCart(false)
       toast({
@@ -157,82 +99,29 @@ export default function ServiceDetailPage() {
       })
       return
     }
-
-    const bookingData = {
-      selectedDate,
-      selectedTime,
-      quantity
-    }
-
-    // Check if this service already exists in cart
-    const existingBookings = state.items
-      .filter(item => item.id === service.slug)
-      .map(item => ({
-        itemIndex: item.itemIndex!,
-        selectedDate: item.selectedDate!,
-        selectedTime: item.selectedTime!,
-        quantity: item.quantity
-      }))
-
-    if (existingBookings.length > 0) {
-      // Conflict detected - show conflict resolution modal
-      setConflictData({
-        existingBookings,
-        newBookingData: bookingData
-      })
-      setIsConflictModalOpen(true)
-      setIsAddingToCart(false)
-      return
-    }
-
-    // No conflict - proceed with normal addition
-    addServiceToCart(bookingData)
-  }
-
-  const addServiceToCart = (bookingData: {
-    selectedDate: string
-    selectedTime: string
-    quantity: number
-  }) => {
-    // Transform service to match cart format (preserve both slug and numeric ID)
-    const cartService = {
-      ...service,
-      id: service.slug, // Use slug as string ID for cart operations (required by booking provider)
-      service_id: service.id, // Store the actual numeric ID from API for backend
-      price: service.price ?? 0,
-      category: service.category ?? 'General',
-      image: service.files?.[0]?.images || '/placeholder.svg',
-      duration: `${service.time ?? 0} hours`,
-      description: service.synopsis || 'No description available',
-      selectedDate: bookingData.selectedDate,
-      selectedTime: bookingData.selectedTime,
-      quantity: bookingData.quantity
-    }
-    
     try {
-      dispatch({
-        type: 'ADD_SERVICE_WITH_QUANTITY',
-        payload: cartService
+      await addToCart({
+        service_id: service.id,
+        quantity,
+        booking_date: selectedDate,
+        booking_time: selectedTime
       })
-      
       toast({
         title: "Service added to cart!",
-        description: `${bookingData.quantity}x ${service.name} added to your cart.`,
+        description: `${quantity}x ${service.name} added to your cart.`,
       })
     } catch (error) {
-      console.error('❌ Error during dispatch:', error)
       toast({
         title: "Error",
         description: "Failed to add service to cart. Please try again.",
         variant: "destructive"
       })
     } finally {
-      // Reset loading state after a short delay to prevent rapid clicking
-      setTimeout(() => {
-        setIsAddingToCart(false)
-      }, 500)
+      setTimeout(() => setIsAddingToCart(false), 500)
     }
   }
+
+
 
   const timeSlots = [
     '09:00 AM', '10:00 AM', '11:00 AM', '12:00 PM',
@@ -369,12 +258,12 @@ export default function ServiceDetailPage() {
               </div>
               <Button
                 onClick={bookService}
-                disabled={isAddingToCart}
+                disabled={isAddingToCart || isLoading}
                 className="w-full"
                 size="lg"
               >
                 <Calendar className="h-5 w-5 mr-2"/>
-                {isAddingToCart ? 'Adding to Cart...' : `Add to Cart - $${(service.price ?? 0) * quantity}`}
+                {isAddingToCart || isLoading ? 'Adding to Cart...' : `Add to Cart - $${(service.price ?? 0) * quantity}`}
               </Button>
             </div>
             <Separator />
@@ -394,17 +283,7 @@ export default function ServiceDetailPage() {
       </div>
       <Footer />
       
-      {/* Booking Conflict Modal */}
-      <BookingConflictModal
-        isOpen={isConflictModalOpen}
-        onClose={handleConflictClose}
-        onCreateNew={handleConflictCreateNew}
-        onAddToExisting={handleConflictAddToExisting}
-        onEditExisting={handleConflictEditExisting}
-        service={service ? { name: service.name, price: service.price } : null}
-        existingBookings={conflictData?.existingBookings || []}
-        newBookingData={conflictData?.newBookingData || null}
-      />
+
     </div>
   )
 }

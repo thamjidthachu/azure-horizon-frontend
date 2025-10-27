@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
-import { BookingProvider } from '@/components/booking-provider'
 import { CartProvider } from '@/components/cart-provider'
 import { ThemeProvider } from '@/components/theme-provider'
 
@@ -25,13 +24,11 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
         <ThemeProvider>
-          <BookingProvider>
-            <CartProvider>
-              <main className="min-h-screen bg-background font-sans antialiased">
-                {children}
-              </main>
-            </CartProvider>
-          </BookingProvider>
+          <CartProvider>
+            <main className="min-h-screen bg-background font-sans antialiased">
+              {children}
+            </main>
+          </CartProvider>
         </ThemeProvider>
       </body>
     </html>

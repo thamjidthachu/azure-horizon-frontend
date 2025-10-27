@@ -35,7 +35,7 @@ export interface Booking {
   status: 'pending' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled'
   payment_status: 'unpaid' | 'partial' | 'paid' | 'refunded'
   subtotal: number
-  tax: number
+  vat: number
   total_amount: number
   special_requests?: string
   created_at: string
@@ -420,13 +420,13 @@ export class BookingAPIService {
   static calculatePricing(cartItems: any[]) {
     const subtotal = cartItems.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0)
     const resortFee = subtotal * 0.10 // 10% resort fee
-    const tax = subtotal * 0.08 // 8% tax
-    const total = subtotal + resortFee + tax
+    const vat = subtotal * 0.08 // 8% vat
+    const total = subtotal + resortFee + vat
 
     return {
       subtotal: parseFloat(subtotal.toFixed(2)),
       resortFee: parseFloat(resortFee.toFixed(2)),
-      tax: parseFloat(tax.toFixed(2)),
+      vat: parseFloat(vat.toFixed(2)),
       total: parseFloat(total.toFixed(2))
     }
   }

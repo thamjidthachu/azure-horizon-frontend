@@ -1,130 +1,316 @@
 "use client"
 
-import { createContext, useContext, useEffect, useReducer, useState } from "react"
-
-interface CartItem {
-  id: string | number
-  name: string
-  price: number
-  quantity: number
-}
-
-type CartAction = 
-  | { type: 'ADD_ITEM'; payload: CartItem }
-  | { type: 'REMOVE_ITEM'; payload: string | number }
-  | { type: 'UPDATE_QUANTITY'; payload: { id: string | number; quantity: number } }
-  | { type: 'CLEAR_CART' }
+import { createContext, useContext, useEffect, useState } from "react"
+import { CartAPIService, type Cart, type CartItem, type OrderDetail } from '@/lib/cart-api'
+import { useAuth } from '@/hooks/useAuth'
+import { useToast } from '@/components/ui/use-toast'
 
 interface CartContextType {
+  // Cart state
+  cart: Cart | null
   items: CartItem[]
-  addItem: (item: CartItem) => void
-  removeItem: (itemId: string | number) => void
-  updateQuantity: (itemId: string | number, quantity: number) => void
-  clearCart: () => void
+  isLoading: boolean
+  error: string | null
+  
+  // Cart actions
+  addToCart: (serviceData: {
+    service_id: number
+    quantity: number
+    booking_date?: string
+    booking_time?: string
+  }) => Promise<void>
+  updateCartItem: (itemId: number, quantity: number, booking_date?: string, booking_time?: string) => Promise<void>
+  removeFromCart: (itemId: number) => Promise<void>
+  clearCart: () => Promise<void>
+  refreshCart: () => Promise<void>
+  
+  // Checkout
+  checkoutCart: (guestInfo: {
+    guest_name: string
+    guest_email: string
+    guest_phone: string
+    special_requests?: string
+  }) => Promise<OrderDetail | null>
+  
+  // Computed values
   total: number
-  dispatch: React.Dispatch<CartAction>
+  subtotal: number
+  vat: number
+  itemCount: number
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined)
 
-const CART_STORAGE_KEY = 'paradise-resort-cart'
-
-function cartReducer(state: CartItem[], action: CartAction): CartItem[] {
-  switch (action.type) {
-    case 'ADD_ITEM':
-      const existingItem = state.find(item => item.id === action.payload.id)
-      if (existingItem) {
-        return state.map(item =>
-          item.id === action.payload.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        )
-      }
-      return [...state, { ...action.payload, quantity: 1 }]
-
-    case 'REMOVE_ITEM':
-      return state.filter(item => item.id !== action.payload)
-
-    case 'UPDATE_QUANTITY':
-      return state.map(item =>
-        item.id === action.payload.id
-          ? { ...item, quantity: Math.max(0, action.payload.quantity) }
-          : item
-      )
-
-    case 'CLEAR_CART':
-      return []
-
-    default:
-      return state
-  }
-}
-
 export function CartProvider({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, user } = useAuth()
+  const { toast } = useToast()
+  const [cart, setCart] = useState<Cart | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [mounted, setMounted] = useState(false)
-  const [state, dispatch] = useReducer(cartReducer, [])
 
-  // Load cart from localStorage on mount
+  // Load cart when user is authenticated
   useEffect(() => {
+    setMounted(true)
+    if (isAuthenticated && user) {
+      refreshCart()
+    } else {
+      // Clear cart when user logs out
+      setCart(null)
+      setError(null)
+    }
+  }, [isAuthenticated, user])
+
+  const refreshCart = async () => {
+    if (!isAuthenticated) return
+    
+    setIsLoading(true)
+    setError(null)
+    
     try {
-      const savedCart = localStorage.getItem(CART_STORAGE_KEY)
-      if (savedCart) {
-        const parsedCart = JSON.parse(savedCart)
-        parsedCart.forEach((item: CartItem) => {
-          dispatch({ type: 'ADD_ITEM', payload: item })
+      const activeCart = await CartAPIService.getActiveCart()
+      setCart(activeCart)
+    } catch (err: any) {
+      console.error('Failed to load cart:', err)
+      setError(err.message)
+      // Don't show toast on initial load failure, just log it
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const addToCart = async (serviceData: {
+    service_id: number
+    quantity: number
+    booking_date?: string
+    booking_time?: string
+  }) => {
+    if (!isAuthenticated) {
+      toast({
+        title: "Login Required",
+        description: "Please log in to add items to your cart.",
+        variant: "destructive"
+      })
+      return
+    }
+
+    setIsLoading(true)
+    setError(null)
+    
+    try {
+      const updatedCart = await CartAPIService.addToCart(serviceData)
+      setCart(updatedCart)
+      toast({
+        title: "Service added to cart!",
+        description: "Item has been added to your cart successfully.",
+        variant: "success"
+      })
+    } catch (err: any) {
+      console.error('Failed to add to cart:', err)
+      setError(err.message)
+      if (err?.message?.includes('500')) {
+        toast({
+          title: "Error",
+          description: "Something went wrong, please try again!!",
+          variant: "destructive"
+        })
+      } else {
+        toast({
+          title: "Failed to Add to Cart",
+          description: err.message,
+          variant: "destructive"
         })
       }
-    } catch (error) {
-      console.error('Failed to load cart:', error)
+    } finally {
+      setIsLoading(false)
     }
-    setMounted(true)
-  }, [])
+  }
 
-  // Save cart to localStorage whenever it changes
-  useEffect(() => {
-    if (mounted) {
-      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(state))
+  const updateCartItem = async (itemId: number, quantity: number, booking_date?: string, booking_time?: string) => {
+    if (!isAuthenticated) return
+
+    setIsLoading(true)
+    setError(null)
+    try {
+      await CartAPIService.updateCartItem(itemId, quantity, booking_date, booking_time)
+      // Refresh cart to get updated totals
+      await refreshCart()
+      toast({
+        title: "Cart Updated!",
+        description: "Cart item updated successfully.",
+        variant: "success"
+      })
+    } catch (err: any) {
+      console.error('Failed to update cart item:', err)
+      setError(err.message)
+      if (err?.message?.includes('500')) {
+        toast({
+          title: "Error",
+          description: "Something went wrong, please try again!!",
+          variant: "destructive"
+        })
+      } else {
+        toast({
+          title: "Failed to Update Item",
+          description: err.message,
+          variant: "destructive"
+        })
+      }
+    } finally {
+      setIsLoading(false)
     }
-  }, [state, mounted])
-
-  const addItem = (newItem: CartItem) => {
-    dispatch({ type: 'ADD_ITEM', payload: newItem })
   }
 
-  const removeItem = (itemId: string | number) => {
-    dispatch({ type: 'REMOVE_ITEM', payload: itemId })
+  const removeFromCart = async (itemId: number) => {
+    if (!isAuthenticated) return
+
+    setIsLoading(true)
+    setError(null)
+    
+    try {
+      await CartAPIService.removeFromCart(itemId)
+      // Refresh cart to get updated state
+      await refreshCart()
+      toast({
+        title: "Item Removed",
+        description: "Item has been removed from your cart.",
+        variant: "default"
+      })
+    } catch (err: any) {
+      console.error('Failed to remove from cart:', err)
+      setError(err.message)
+      if (err?.message?.includes('500')) {
+        toast({
+          title: "Error",
+          description: "Something went wrong, please try again!!",
+          variant: "destructive"
+        })
+      } else {
+        toast({
+          title: "Failed to Remove Item",
+          description: err.message,
+          variant: "destructive"
+        })
+      }
+    } finally {
+      setIsLoading(false)
+    }
   }
 
-  const updateQuantity = (itemId: string | number, quantity: number) => {
-    dispatch({ type: 'UPDATE_QUANTITY', payload: { id: itemId, quantity } })
+  const clearCart = async () => {
+    if (!isAuthenticated) return
+
+    setIsLoading(true)
+    setError(null)
+    
+    try {
+      await CartAPIService.clearCart()
+      setCart(null)
+      
+      toast({
+        title: "Cart Cleared",
+        description: "All items have been removed from your cart.",
+        variant: "default"
+      })
+    } catch (err: any) {
+      console.error('Failed to clear cart:', err)
+      setError(err.message)
+      toast({
+        title: "Failed to Clear Cart",
+        description: err.message,
+        variant: "destructive"
+      })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
-  const clearCart = () => {
-    dispatch({ type: 'CLEAR_CART' })
+  const checkoutCart = async (guestInfo: {
+    guest_name: string
+    guest_email: string
+    guest_phone: string
+    special_requests?: string
+  }): Promise<OrderDetail | null> => {
+    if (!isAuthenticated || !cart) {
+      toast({
+        title: "Checkout Failed",
+        description: "Please log in and add items to your cart before checkout.",
+        variant: "destructive"
+      })
+      return null
+    }
+
+    setIsLoading(true)
+    setError(null)
+    
+    try {
+      const order = await CartAPIService.checkoutCart(guestInfo)
+      
+      // Refresh cart after checkout (should be cleared or new one created)
+      await refreshCart()
+      
+      toast({
+        title: "Checkout Successful",
+        description: `Order ${order.order_number} has been created successfully.`,
+        variant: "default"
+      })
+      
+      return order
+    } catch (err: any) {
+      console.error('Failed to checkout:', err)
+      setError(err.message)
+      toast({
+        title: "Checkout Failed",
+        description: err.message,
+        variant: "destructive"
+      })
+      return null
+    } finally {
+      setIsLoading(false)
+    }
   }
 
-  const total = state.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+  // Computed values
+  const items = cart?.items ?? [];
+  const subtotal = cart ? parseFloat(cart.subtotal ?? '0') : 0;
+  const vat = cart ? parseFloat(cart.vat ?? '0') : 0;
+  const total = cart ? parseFloat(cart.total ?? '0') : 0;
+  const itemCount = items.reduce((sum, item) => sum + (item.quantity || 0), 0);
 
-  const value = {
-    items: state,
-    addItem,
-    removeItem,
-    updateQuantity,
+  const value: CartContextType = {
+    cart,
+    items,
+    isLoading,
+    error,
+    addToCart,
+    updateCartItem,
+    removeFromCart,
     clearCart,
+    refreshCart,
+    checkoutCart,
     total,
-    dispatch
+    subtotal,
+    vat,
+    itemCount
   }
 
   if (!mounted) {
     return (
       <CartContext.Provider value={{
+        cart: null,
         items: [],
-        addItem: () => {},
-        removeItem: () => {},
-        updateQuantity: () => {},
-        clearCart: () => {},
+        isLoading: false,
+        error: null,
+        addToCart: async () => {},
+        updateCartItem: async () => {},
+        removeFromCart: async () => {},
+        clearCart: async () => {},
+        refreshCart: async () => {},
+        checkoutCart: async () => null,
         total: 0,
-        dispatch: () => {}
+        subtotal: 0,
+        vat: 0,
+        itemCount: 0
       }}>
         {children}
       </CartContext.Provider>
