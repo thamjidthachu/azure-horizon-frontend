@@ -13,7 +13,10 @@ import { StripePaymentService } from '@/lib/stripe-payment'
 import { useToast } from '@/components/ui/use-toast'
 import { type Booking } from '@/lib/booking-api'
 
-export default function PaymentSuccessPage() {
+
+import { Suspense } from 'react';
+
+function PaymentSuccessContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const { toast } = useToast()
@@ -217,4 +220,12 @@ export default function PaymentSuccessPage() {
       <Footer />
     </div>
   )
+}
+
+export default function PaymentSuccessPage() {
+  return (
+    <Suspense>
+      <PaymentSuccessContent />
+    </Suspense>
+  );
 }
