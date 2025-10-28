@@ -4,7 +4,9 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import Image from "next/image"
+import Link from "next/link"
 import { authFetch } from "@/utils/authFetch"
+import { useAuth } from "@/hooks/useAuth"
 
 export function ReviewSection({ serviceSlug }: { serviceSlug: string }) {
   const [reviews, setReviews] = useState<any[]>([])
@@ -17,6 +19,13 @@ export function ReviewSection({ serviceSlug }: { serviceSlug: string }) {
   const [message, setMessage] = useState("")
   const reviewsEndRef = useRef<HTMLDivElement>(null)
   const [nextUrl, setNextUrl] = useState<string | null>(null)
+  const [currentPath, setCurrentPath] = useState("")
+  const { isAuthenticated, loading: authLoading } = useAuth()
+
+  // Set current path on client side
+  useEffect(() => {
+    setCurrentPath(window.location.pathname + '#reviews')
+  }, [])
 
   // Fetch reviews with pagination
 useEffect(() => {
@@ -78,42 +87,65 @@ useEffect(() => {
 
   return (
     <div>
-      {/* Review Post Form */}
-      <form onSubmit={handlePost} className="mb-8 p-4 bg-white rounded-lg shadow flex flex-col gap-4 animate-fade-in dark:bg-gray-800">
-        <span className="font-small">Tell others what you think</span>
-        <div className="flex items-center gap-1">
-          {[1,2,3,4,5].map(i => (
-            <button
-              type="button"
-              key={i}
-              onMouseEnter={() => setHoverRating(i)}
-              onMouseLeave={() => setHoverRating(0)}
-              onClick={() => setRating(i)}
-              className="transition-transform duration-150"
-              style={{
-                transform: (hoverRating === i || rating === i) ? "scale(1.2)" : "scale(1)"
-              }}
-            >
-              <Star
-                className={`h-6 w-6 cursor-pointer transition-colors duration-150 ${
-                  (hoverRating || rating) >= i ? "text-yellow-400 fill-current" : "text-gray-300"
-                }`}
-                fill={(hoverRating || rating) >= i ? "#eed51dff" : "none"}
-              />
-            </button>
-          ))}
-        </div>
-        <Input
-          placeholder="Write your review..."
-          value={message}
-          onChange={e => setMessage(e.target.value)}
-          maxLength={200}
-          disabled={posting}
-        />
-        <Button type="submit" disabled={posting || !rating || !message.trim()} className="self-end">
-          {posting ? "Posting..." : "Post Review"}
-        </Button>
-      </form>
+      {/* Review Post Form - Show login prompt if not authenticated */}
+      {!authLoading && (
+        !isAuthenticated ? (
+          <div className="mb-8 p-6 bg-gray-50 dark:bg-gray-800 rounded-lg shadow border-2 border-dashed border-gray-300 dark:border-gray-600 text-center animate-fade-in">
+            <div className="flex flex-col items-center gap-4">
+              <Star className="h-12 w-12 text-gray-400" />
+              <div>
+                <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  Please login to review
+                </h3>
+                <p className="text-gray-500 dark:text-gray-400 mb-4">
+                  Share your experience with other users by leaving a review
+                </p>
+                <Link href={`/login?redirect=${encodeURIComponent(currentPath)}`}>
+                  <Button className="bg-teal-600 hover:bg-teal-700 text-white">
+                    Login Now
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <form onSubmit={handlePost} className="mb-8 p-4 bg-white rounded-lg shadow flex flex-col gap-4 animate-fade-in dark:bg-gray-800">
+            <span className="font-small">Tell others what you think</span>
+            <div className="flex items-center gap-1">
+              {[1,2,3,4,5].map(i => (
+                <button
+                  type="button"
+                  key={i}
+                  onMouseEnter={() => setHoverRating(i)}
+                  onMouseLeave={() => setHoverRating(0)}
+                  onClick={() => setRating(i)}
+                  className="transition-transform duration-150"
+                  style={{
+                    transform: (hoverRating === i || rating === i) ? "scale(1.2)" : "scale(1)"
+                  }}
+                >
+                  <Star
+                    className={`h-6 w-6 cursor-pointer transition-colors duration-150 ${
+                      (hoverRating || rating) >= i ? "text-yellow-400 fill-current" : "text-gray-300"
+                    }`}
+                    fill={(hoverRating || rating) >= i ? "#eed51dff" : "none"}
+                  />
+                </button>
+              ))}
+            </div>
+            <Input
+              placeholder="Write your review..."
+              value={message}
+              onChange={e => setMessage(e.target.value)}
+              maxLength={200}
+              disabled={posting}
+            />
+            <Button type="submit" disabled={posting || !rating || !message.trim()} className="self-end">
+              {posting ? "Posting..." : "Post Review"}
+            </Button>
+          </form>
+        )
+      )}
 
       <Separator />
 

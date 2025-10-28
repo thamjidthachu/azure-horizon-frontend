@@ -32,7 +32,7 @@ export default function TermsPage() {
               <ul className="list-disc pl-6 mb-4">
                 <li>Bookings must be made by guests 18 years or older</li>
                 <li>Valid identification is required at check-in</li>
-                <li>All rates are quoted in USD and subject to applicable taxes</li>
+                <li>All rates are quoted in USD and subject to applicable vates</li>
                 <li>Special requests are subject to availability and may incur additional charges</li>
               </ul>
             </section>
@@ -45,7 +45,7 @@ export default function TermsPage() {
               <ul className="list-disc pl-6 mb-4">
                 <li>Full payment is due at time of booking for services under $500</li>
                 <li>A 50% deposit is required for services over $500, with balance due upon arrival</li>
-                <li>Resort fees and taxes are additional and will be charged separately</li>
+                <li>Resort fees and vates are additional and will be charged separately</li>
                 <li>Currency exchange rates may apply for international payments</li>
               </ul>
             </section>

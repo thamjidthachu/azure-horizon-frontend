@@ -41,7 +41,7 @@ export function TrendingHeader() {
           onClick={() => setIsVisible(false)}
           className="absolute right-4 hover:bg-white/20 rounded-full p-1"
         >
-          <X className="h-4 w-4" />
+          <X className="h-4 w-4"/>
         </button>
       </div>
     </div>

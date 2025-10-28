@@ -11,11 +11,11 @@ import { Star, Calendar, Clock, Users, MapPin } from "lucide-react"
 import { TrendingHeader } from "@/components/trending-header"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
-import { useBooking } from "@/components/booking-provider"
-import { useToast } from "@/hooks/use-toast"
+import { useToast } from "@/components/ui/use-toast"
 import { useParams } from "next/navigation"
 import { ReviewSection } from "@/components/ui/review-section"
 import { authFetch } from "@/utils/authFetch"
+import { useCart } from '@/components/cart-provider'
 
 export default function ServiceDetailPage() {
   const params = useParams<{ slug: string }>()
@@ -24,14 +24,47 @@ export default function ServiceDetailPage() {
   const [quantity, setQuantity] = useState(1)
   const [selectedDate, setSelectedDate] = useState('')
   const [selectedTime, setSelectedTime] = useState('')
-  const { dispatch } = useBooking()
+  const [isAddingToCart, setIsAddingToCart] = useState(false)
+  const [isConflictModalOpen, setIsConflictModalOpen] = useState(false)
+  const [conflictData, setConflictData] = useState<{
+    existingBookings: Array<{
+      itemIndex: number
+      selectedDate: string
+      selectedTime: string
+      quantity: number
+    }>
+    newBookingData: {
+      selectedDate: string
+      selectedTime: string
+      quantity: number
+    }
+  } | null>(null)
   const { toast } = useToast()
+  const { addToCart, items, isLoading } = useCart()
+  
+  // Auto-set date and time for testing in development
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      // Set tomorrow's date for testing
+      const tomorrow = new Date()
+      tomorrow.setDate(tomorrow.getDate() + 1)
+      setSelectedDate(tomorrow.toISOString().split('T')[0])
+      setSelectedTime('10:00 AM')
+    }
+  }, [])
+
+
 
   useEffect(() => {
     if (!params?.slug) return
     authFetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/services/${params.slug}/`)
       .then(res => res.json())
       .then(data => {
+        if (process.env.NODE_ENV === 'development') {
+          console.log('🏨 Service data from API:', data)
+          console.log('🔍 Service keys:', Object.keys(data))
+          console.log('🆔 Service ID fields:', { id: data.id, pk: data.pk, slug: data.slug })
+        }
         setService(data)
         setLoading(false)
       })
@@ -54,8 +87,11 @@ export default function ServiceDetailPage() {
     )
   }
 
-  const bookService = () => {
+  const bookService = async () => {
+    if (isAddingToCart) return
+    setIsAddingToCart(true)
     if (!selectedDate || !selectedTime) {
+      setIsAddingToCart(false)
       toast({
         title: "Please select date and time",
         description: "Date and time selection is required for booking.",
@@ -63,21 +99,29 @@ export default function ServiceDetailPage() {
       })
       return
     }
-    for (let i = 0; i < quantity; i++) {
-      dispatch({
-        type: 'ADD_SERVICE',
-        payload: {
-          ...service,
-          selectedDate,
-          selectedTime
-        }
+    try {
+      await addToCart({
+        service_id: service.id,
+        quantity,
+        booking_date: selectedDate,
+        booking_time: selectedTime
       })
+      toast({
+        title: "Service added to cart!",
+        description: `${quantity}x ${service.name} added to your cart.`,
+      })
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to add service to cart. Please try again.",
+        variant: "destructive"
+      })
+    } finally {
+      setTimeout(() => setIsAddingToCart(false), 500)
     }
-    toast({
-      title: "Service booked!",
-      description: `${quantity} ${service.name} booking added to your cart.`,
-    })
   }
+
+
 
   const timeSlots = [
     '09:00 AM', '10:00 AM', '11:00 AM', '12:00 PM',
@@ -97,7 +141,7 @@ export default function ServiceDetailPage() {
             <div className="relative">
               <Image
                 src={service.files?.[0]?.images || "/placeholder.svg"}
-                alt={service.name}
+                alt={service.name || "Service-Image"}
                 width={600}
                 height={400}
                 className="w-full h-96 lg:h-[500px] object-cover rounded-lg"
@@ -133,15 +177,15 @@ export default function ServiceDetailPage() {
               </div>
               <div className="flex items-center space-x-6 mb-6 text-gray-600">
                 <div className="flex items-center">
-                  <Clock className="h-5 w-5 mr-2" />
+                  <Clock className="h-5 w-5 mr-2"/>
                   {service.time || 0} hours
                 </div>
                 <div className="flex items-center">
-                  <Users className="h-5 w-5 mr-2" />
+                  <Users className="h-5 w-5 mr-2"/>
                   Up to {service.max_people || 0} guests
                 </div>
                 <div className="flex items-center">
-                  <MapPin className="h-5 w-5 mr-2" />
+                  <MapPin className="h-5 w-5 mr-2"/>
                   {service.location || "Location not specified"}
                 </div>
               </div>
@@ -214,11 +258,12 @@ export default function ServiceDetailPage() {
               </div>
               <Button
                 onClick={bookService}
+                disabled={isAddingToCart || isLoading}
                 className="w-full"
                 size="lg"
               >
-                <Calendar className="h-5 w-5 mr-2" />
-                Book Now - ${service.price ?? 0 * quantity}
+                <Calendar className="h-5 w-5 mr-2"/>
+                {isAddingToCart || isLoading ? 'Adding to Cart...' : `Add to Cart - $${(service.price ?? 0) * quantity}`}
               </Button>
             </div>
             <Separator />
@@ -230,13 +275,15 @@ export default function ServiceDetailPage() {
           </div>
           <Separator /> 
           {/* Reviews Section */}
-          <div className="mt-8">
+          <div id="reviews" className="mt-8">
   <h3 className="text-lg font-semibold mb-4">Rate this service</h3>
     <ReviewSection serviceSlug={service.slug} />
     </div>
     </div>
       </div>
       <Footer />
+      
+
     </div>
   )
 }

@@ -1,0 +1,35 @@
+
+> my-v0-project@0.1.0 dev /mnt/d/Projects/playground/frontend_azure_horizon
+> next dev --turbo
+
+ ⚠ Port 3000 is in use, trying 3001 instead.
+   ▲ Next.js 15.2.4 (Turbopack)
+   - Local:        http://localhost:3001
+   - Network:      http://10.255.255.254:3001
+   - Environments: .env.local, .env
+   - Experiments (use with caution):
+     · turbo
+
+ ✓ Starting...
+ ✓ Ready in 8.6s
+ ELIFECYCLE  Command failed.
+[?25h
+rvices ...
+ ✓ Compiled /services in 2.1s
+ GET /services 200 in 2264ms
+ GET /services 200 in 207ms
+ GET /services 200 in 203ms
+ ○ Compiling /services/[slug] ...
+ ✓ Compiled /services/[slug] in 1107ms
+ GET /services/couples-yoga-sessions 200 in 5682ms
+ GET /services/couples-yoga-sessions 200 in 234ms
+ ○ Compiling /login ...
+ ✓ Compiled /login in 1638ms
+ GET /login?redirect=%2Fservices%2Fcouples-yoga-sessions%23reviews 200 in 1791ms
+ GET /services/couples-yoga-sessions 200 in 514ms
+ ○ Compiling /_not-found/page ...
+ ✓ Compiled /_not-found/page in 929ms
+ GET /.well-known/appspecific/com.chrome.devtools.json 404 in 1122ms
+ GET / 200 in 236ms
+ ELIFECYCLE  Command failed.
+[?25h

@@ -41,16 +41,18 @@ export default function ProfilePage() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-100 to-white">
       <Card className="w-full max-w-md shadow-xl animate-fade-in">
         <CardContent className="p-8 flex flex-col items-center">
-          <Image
-            src={`${process.env.NEXT_PUBLIC_API_BASE_URL}/${profile.avatar || "/placeholder-user.jpg"}`}
-            alt={profile.username}
-            width={80}
-            height={80}
-            className="rounded-full object-cover mb-4"
-          />
+          <div className="w-20 h-20 rounded-full overflow-hidden bg-muted flex items-center justify-center mb-4">
+            <Image
+              src={profile.avatar ? `${process.env.NEXT_PUBLIC_API_BASE_URL}/${profile.avatar}` : "/placeholder-user.jpg"}
+              alt={profile.username}
+              width={80}
+              height={80}
+              className="object-cover w-full h-full"
+            />
+          </div>
           <h2 className="text-2xl font-bold mb-1">{profile.full_name || profile.username}</h2>
           <div className="text-gray-500 mb-4">@{profile.username}</div>
-          <Separator className="my-4" />
+          <Separator className="my-4"/>
           <div className="w-full space-y-2 text-center">
             <div><span className="font-medium">Email:</span>&nbsp;{profile.email}</div>
             <div><span className="font-medium">Phone:</span>&nbsp;{profile.phone}</div>

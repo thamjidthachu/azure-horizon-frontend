@@ -12,8 +12,11 @@ import { Star, Calendar, Clock } from 'lucide-react'
 import { TrendingHeader } from '@/components/trending-header'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
-import { useBooking } from '@/components/booking-provider'
-import { useToast } from '@/hooks/use-toast'
+import { useCart } from '@/components/cart-provider'
+import { useAuth } from '@/hooks/useAuth'
+import { useToast } from '@/components/ui/use-toast'
+import { BookingModal } from '@/components/booking-modal'
+import { BookingConflictModal } from '@/components/booking-conflict-modal'
 
 interface ServiceFile {
   id: number
@@ -21,6 +24,7 @@ interface ServiceFile {
 }
 
 interface Service {
+  id: number // Add the numeric ID field
   slug: string
   name: string
   synopsis: string
@@ -34,21 +38,71 @@ interface Service {
 }
 
 export default function ServicesPage() {
+  // Helper to convert 12-hour time (e.g., '10:00 AM') to 24-hour format ('10:00')
+  function to24Hour(time12h: string): string {
+    if (!time12h) return '09:00';
+    const [time, period] = time12h.split(' ');
+    let [hours, minutes] = time.split(':');
+    let h = parseInt(hours, 10);
+    if (period?.toUpperCase() === 'PM' && h !== 12) h += 12;
+    if (period?.toUpperCase() === 'AM' && h === 12) h = 0;
+    return `${h.toString().padStart(2, '0')}:${minutes || '00'}`;
+  }
   const [services, setServices] = useState<Service[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [sortBy, setSortBy] = useState('name')
   const [filterBy, setFilterBy] = useState('all')
-  const { dispatch } = useBooking()
+  const [selectedService, setSelectedService] = useState<Service | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isConflictModalOpen, setIsConflictModalOpen] = useState(false)
+  const [conflictData, setConflictData] = useState<{
+    existingBookings: Array<{
+      itemIndex: number
+      selectedDate: string
+      selectedTime: string
+      quantity: number
+    }>
+    newBookingData: {
+      selectedDate: string
+      selectedTime: string
+      quantity: number
+    }
+  } | null>(null)
+  const { addToCart, items: cartItems, updateCartItem } = useCart()
+  const { isAuthenticated } = useAuth()
   const { toast } = useToast()
 
   useEffect(() => {
     const fetchServices = async () => {
       try {
         setLoading(true)
-        const res = await authFetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/services/list/`)
+        const apiUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/services/list/`
+        console.log('🌐 Attempting to fetch services from:', apiUrl)
+        console.log('🔧 API Base URL:', process.env.NEXT_PUBLIC_API_BASE_URL)
+        
+        // First test if the API is reachable
+        try {
+          const testRes = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/`)
+          console.log('🔍 Backend API health check:', testRes.status)
+        } catch (testError) {
+          console.error('❌ Backend API not reachable:', testError)
+          throw new Error('Backend API server is not running or not accessible')
+        }
+        
+        const res = await authFetch(apiUrl)
+        console.log('📡 Services API response status:', res.status, res.statusText)
+        
         if (!res.ok) throw new Error('Failed to fetch services')
         const data = await res.json()
+        console.log('📊 Services API response:', data)
+        
+        if (process.env.NODE_ENV === 'development' && data.length > 0) {
+          console.log('🏨 First service from list API:', data[0])
+          console.log('🔍 Service keys:', Object.keys(data[0]))
+          console.log('🆔 Service ID fields:', { id: data[0].id, pk: data[0].pk, slug: data[0].slug })
+        }
+        
         setServices(data)
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load services')
@@ -84,12 +138,136 @@ export default function ServicesPage() {
       }
     })
 
-  const bookService = (service: any) => {
-    dispatch({ type: 'ADD_SERVICE', payload: service })
+  const handleQuickBook = (service: any) => {
+    setSelectedService(service)
+    setIsModalOpen(true)
+  }
+
+  const handleModalConfirm = (bookingData: {
+    selectedDate: string
+    selectedTime: string
+    quantity: number
+  }) => {
+    if (!selectedService) return
+
+    // Check if this service already exists in cart (API-based)
+    const existingBookings = cartItems
+      .filter(item => item.service_id === selectedService.id)
+      .map(item => ({
+        itemIndex: item.id, // Use cart item id from backend
+        selectedDate: item.booking_date || '',
+        selectedTime: item.booking_time || '',
+        quantity: item.quantity
+      }))
+
+    if (existingBookings.length > 0) {
+      // Conflict detected - show conflict resolution modal
+      setConflictData({
+        existingBookings,
+        newBookingData: bookingData
+      })
+      setIsConflictModalOpen(true)
+      setIsModalOpen(false)
+      return
+    }
+
+    // No conflict - proceed with normal addition
+    addServiceToCart(bookingData)
+  }
+
+  const addServiceToCart = async (bookingData: {
+    selectedDate: string
+    selectedTime: string
+    quantity: number
+  }) => {
+    if (!selectedService) return
+    
+    if (!isAuthenticated) {
+      toast({
+        title: "Login Required",
+        description: "Please log in to add services to your cart.",
+        variant: "destructive"
+      })
+      return
+    }
+
+    // Prepare cart data for API
+    const cartData = {
+      service_id: Number(selectedService.id), // Ensure numeric
+      quantity: bookingData.quantity,
+      booking_date: bookingData.selectedDate,
+      booking_time: to24Hour(bookingData.selectedTime)
+    }
+    
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🏨 Services page adding service to cart via API:', {
+        original: selectedService,
+        cartData,
+        bookingData
+      })
+    }
+    
+    // Use the cart API to add the item
+    await addToCart(cartData)
+
+    // Close modals on success (addToCart will handle error toasts)
+    setIsModalOpen(false)
+    setSelectedService(null)
+  }
+
+  const handleModalClose = () => {
+    setIsModalOpen(false)
+    setSelectedService(null)
+  }
+
+  const handleConflictCreateNew = (bookingData: {
+    selectedDate: string
+    selectedTime: string
+    quantity: number
+  }) => {
+  addServiceToCart(bookingData)
+  setIsConflictModalOpen(false)
+  setConflictData(null)
+  }
+
+  const handleConflictAddToExisting = (itemIndex: number, additionalQuantity: number) => {
+    // Update the cart item quantity using the API
+    const cartItem = cartItems.find(item => item.id === itemIndex)
+    if (cartItem) {
+      updateCartItem(itemIndex, cartItem.quantity + additionalQuantity)
+      toast({
+        title: "Added to existing booking",
+        description: `${additionalQuantity} guest${additionalQuantity > 1 ? 's' : ''} added to your existing booking.`,
+      })
+    }
+    setIsConflictModalOpen(false)
+    setConflictData(null)
+    setSelectedService(null)
+  }
+
+  const handleConflictEditExisting = (itemIndex: number, newBookingData: {
+    selectedDate: string
+    selectedTime: string
+    quantity: number
+  }) => {
+    updateCartItem(
+      itemIndex,
+      newBookingData.quantity,
+      newBookingData.selectedDate,
+      to24Hour(newBookingData.selectedTime)
+    )
     toast({
-      title: "Service added to cart",
-      description: `${service.name} has been added to your bookings.`,
+      title: "Booking updated",
+      description: `Booking updated to ${newBookingData.selectedDate} at ${newBookingData.selectedTime} for ${newBookingData.quantity} guest${newBookingData.quantity > 1 ? 's' : ''}.`,
     })
+    setIsConflictModalOpen(false)
+    setConflictData(null)
+    setSelectedService(null)
+  }
+
+  const handleConflictClose = () => {
+    setIsConflictModalOpen(false)
+    setConflictData(null)
   }
 
   if (loading) {
@@ -144,7 +322,7 @@ export default function ServicesPage() {
           <div className="flex flex-col sm:flex-row gap-4 mb-6">
             <Select value={filterBy} onValueChange={setFilterBy}>
               <SelectTrigger className="w-full sm:w-48">
-                <SelectValue placeholder="Filter by category" />
+                <SelectValue placeholder="Filter by category"/>
               </SelectTrigger>
               <SelectContent>
                 {categories.map(category => (
@@ -156,7 +334,7 @@ export default function ServicesPage() {
             </Select>
             <Select value={sortBy} onValueChange={setSortBy}>
               <SelectTrigger className="w-full sm:w-48">
-                <SelectValue placeholder="Sort by" />
+                <SelectValue placeholder="Sort by"/>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="name">Name</SelectItem>
@@ -191,21 +369,22 @@ export default function ServicesPage() {
                 </h3>
                 <div className="flex items-center mb-2">
                   <div className="flex items-center">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`h-4 w-4 ${
-                          i < Math.floor(service.rating ?? 0)
-                            ? 'text-yellow-400 fill-current'
-                            : 'text-gray-300'
-                        }`}
-                      />
-                    ))}
+                    {[...Array(5)].map((_, i) => {
+                      const isFilled = i < Math.floor(service.rating ?? 0)
+                      return (
+                        <Star
+                          key={i}
+                          className={
+                            'h-4 w-4 ' + (isFilled ? 'text-yellow-400 fill-current' : 'text-gray-300')
+                          }
+                        />
+                      )
+                    })}
                   </div>
                   <span className="text-sm text-gray-500 ml-2">({service.review_count ?? 20})</span>
                 </div>
                 <div className="flex items-center mb-3 text-sm text-gray-600">
-                  <Clock className="h-4 w-4 mr-1" />
+                  <Clock className="h-4 w-4 mr-1"/>
                   {service.time ?? 0} hours
                 </div>
                 <p className="text-gray-600 text-sm mb-4 line-clamp-2">
@@ -222,16 +401,18 @@ export default function ServicesPage() {
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <Link href={`/services/${service.slug}`} className="flex-1">
-                    <Button variant="outline" className="w-full">
-                      View Details
-                    </Button>
+                  <Link href={`/services/${service.slug}`}>
+                    <div className="w-full flex-1">
+                      <Button variant="outline" className="w-full">
+                        View Details
+                      </Button>
+                    </div>
                   </Link>
                   <Button
-                    onClick={() => bookService(service)}
+                    onClick={() => handleQuickBook(service)}
                     className="flex-1"
                   >
-                    <Calendar className="h-4 w-4 mr-2" />
+                    <Calendar className="h-4 w-4 mr-2"/>
                     Book Now
                   </Button>
                 </div>
@@ -241,6 +422,26 @@ export default function ServicesPage() {
         </div>
       </div>
       <Footer />
+      
+      {/* Booking Modal */}
+      <BookingModal
+        isOpen={isModalOpen}
+        onClose={handleModalClose}
+        onConfirm={handleModalConfirm}
+        service={selectedService}
+      />
+
+      {/* Booking Conflict Modal */}
+      <BookingConflictModal
+        isOpen={isConflictModalOpen}
+        onClose={handleConflictClose}
+        onCreateNew={handleConflictCreateNew}
+        onAddToExisting={handleConflictAddToExisting}
+        onEditExisting={handleConflictEditExisting}
+        service={selectedService}
+        existingBookings={conflictData?.existingBookings || []}
+        newBookingData={conflictData?.newBookingData || null}
+      />
     </div>
   )
 }

@@ -21,7 +21,7 @@ export default function CancellationPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <Card>
             <CardContent className="p-6 text-center">
-              <Clock className="h-12 w-12 text-teal-600 mx-auto mb-4" />
+              <Clock className="h-12 w-12 text-teal-600 mx-auto mb-4"/>
               <h3 className="text-lg font-semibold mb-2">24-Hour Free Cancellation</h3>
               <p className="text-gray-600">Cancel any booking up to 24 hours before for full refund</p>
             </CardContent>
@@ -29,7 +29,7 @@ export default function CancellationPage() {
 
           <Card>
             <CardContent className="p-6 text-center">
-              <Calendar className="h-12 w-12 text-blue-600 mx-auto mb-4" />
+              <Calendar className="h-12 w-12 text-blue-600 mx-auto mb-4"/>
               <h3 className="text-lg font-semibold mb-2">Flexible Rescheduling</h3>
               <p className="text-gray-600">Reschedule your services based on availability</p>
             </CardContent>
@@ -37,7 +37,7 @@ export default function CancellationPage() {
 
           <Card>
             <CardContent className="p-6 text-center">
-              <CreditCard className="h-12 w-12 text-green-600 mx-auto mb-4" />
+              <CreditCard className="h-12 w-12 text-green-600 mx-auto mb-4"/>
               <h3 className="text-lg font-semibold mb-2">Quick Refunds</h3>
               <p className="text-gray-600">Refunds processed within 3-5 business days</p>
             </CardContent>
@@ -45,7 +45,7 @@ export default function CancellationPage() {
 
           <Card>
             <CardContent className="p-6 text-center">
-              <Phone className="h-12 w-12 text-purple-600 mx-auto mb-4" />
+              <Phone className="h-12 w-12 text-purple-600 mx-auto mb-4"/>
               <h3 className="text-lg font-semibold mb-2">24/7 Support</h3>
               <p className="text-gray-600">Our concierge team is always available to help</p>
             </CardContent>
@@ -67,7 +67,7 @@ export default function CancellationPage() {
                 <div className="space-y-4">
                   <div className="bg-green-50 p-4 rounded-lg border-l-4 border-green-400">
                     <div className="flex items-center mb-2">
-                      <Shield className="h-5 w-5 text-green-600 mr-2" />
+                      <Shield className="h-5 w-5 text-green-600 mr-2"/>
                       <h4 className="font-semibold text-green-800">24+ Hours Before Service</h4>
                     </div>
                     <p className="text-green-700">
@@ -77,7 +77,7 @@ export default function CancellationPage() {
                   
                   <div className="bg-yellow-50 p-4 rounded-lg border-l-4 border-yellow-400">
                     <div className="flex items-center mb-2">
-                      <AlertCircle className="h-5 w-5 text-yellow-600 mr-2" />
+                      <AlertCircle className="h-5 w-5 text-yellow-600 mr-2"/>
                       <h4 className="font-semibold text-yellow-800">12-24 Hours Before Service</h4>
                     </div>
                     <p className="text-yellow-700">
@@ -87,7 +87,7 @@ export default function CancellationPage() {
                   
                   <div className="bg-red-50 p-4 rounded-lg border-l-4 border-red-400">
                     <div className="flex items-center mb-2">
-                      <Clock className="h-5 w-5 text-red-600 mr-2" />
+                      <Clock className="h-5 w-5 text-red-600 mr-2"/>
                       <h4 className="font-semibold text-red-800">Less Than 12 Hours</h4>
                     </div>
                     <p className="text-red-700">

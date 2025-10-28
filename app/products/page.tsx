@@ -13,7 +13,7 @@ import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { products } from '@/lib/products'
 import { useCart } from '@/components/cart-provider'
-import { useToast } from '@/hooks/use-toast'
+import { useToast } from '@/components/ui/use-toast'
 import ProductsList from "./products-list"
 
 export default function ProductsPage() {
@@ -28,7 +28,7 @@ export default function ProductsPage() {
 
   if (!isClient) return null
 
-  const { addItem } = useCart()
+  const { addToCart } = useCart()
   const { toast } = useToast()
 
   const categories = ['all', ...Array.from(new Set(products.map(p => p.category)))]
@@ -48,8 +48,12 @@ export default function ProductsPage() {
       }
     })
 
-  const addToCart = (product: any) => {
-    addItem(product)
+
+  const handleAddToCart = (product: any) => {
+    addToCart({
+      service_id: product.id,
+      quantity: 1
+    })
     toast({
       title: "Added to cart",
       description: `${product.name} has been added to your cart.`,
@@ -69,7 +73,7 @@ export default function ProductsPage() {
           <div className="flex flex-col sm:flex-row gap-4 mb-6">
             <Select value={filterBy} onValueChange={setFilterBy}>
               <SelectTrigger className="w-full sm:w-48">
-                <SelectValue placeholder="Filter by category" />
+                <SelectValue placeholder="Filter by category"/>
               </SelectTrigger>
               <SelectContent>
                 {categories.map(category => (
@@ -82,7 +86,7 @@ export default function ProductsPage() {
 
             <Select value={sortBy} onValueChange={setSortBy}>
               <SelectTrigger className="w-full sm:w-48">
-                <SelectValue placeholder="Sort by" />
+                <SelectValue placeholder="Sort by"/>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="name">Name</SelectItem>

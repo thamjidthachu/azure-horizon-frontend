@@ -13,10 +13,10 @@ export function Footer() {
               From peaceful retreats surrounded by nature to indulgent luxury experiences, every moment is designed to refresh your soul.
             </p>
             <div className="flex space-x-4">
-              <Facebook className="h-6 w-6 text-gray-400 hover:text-white cursor-pointer" />
-              <Twitter className="h-6 w-6 text-gray-400 hover:text-white cursor-pointer" />
-              <Instagram className="h-6 w-6 text-gray-400 hover:text-white cursor-pointer" />
-              <Youtube className="h-6 w-6 text-gray-400 hover:text-white cursor-pointer" />
+              <Facebook className="h-6 w-6 text-gray-400 hover:text-white cursor-pointer"/>
+              <Twitter className="h-6 w-6 text-gray-400 hover:text-white cursor-pointer"/>
+              <Instagram className="h-6 w-6 text-gray-400 hover:text-white cursor-pointer"/>
+              <Youtube className="h-6 w-6 text-gray-400 hover:text-white cursor-pointer"/>
             </div>
           </div>
           
@@ -34,15 +34,15 @@ export function Footer() {
             <h4 className="text-lg font-semibold mb-4">Contact Info</h4>
             <ul className="space-y-2">
               <li className="flex items-center text-gray-300">
-                <MapPin className="h-4 w-4 mr-2" />
+                <MapPin className="h-4 w-4 mr-2"/>
                 Al Reem Island, Abu Dhabi, UAE
               </li>
               <li className="flex items-center text-gray-300">
-                <Phone className="h-4 w-4 mr-2" />
-                +960 123-4567
+                <Phone className="h-4 w-4 mr-2"/>
+                +971 527627117
               </li>
               <li className="flex items-center text-gray-300">
-                <Mail className="h-4 w-4 mr-2" />
+                <Mail className="h-4 w-4 mr-2"/>
                 info@azurehorizon.com
               </li>
             </ul>
@@ -58,7 +58,7 @@ export function Footer() {
         
         <div className="border-t border-gray-800 mt-8 pt-8 text-center">
           <p className="text-gray-400">
-            © 2024 Azure Horizon. All rights reserved.
+            © 2025 Azure Horizon. All rights reserved.
           </p>
         </div>
       </div>

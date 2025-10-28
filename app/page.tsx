@@ -10,6 +10,7 @@ import { Footer } from "@/components/footer"
 import { TrendingHeader } from "@/components/trending-header"
 import { Sparkles, Utensils, Waves, Calendar } from "lucide-react"
 import { authFetch } from "@/utils/authFetch"
+import { HotReloadTest } from "@/components/hot-reload-test"
 
 type Service = {
   id: number
@@ -76,8 +77,8 @@ export default function HomePage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Link href="/services">
-                <Button variant="outline" className="w-full text-gray-700 hover:text-teal-600">
-                  Explore Services
+                <Button className="w-full bg-teal-600 hover:bg-teal-700 text-white">
+                  Book Now
                 </Button>
               </Link>
               <Link href="/services">
@@ -96,7 +97,7 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center">
               <div className="bg-teal-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Sparkles className="h-8 w-8 text-teal-600" />
+                <Sparkles className="h-8 w-8 text-teal-600"/>
               </div>
               <h3 className="text-xl font-semibold mb-2">Luxury Spa</h3>
               <p className="text-gray-600">
@@ -105,7 +106,7 @@ export default function HomePage() {
             </div>
             <div className="text-center">
               <div className="bg-teal-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Utensils className="h-8 w-8 text-teal-600" />
+                <Utensils className="h-8 w-8 text-teal-600"/>
               </div>
               <h3 className="text-xl font-semibold mb-2">Fine Dining</h3>
               <p className="text-gray-600">
@@ -114,7 +115,7 @@ export default function HomePage() {
             </div>
             <div className="text-center">
               <div className="bg-teal-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Waves className="h-8 w-8 text-teal-600" />
+                <Waves className="h-8 w-8 text-teal-600"/>
               </div>
               <h3 className="text-xl font-semibold mb-2">Water Adventures</h3>
               <p className="text-gray-600">
@@ -182,7 +183,7 @@ export default function HomePage() {
                       {service.name}
                     </h3>
                     <p className="text-gray-600">{service.synopsis}</p>
-                    <Link href={`/services/${service.id}`}>
+                    <Link href={`/services/${service.slug}`}>
                       <Button variant="outline">View Details</Button>
                     </Link>
                   </CardContent>
@@ -219,6 +220,7 @@ export default function HomePage() {
       </section>
 
       <Footer />
+      <HotReloadTest />
     </div>
   )
 }
