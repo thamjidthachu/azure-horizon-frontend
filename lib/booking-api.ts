@@ -99,7 +99,7 @@ export class BookingAPIService {
   /**
    * Get user's bookings
    */
-  static async getMyBookings(page: number = 1): Promise<{ bookings: Booking[], count: number, next: string | null, previous: string | null }> {
+  static async getMyBookings(page: number = 1): Promise<{ results: Booking[], count: number, next: string | null, previous: string | null }> {
     try {
       const response = await authFetch(`${API_BASE_URL}/bookings/my-bookings/?page=${page}`)
 
@@ -119,7 +119,7 @@ export class BookingAPIService {
    */
   static async getBookingDetail(bookingNumber: string): Promise<Booking> {
     try {
-      const response = await authFetch(`${API_BASE_URL}/bookings/${bookingNumber}/`)
+      const response = await authFetch(`${API_BASE_URL}/bookings/${bookingNumber}/details/`)
 
       if (!response.ok) {
         throw new Error(`Failed to fetch booking: ${response.status}`)
@@ -208,21 +208,30 @@ export class BookingAPIService {
    */
   static async verifyPayment(sessionId: string): Promise<{ booking: Booking, message: string }> {
     try {
-      const params = new URLSearchParams({ session_id: sessionId });
       // Accept bookingNumber as an optional second argument
+      const data: Record<string, string> = { session_id: sessionId };
       if (typeof arguments[1] === 'string' && arguments[1]) {
-        params.append('booking_number', arguments[1]);
+        data.booking_number = arguments[1];
       }
-      const response = await authFetch(`${API_BASE_URL}/bookings/verify-payment/?${params.toString()}`, {
-        method: 'GET',
+      const response = await authFetch(`${API_BASE_URL}/bookings/verify-payment/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
       });
 
+      const json = await response.json();
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || `Failed to verify payment: ${response.status}`);
+        throw new Error(json.message || `Failed to verify payment: ${response.status}`);
       }
 
-      return await response.json();
+      // If the response has booking_number, return as-is (for payment-success page)
+      if (json && json.booking_number) {
+        return json;
+      }
+      // fallback to old style
+      return json;
     } catch (error) {
       console.error('Error verifying payment:', error);
       throw error;

@@ -5,7 +5,8 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
-import { Minus, Plus, Trash2, Calendar, Loader2 } from 'lucide-react'
+import { Minus, Plus, Trash2, Calendar, Loader2, ShoppingCart } from 'lucide-react'
+import { DirhamIcon } from '@/components/ui/dirham-icon'
 import { TrendingHeader } from '@/components/trending-header'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
@@ -70,7 +71,7 @@ export default function CartPage() {
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="text-center">
-            <Calendar className="h-24 w-24 text-gray-400 mx-auto mb-4"/>
+            <ShoppingCart className="h-24 w-24 text-gray-400 mx-auto mb-4"/>
             <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Login Required</h1>
             <p className="text-xl text-gray-600 dark:text-gray-400 mb-8">
               Please log in to view your cart and make bookings.
@@ -114,7 +115,7 @@ export default function CartPage() {
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="text-center">
-            <Calendar className="h-24 w-24 text-red-400 mx-auto mb-4"/>
+            <ShoppingCart className="h-24 w-24 text-red-400 mx-auto mb-4"/>
             <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Cart Error</h1>
             <p className="text-xl text-red-600 dark:text-red-400 mb-8">{error}</p>
             <Link href="/services">
@@ -136,8 +137,8 @@ export default function CartPage() {
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="text-center">
-            <Calendar className="h-24 w-24 text-gray-400 mx-auto mb-4"/>
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">No bookings yet</h1>
+            <ShoppingCart className="h-24 w-24 text-gray-400 mx-auto mb-4"/>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">Nothing in the cart, yet!!</h1>
             <p className="text-gray-600 mb-8">Start exploring our services to create your perfect getaway</p>
             <Link href="/services">
               <Button size="lg">
@@ -193,11 +194,11 @@ export default function CartPage() {
                             📅 {item.booking_date} {item.booking_time && `at ${item.booking_time}`}
                           </p>
                         )}
-                        <p className="text-xl font-bold text-blue-600 dark:text-blue-400">
-                          ${parseFloat(item.service_price).toFixed(2)} per service
+                        <p className="text-xl font-bold text-blue-600 dark:text-blue-400 flex items-center gap-1">
+                          <DirhamIcon className="h-5 w-5 inline-block align-text-bottom" />{parseFloat(item.service_price).toFixed(2)} per service
                         </p>
-                        <p className="text-sm text-gray-600">
-                          Subtotal: ${parseFloat(item.subtotal).toFixed(2)}
+                        <p className="text-sm text-gray-600 flex items-center gap-1">
+                          Subtotal: <DirhamIcon className="h-4 w-4 inline-block align-text-bottom" />{parseFloat(item.subtotal).toFixed(2)}
                         </p>
                       </div>
                       
@@ -250,18 +251,18 @@ export default function CartPage() {
                 <div className="space-y-3">
                   <div className="flex justify-between">
                     <span>Subtotal ({itemCount} service{itemCount !== 1 ? 's' : ''})</span>
-                    <span>${subtotal.toFixed(2)}</span>
+                    <span className="flex items-center gap-1"><DirhamIcon className="h-4 w-4 inline-block align-text-bottom" />{subtotal.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Vat (5%)</span>
-                    <span>${vat.toFixed(2)}</span>
+                    <span className="flex items-center gap-1"><DirhamIcon className="h-4 w-4 inline-block align-text-bottom" />{vat.toFixed(2)}</span>
                   </div>
                   
                   <Separator />
                   
                   <div className="flex justify-between text-lg font-semibold">
                     <span>Total</span>
-                    <span>${total.toFixed(2)}</span>
+                    <span className="flex items-center gap-1"><DirhamIcon className="h-5 w-5 inline-block align-text-bottom" />{total.toFixed(2)}</span>
                   </div>
                 </div>
                 

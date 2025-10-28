@@ -92,7 +92,7 @@ export class CartAPIService {
     console.log('🛒 CartAPI: Getting active cart...')
     
     try {
-      const response = await authFetch(`${API_BASE_URL}/api/cart/cart/active/`)
+      const response = await authFetch(`${API_BASE_URL}/api/cart/get-my-cart/`)
       
       if (!response.ok) {
         throw new Error(`Failed to get active cart: ${response.status} ${response.statusText}`)
@@ -119,7 +119,7 @@ export class CartAPIService {
     console.log('🛒 CartAPI: Adding item to cart:', serviceData)
     
     try {
-      const response = await authFetch(`${API_BASE_URL}/api/cart/cart/add/`, {
+      const response = await authFetch(`${API_BASE_URL}/api/cart/add-to-cart/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -156,7 +156,7 @@ export class CartAPIService {
       const body: any = { quantity }
       if (booking_date !== undefined) body.booking_date = booking_date
       if (booking_time !== undefined) body.booking_time = booking_time
-      const response = await authFetch(`${API_BASE_URL}/api/cart/cart/items/${itemId}/`, {
+      const response = await authFetch(`${API_BASE_URL}/api/cart/items/${itemId}/`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -183,7 +183,7 @@ export class CartAPIService {
     console.log('🛒 CartAPI: Removing item from cart:', itemId)
     
     try {
-      const response = await authFetch(`${API_BASE_URL}/api/cart/cart/items/${itemId}/remove/`, {
+      const response = await authFetch(`${API_BASE_URL}/api/cart/items/${itemId}/remove/`, {
         method: 'DELETE'
       })
       
@@ -208,7 +208,7 @@ export class CartAPIService {
     console.log('🛒 CartAPI: Clearing cart...')
     
     try {
-      const response = await authFetch(`${API_BASE_URL}/api/cart/cart/clear/`, {
+      const response = await authFetch(`${API_BASE_URL}/api/cart/clear-cart/`, {
         method: 'DELETE'
       })
       
@@ -238,7 +238,7 @@ export class CartAPIService {
     console.log('🛒 CartAPI: Checking out cart:', guestInfo)
     
     try {
-      const response = await authFetch(`${API_BASE_URL}/api/cart/cart/checkout/`, {
+      const response = await authFetch(`${API_BASE_URL}/api/cart/checkout/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

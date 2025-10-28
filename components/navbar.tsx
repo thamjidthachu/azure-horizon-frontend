@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { Menu, Calendar, Search, User, Heart, LogOut } from "lucide-react"
+import { Menu, Calendar, Search, User, Heart, LogOut, ShoppingCart } from "lucide-react"
 import ThemeToggle from "@/components/ui/theme-toggler"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -57,8 +57,6 @@ export function Navbar() {
             )}
           </div>
 
-          {/* Search Bar removed */}
-
           {/* Theme Toggle */}
           <div className="hidden md:flex items-center justify-center w-12">
             <ThemeToggle />
@@ -79,7 +77,7 @@ export function Navbar() {
             )}
             <Link href="/cart">
               <Button variant="ghost" size="icon" className="relative" aria-label="Cart">
-                <Calendar className="h-5 w-5"/>
+                <ShoppingCart className="h-5 w-5"/>
                 {items.length > 0 && (
                   <Badge className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs">
                     {items.reduce((sum, item) => sum + item.quantity, 0)}
@@ -94,7 +92,7 @@ export function Navbar() {
             <ThemeToggle />
             <Link href="/cart">
               <Button variant="ghost" size="icon" className="relative" aria-label="Cart">
-                <Calendar className="h-5 w-5"/>
+                <ShoppingCart className="h-5 w-5"/>
                 {items.length > 0 && (
                   <Badge className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs">
                     {items.reduce((sum, item) => sum + item.quantity, 0)}

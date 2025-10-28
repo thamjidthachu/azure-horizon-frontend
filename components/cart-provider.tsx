@@ -245,7 +245,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     try {
       // Use authFetch to include the token
       const response = await (await import('@/utils/authFetch')).authFetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'}/api/cart/cart/checkout/`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'}/api/cart/checkout/`,
         {
           method: 'POST',
           headers: {

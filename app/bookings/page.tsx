@@ -70,6 +70,10 @@ export default function MyBookingsPage() {
   const [cancellingBooking, setCancellingBooking] = useState<string | null>(null)
   const [cancelReason, setCancelReason] = useState('')
   const [bookings, setBookings] = useState<any[]>([])
+  const [count, setCount] = useState(0)
+  const [next, setNext] = useState<string|null>(null)
+  const [previous, setPrevious] = useState<string|null>(null)
+  const [page, setPage] = useState(1)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -78,19 +82,20 @@ export default function MyBookingsPage() {
     if (isAuthenticated && user) {
       setIsLoading(true)
       setError(null)
-      import('@/lib/cart-api').then(({ CartAPIService }) => {
-        CartAPIService.getUserOrders()
-          .then((orders) => {
-            setBookings(orders)
-            setIsLoading(false)
-          })
-          .catch((err) => {
-            setError(err.message)
-            setIsLoading(false)
-          })
-      })
+      BookingAPIService.getMyBookings(page)
+        .then((data) => {
+          setBookings(data.results)
+          setCount(data.count)
+          setNext(data.next)
+          setPrevious(data.previous)
+          setIsLoading(false)
+        })
+        .catch((err) => {
+          setError(err.message)
+          setIsLoading(false)
+        })
     }
-  }, [isAuthenticated, user])
+  }, [isAuthenticated, user, page])
 
   if (!mounted || authLoading) {
     return (
@@ -251,136 +256,77 @@ export default function MyBookingsPage() {
                     </div>
                   </div>
 
-                  {/* Guest Information */}
-                  <div className="mb-6">
-                    <h3 className="font-semibold mb-2">Guest Information</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <span className="text-gray-500">Name: </span>
-                        <span className="font-medium">{booking.customer_name}</span>
-                      </div>
-                      <div>
-                        <span className="text-gray-500">Email: </span>
-                        <span className="font-medium">{booking.customer_email}</span>
-                      </div>
-                      <div>
-                        <span className="text-gray-500">Phone: </span>
-                        <span className="font-medium">{booking.customer_phone}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Services */}
-                  {booking.services && booking.services.length > 0 && (
-                    <div className="mb-6">
-                      <h3 className="font-semibold mb-2">Services</h3>
-                      <div className="space-y-2">
-                        {booking.services.map((service: any, index: number) => (
-                          <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded">
-                            <div>
-                              <p className="font-medium">{service.name}</p>
-                              <p className="text-sm text-gray-500">Quantity: {service.quantity}</p>
-                            </div>
-                            <p className="font-medium">${(service.price * service.quantity).toFixed(2)}</p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Special Requests */}
-                  {booking.special_requests && (
-                    <div className="mb-6">
-                      <h3 className="font-semibold mb-2">Special Requests</h3>
-                      <p className="text-gray-700 p-3 bg-gray-50 rounded">{booking.special_requests}</p>
-                    </div>
-                  )}
-
                   <Separator className="my-6" />
 
-                  {/* Pricing */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <h3 className="font-semibold mb-3">Payment Summary</h3>
-                      <div className="space-y-2 text-sm">
-                        <div className="flex justify-between">
-                          <span>Subtotal:</span>
-                          <span>${(typeof booking.subtotal === 'number' ? booking.subtotal : parseFloat(booking.subtotal)).toFixed(2)}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Vat:</span>
-                          <span>${(typeof booking.vat === 'number' ? booking.vat : parseFloat(booking.vat)).toFixed(2)}</span>
-                        </div>
-                        <Separator />
-                        <div className="flex justify-between font-bold">
-                          <span>Total:</span>
-                          <span>${(typeof booking.total_amount === 'number' ? booking.total_amount : parseFloat(booking.total_amount)).toFixed(2)}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex flex-col justify-end space-y-3">
-                      <div className="flex gap-2">
-                        <Link href={`/bookings/${booking.booking_number}`}>
-                          <Button variant="outline" size="sm">
-                            <Eye className="h-4 w-4 mr-1"/>
-                            View Details
+                  <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+                    <Link href={`/bookings/${booking.booking_number}`}>
+                      <Button variant="outline" size="sm">
+                        <Eye className="h-4 w-4 mr-1"/>
+                        View Details
+                      </Button>
+                    </Link>
+                    {booking.payment_status === 'unpaid' && (
+                      <Button 
+                        onClick={() => handlePayNow(booking.booking_number)}
+                        size="sm"
+                        className="bg-green-600 hover:bg-green-700"
+                      >
+                        <CreditCard className="h-4 w-4 mr-1"/>
+                        Pay Now
+                      </Button>
+                    )}
+                    {booking.status !== 'cancelled' && booking.status !== 'completed' && (
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="destructive" size="sm">
+                            <X className="h-4 w-4 mr-1"/>
+                            Cancel Booking
                           </Button>
-                        </Link>
-
-                        {booking.payment_status === 'unpaid' && (
-                          <Button 
-                            onClick={() => handlePayNow(booking.booking_number)}
-                            size="sm"
-                            className="bg-green-600 hover:bg-green-700"
-                          >
-                            <CreditCard className="h-4 w-4 mr-1"/>
-                            Pay Now
-                          </Button>
-                        )}
-                      </div>
-
-                      {booking.status !== 'cancelled' && booking.status !== 'completed' && (
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button variant="destructive" size="sm">
-                              <X className="h-4 w-4 mr-1"/>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Cancel Booking</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Are you sure you want to cancel booking #{booking.booking_number}? This action cannot be undone.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <div className="py-4">
+                            <Label htmlFor="cancelReason">Cancellation Reason (Optional)</Label>
+                            <Textarea
+                              id="cancelReason"
+                              placeholder="Please let us know why you're cancelling..."
+                              value={cancelReason}
+                              onChange={(e) => setCancelReason(e.target.value)}
+                              className="mt-2"
+                            />
+                          </div>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel onClick={() => setCancelReason('')}>
+                              Keep Booking
+                            </AlertDialogCancel>
+                            <AlertDialogAction 
+                              onClick={() => confirmCancellation(booking.booking_number)}
+                              className="bg-red-600 hover:bg-red-700"
+                            >
                               Cancel Booking
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Cancel Booking</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Are you sure you want to cancel booking #{booking.booking_number}? This action cannot be undone.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <div className="py-4">
-                              <Label htmlFor="cancelReason">Cancellation Reason (Optional)</Label>
-                              <Textarea
-                                id="cancelReason"
-                                placeholder="Please let us know why you're cancelling..."
-                                value={cancelReason}
-                                onChange={(e) => setCancelReason(e.target.value)}
-                                className="mt-2"
-                              />
-                            </div>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel onClick={() => setCancelReason('')}>
-                                Keep Booking
-                              </AlertDialogCancel>
-                              <AlertDialogAction 
-                                onClick={() => confirmCancellation(booking.booking_number)}
-                                className="bg-red-600 hover:bg-red-700"
-                              >
-                                Cancel Booking
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      )}
-                    </div>
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    )}
                   </div>
+        {/* Pagination */}
+        {count > bookings.length && (
+          <div className="flex justify-center mt-8 gap-2">
+            <Button variant="outline" size="sm" disabled={!previous} onClick={() => setPage(page - 1)}>
+              Previous
+            </Button>
+            <span className="px-3 py-2 text-sm text-muted-foreground">Page {page}</span>
+            <Button variant="outline" size="sm" disabled={!next} onClick={() => setPage(page + 1)}>
+              Next
+            </Button>
+          </div>
+        )}
                 </CardContent>
               </Card>
             ))}

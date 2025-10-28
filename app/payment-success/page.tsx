@@ -1,186 +1,118 @@
-"use client"
 
-import { useEffect, useState, Suspense } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { CheckCircle, Calendar, Mail, Phone, Loader2 } from 'lucide-react';
-import { TrendingHeader } from '@/components/trending-header';
-import { Navbar } from '@/components/navbar';
-import { Footer } from '@/components/footer';
-import { useToast } from '@/components/ui/use-toast';
-import { BookingAPIService, type Booking } from '@/lib/booking-api';
+"use client";
 
-function PaymentSuccessContent() {
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const { toast } = useToast();
-  const [booking, setBooking] = useState<Booking | null>(null);
-  const [isVerifying, setIsVerifying] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-      const verifyPayment = async () => {
-        try {
-          const sessionId = searchParams.get('session_id');
-          const bookingNumber = searchParams.get('booking_number');
-          if (!sessionId && !bookingNumber) {
-            throw new Error('No payment session or booking information found');
-          }
-          // Always call verify-payment API if sessionId is present
-          if (sessionId) {
-            // Fix: Use explicit method signature for verifyPayment
-            const result = await (BookingAPIService.verifyPayment as (sessionId: string, bookingNumber?: string) => Promise<any>)(sessionId, bookingNumber ?? undefined);
-            if (result?.booking) {
-              setBooking(result.booking);
-              toast({
-                title: 'Payment Successful!',
-                description: `Your booking ${result.booking.booking_number} has been confirmed.`,
-                variant: 'default',
-              });
-            } else {
-              throw new Error('Payment verification failed');
-            }
-          } else if (bookingNumber) {
-            // fallback: fetch booking details
-            const booking = await BookingAPIService.getBookingDetail(bookingNumber);
-            setBooking(booking);
-          } else {
-            throw new Error('No payment information found');
-          }
-        } catch (error: any) {
-          setError(error.message);
-          toast({
-            title: 'Payment Verification Failed',
-            description: error.message || 'Unable to verify your payment. Please contact support.',
-            variant: 'destructive',
-          });
-        } finally {
-          setIsVerifying(false);
-        }
-      };
-      verifyPayment();
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [searchParams]);
+import React, { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { BookingAPIService } from "@/lib/booking-api";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
-  if (isVerifying) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-black">
-        <Navbar />
-        <TrendingHeader />
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <Card className="text-center">
-            <CardContent className="p-8">
-              <Loader2 className="h-16 w-16 text-blue-500 mx-auto mb-4 animate-spin" />
-              <h1 className="text-2xl font-bold text-gray-900 mb-2">Verifying Payment...</h1>
-              <p className="text-gray-600">Please wait while we confirm your payment and booking details.</p>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    );
-  }
 
-  if (error || !booking) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-black">
-        <Navbar />
-        <TrendingHeader />
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <Card className="text-center border-red-200">
-            <CardContent className="p-8">
-              <div className="text-red-500 mb-4">
-                <svg className="h-16 w-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                </svg>
-              </div>
-              <h1 className="text-2xl font-bold text-gray-900 mb-2">Payment Verification Error</h1>
-              <p className="text-gray-600 mb-6">{error || "We couldn't verify your payment. Please contact our support team for assistance."}</p>
-              <div className="flex gap-4 justify-center">
-                <Link href="/contact">
-                  <Button variant="outline">Contact Support</Button>
-                </Link>
-                <Link href="/bookings">
-                  <Button>View Bookings</Button>
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    );
-  }
+import dynamic from "next/dynamic";
+const Confetti = dynamic(() => import("react-confetti"), { ssr: false });
 
-  return (
-    <div className="min-h-screen bg-gray-50 dark:bg-black">
-      <Navbar />
-      <TrendingHeader />
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <Card className="text-center">
-          <CardContent className="p-8">
-            <div className="mb-6">
-              <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Booking Confirmed!</h1>
-              <p className="text-gray-600">Your Azure experience has been successfully booked. Get ready for an unforgettable getaway!</p>
-            </div>
-            <div className="bg-gray-50 rounded-lg p-6 mb-6">
-              <h2 className="text-lg font-semibold mb-2">Booking Details</h2>
-              <p className="text-gray-600 mb-1">Booking Number: <span className="font-mono font-medium">{booking.booking_number}</span></p>
-              <p className="text-gray-600 mb-1">Guest: <span className="font-medium">{booking.customer_name}</span></p>
-              <p className="text-gray-600 mb-1">Date: <span className="font-medium">{new Date(booking.booking_date).toLocaleDateString()}</span></p>
-              <p className="text-gray-600 mb-1">Total: <span className="font-medium">${booking.total_amount.toFixed(2)}</span></p>
-              <p className="text-gray-600">Confirmation email sent to {booking.customer_email}</p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-              <div className="flex items-center justify-center p-4 bg-teal-50 rounded-lg">
-                <Calendar className="h-6 w-6 text-teal-600 mr-3" />
-                <div className="text-left">
-                  <p className="font-medium text-teal-900">Booking Confirmed</p>
-                  <p className="text-sm text-teal-600">Your services are reserved</p>
-                </div>
-              </div>
-              <div className="flex items-center justify-center p-4 bg-blue-50 rounded-lg">
-                <Mail className="h-6 w-6 text-blue-600 mr-3" />
-                <div className="text-left">
-                  <p className="font-medium text-blue-900">Confirmation Sent</p>
-                  <p className="text-sm text-blue-600">Check your email for details</p>
-                </div>
-              </div>
-            </div>
-            <div className="space-y-4">
-              <p className="text-gray-600">We're excited to welcome you to Azure Horizon! Please arrive 15 minutes before your scheduled services.</p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link href={`/bookings/${booking.booking_number}`}>
-                  <Button size="lg">View Booking Details</Button>
-                </Link>
-                <Link href="/services">
-                  <Button variant="outline" size="lg">Book More Services</Button>
-                </Link>
-                <Link href="/">
-                  <Button variant="outline" size="lg">Back to Home</Button>
-                </Link>
-              </div>
-              <div className="mt-6 p-4 bg-yellow-50 rounded-lg">
-                <div className="flex items-center justify-center mb-2">
-                  <Phone className="h-5 w-5 text-yellow-600 mr-2" />
-                  <span className="font-medium text-yellow-800">Need Help?</span>
-                </div>
-                <p className="text-sm text-yellow-700">Contact our concierge at +960 123-4567 for any assistance or special requests</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-      <Footer />
-    </div>
-  );
-}
+
+import { Navbar } from "@/components/navbar";
 
 export default function PaymentSuccessPage() {
+  const searchParams = useSearchParams();
+  const sessionId = searchParams.get("session_id");
+  const bookingNumber = searchParams.get("booking_number");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [details, setDetails] = useState<any>(null);
+
+
+  useEffect(() => {
+    async function verify() {
+      if (!sessionId) {
+        setError("Missing session ID");
+        setLoading(false);
+        return;
+      }
+      try {
+        // @ts-ignore: Accepts bookingNumber as optional second arg
+        const res = await BookingAPIService.verifyPayment(sessionId, bookingNumber);
+        let data: any = res;
+        if (res && typeof res === 'object') {
+          if ('booking' in res && res.booking) {
+            data = res.booking;
+          } else if ('booking_number' in res) {
+            data = res;
+          }
+        }
+        if (
+          data &&
+          data.booking_number &&
+          (data.payment_status === "paid" || data.booking_payment_status === "paid")
+        ) {
+          setDetails(data);
+        } else {
+          setError("Payment not completed or booking not found.");
+        }
+      } catch (err: any) {
+        setError(err.message || "Verification failed");
+      } finally {
+        setLoading(false);
+      }
+    }
+    verify();
+  }, [sessionId, bookingNumber]);
+
+
   return (
-    <Suspense>
-      <PaymentSuccessContent />
-    </Suspense>
+    <>
+      <Navbar />
+      <main className="bg-background min-h-[80vh] py-8 px-2 md:px-0">
+        <div className="max-w-3xl mx-auto">
+          <Card className="p-0 md:p-0 shadow border border-border">
+            {loading ? (
+              <div className="flex flex-col items-center py-16">
+                <svg className="animate-spin mb-4 text-primary" width="48" height="48" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg>
+                <span className="text-lg font-medium text-gray-700">Verifying payment...</span>
+              </div>
+            ) : error ? (
+              <div className="flex flex-col items-center py-16">
+                <svg width="64" height="64" fill="none" viewBox="0 0 24 24" className="mb-4 text-red-500"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="none"/><path d="M15 9l-6 6M9 9l6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
+                <div className="text-red-600 text-center py-8 text-lg font-semibold">{error}</div>
+              </div>
+            ) : details ? (
+              <div className="p-6 md:p-10">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-border pb-6 mb-6">
+                  <div>
+                    <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">Thank you for your booking!</h1>
+                    <div className="text-base md:text-lg text-muted-foreground">Your booking <span className="font-semibold text-primary">#{details.booking_number}</span> is confirmed.</div>
+                    <div className="text-base text-muted-foreground mt-1">A confirmation email has been sent to <span className="font-medium text-foreground">{details.customer_email}</span>.</div>
+                  </div>
+                  <div className="flex flex-col items-center gap-2">
+                    <svg width="56" height="56" fill="none" viewBox="0 0 24 24" className="text-primary"><circle cx="12" cy="12" r="10" fill="#2563eb" opacity="0.15"/><path d="M8 12.5l2.5 2.5L16 9.5" stroke="#2563eb" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                  <div className="flex flex-col gap-2">
+                    <div className="font-semibold text-foreground flex items-center gap-2"><span>Booking Details</span></div>
+                    <div className="text-sm text-muted-foreground">Booking #: <span className="font-medium text-foreground">{details.booking_number}</span></div>
+                    <div className="text-sm text-muted-foreground">Status: <Badge>{details.booking_status}</Badge></div>
+                    <div className="text-sm text-muted-foreground">Payment: <Badge>{details.payment_status}</Badge></div>
+                    <div className="text-sm text-muted-foreground">Guest Email: <span className="font-medium text-foreground">{details.customer_email}</span></div>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <div className="font-semibold text-foreground flex items-center gap-2"><span>Need Help?</span></div>
+                    <div className="text-sm text-muted-foreground flex items-center gap-2"><span>📞</span> <span>+1 (888) 232-4535</span></div>
+                    <div className="text-sm text-muted-foreground flex items-center gap-2"><span>✉️</span> <a href="mailto:support@azurehorizon.com" className="underline hover:text-primary">Email Us</a></div>
+                    <div className="text-sm text-muted-foreground flex items-center gap-2"><span>💬</span> <a href="/contact" className="underline hover:text-primary">Chat With Us</a></div>
+                  </div>
+                </div>
+                <div className="flex flex-col md:flex-row md:justify-between items-center gap-2 text-xs text-muted-foreground border-t border-border pt-4">
+                  <div>Need to cancel or change your booking? <a href="/profile" className="underline hover:text-primary">Manage your bookings</a>.</div>
+                  <div>Print or save this page for your records.</div>
+                </div>
+              </div>
+            ) : null}
+          </Card>
+        </div>
+      </main>
+    </>
   );
 }
