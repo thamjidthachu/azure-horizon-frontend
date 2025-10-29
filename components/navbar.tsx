@@ -1,11 +1,10 @@
-"use client"
+﻿"use client"
 
 import { useState } from "react"
 import Link from "next/link"
-import { Menu, Calendar, Search, User, Heart, LogOut, ShoppingCart } from "lucide-react"
+import { Menu, Calendar, User, Heart, LogOut, ShoppingCart } from "lucide-react"
 import ThemeToggle from "@/components/ui/theme-toggler"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useAuth } from "@/hooks/useAuth"
@@ -270,3 +269,4 @@ function AuthPopover() {
     </Popover>
   )
 }
+

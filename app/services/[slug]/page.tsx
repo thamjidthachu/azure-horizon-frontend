@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useState } from "react"
 import Image from "next/image"
@@ -25,22 +25,8 @@ export default function ServiceDetailPage() {
   const [selectedDate, setSelectedDate] = useState('')
   const [selectedTime, setSelectedTime] = useState('')
   const [isAddingToCart, setIsAddingToCart] = useState(false)
-  const [isConflictModalOpen, setIsConflictModalOpen] = useState(false)
-  const [conflictData, setConflictData] = useState<{
-    existingBookings: Array<{
-      itemIndex: number
-      selectedDate: string
-      selectedTime: string
-      quantity: number
-    }>
-    newBookingData: {
-      selectedDate: string
-      selectedTime: string
-      quantity: number
-    }
-  } | null>(null)
   const { toast } = useToast()
-  const { addToCart, items, isLoading } = useCart()
+  const { addToCart, isLoading } = useCart()
   
   // Auto-set date and time for testing in development
   useEffect(() => {
@@ -61,9 +47,9 @@ export default function ServiceDetailPage() {
       .then(res => res.json())
       .then(data => {
         if (process.env.NODE_ENV === 'development') {
-          console.log('🏨 Service data from API:', data)
-          console.log('🔍 Service keys:', Object.keys(data))
-          console.log('🆔 Service ID fields:', { id: data.id, pk: data.pk, slug: data.slug })
+          console.log('Service data from API:', data)
+          console.log('Service keys:', Object.keys(data))
+          console.log('Service ID fields:', { id: data.id, pk: data.pk, slug: data.slug })
         }
         setService(data)
         setLoading(false)
@@ -87,37 +73,53 @@ export default function ServiceDetailPage() {
     )
   }
 
+
+  // Helper to convert 12-hour time (e.g., '09:00 AM') to 24-hour format ('09:00')
+  function to24Hour(time12h: string) {
+    if (!time12h) return '';
+    const [time, modifier] = time12h.split(' ');
+    let [hours, minutes] = time.split(':');
+    let hoursNum = parseInt(hours, 10);
+    if (modifier === 'PM' && hoursNum !== 12) {
+      hoursNum += 12;
+    }
+    if (modifier === 'AM' && hoursNum === 12) {
+      hoursNum = 0;
+    }
+    return `${hoursNum.toString().padStart(2, '0')}:${minutes}`;
+  }
+
   const bookService = async () => {
-    if (isAddingToCart) return
-    setIsAddingToCart(true)
+    if (isAddingToCart) return;
+    setIsAddingToCart(true);
     if (!selectedDate || !selectedTime) {
-      setIsAddingToCart(false)
+      setIsAddingToCart(false);
       toast({
         title: "Please select date and time",
         description: "Date and time selection is required for booking.",
         variant: "destructive"
-      })
-      return
+      });
+      return;
     }
     try {
       await addToCart({
         service_id: service.id,
         quantity,
         booking_date: selectedDate,
-        booking_time: selectedTime
-      })
+        booking_time: to24Hour(selectedTime)
+      });
       toast({
         title: "Service added to cart!",
         description: `${quantity}x ${service.name} added to your cart.`,
-      })
+      });
     } catch (error) {
       toast({
         title: "Error",
         description: "Failed to add service to cart. Please try again.",
         variant: "destructive"
-      })
+      });
     } finally {
-      setTimeout(() => setIsAddingToCart(false), 500)
+      setTimeout(() => setIsAddingToCart(false), 500);
     }
   }
 
@@ -287,3 +289,7 @@ export default function ServiceDetailPage() {
     </div>
   )
 }
+
+
+
+

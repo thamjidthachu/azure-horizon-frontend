@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from 'react'
-import { useSearchParams, useRouter } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -18,7 +18,6 @@ import { Suspense } from 'react';
 
 function PaymentSuccessContent() {
   const searchParams = useSearchParams()
-  const router = useRouter()
   const { toast } = useToast()
   const [booking, setBooking] = useState<Booking | null>(null)
   const [isVerifying, setIsVerifying] = useState(true)

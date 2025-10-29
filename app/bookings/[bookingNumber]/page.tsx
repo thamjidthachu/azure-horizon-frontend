@@ -36,7 +36,7 @@ import { Label } from '@/components/ui/label'
 export default function BookingDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const { user, isAuthenticated, loading: authLoading } = useAuth();
+  const { isAuthenticated, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const [mounted, setMounted] = useState(false);
   const [cancelReason, setCancelReason] = useState('');
@@ -175,7 +175,7 @@ export default function BookingDetailPage() {
               Booking #{booking.booking_number}
             </h1>
             <p className="text-gray-600 dark:text-gray-300 mt-1">
-              Created on {new Date(booking.created_at).toLocaleDateString()} &middot; Status: <span className={`font-semibold text-${getStatusColor(booking.status)}-600`}>{BookingAPIService.formatBookingStatus(booking.status).label}</span>
+              Created on {new Date(booking.created_at).toLocaleDateString()} &middot; Status: <span className={`inline-flex items-center gap-2 font-semibold text-${getStatusColor(booking.status)}-600`}>{getStatusIcon(booking.status)}{BookingAPIService.formatBookingStatus(booking.status).label}</span>
             </p>
           </div>
         </div>
@@ -260,7 +260,7 @@ export default function BookingDetailPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {booking.order.order_items.map((item: any, idx: number) => (
+                    {booking.order.order_items.map((item: any) => (
                       <div key={item.id} className="flex items-center gap-4 p-4 bg-white dark:bg-gray-900 rounded-lg border border-gray-100 dark:border-gray-800">
                         <img src={item.service?.files?.[0]?.images} alt={item.service?.name} className="w-20 h-20 object-cover rounded-lg border" />
                         <div className="flex-1">

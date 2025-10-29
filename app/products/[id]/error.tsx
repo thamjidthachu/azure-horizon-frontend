@@ -1,12 +1,10 @@
-'use client'
+﻿'use client'
 
-export default function Error({
-  error,
-  reset,
-}: {
-  error: Error & { digest?: string }
+interface ErrorProps {
   reset: () => void
-}) {
+}
+
+export default function Error({ reset }: ErrorProps) {
   return (
     <div className="container mx-auto p-8">
       <h2>Something went wrong!</h2>

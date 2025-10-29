@@ -1,11 +1,11 @@
-"use client"
+﻿"use client"
 
 import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
-import { Minus, Plus, Trash2, Calendar, Loader2, ShoppingCart } from 'lucide-react'
+import { Minus, Plus, Trash2, Loader2, ShoppingCart } from 'lucide-react'
 import { DirhamIcon } from '@/components/ui/dirham-icon'
 import { TrendingHeader } from '@/components/trending-header'
 import { Navbar } from '@/components/navbar'
@@ -191,7 +191,7 @@ export default function CartPage() {
                         </p>
                         {item.booking_date && (
                           <p className="text-sm text-blue-600 dark:text-blue-400">
-                            📅 {item.booking_date} {item.booking_time && `at ${item.booking_time}`}
+                            Schedule: {item.booking_date} {item.booking_time && `at ${item.booking_time}`}
                           </p>
                         )}
                         <p className="text-xl font-bold text-blue-600 dark:text-blue-400 flex items-center gap-1">
@@ -301,3 +301,6 @@ export default function CartPage() {
     </div>
   )
 }
+
+
+

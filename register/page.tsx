@@ -210,7 +210,7 @@ export default function RegisterPage() {
                     onChange={handleChange}
                     className="accent-teal-500"
                   />
-                   Male <span role="img" aria-label="Male" className="text-blue-500">♂️</span>
+                   Male
                 </label>
                 <label className="flex items-center gap-1 cursor-pointer">
                   <input
@@ -221,7 +221,7 @@ export default function RegisterPage() {
                     onChange={handleChange}
                     className="accent-teal-500"
                   />
-                  Female <span role="img" aria-label="Female" className="text-pink-500">♀️</span>
+                  Female
                 </label>
               </div>
             </div>

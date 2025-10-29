@@ -1,15 +1,28 @@
-"use client"
+"use client";
+import { Navbar } from "@/components/navbar";
+import { TrendingHeader } from "@/components/trending-header";
+import { Footer } from "@/components/footer";
+import { Toaster } from "@/components/ui/toaster";
+import ResetPasswordSetForm from "@/components/reset-password-set-form";
+import { useSearchParams, useRouter } from "next/navigation";
 
-import { Toaster } from "@/components/ui/toaster"
-import LoginForm from "@/components/login-form"
-import { Navbar } from "@/components/navbar"
-import { TrendingHeader } from "@/components/trending-header"
-import { Footer } from "@/components/footer"
+export default function ResetPasswordPage() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const token = searchParams.get("token");
+  const username = searchParams.get("username");
 
-// Force dynamic rendering to prevent prerendering issues with useSearchParams
-export const dynamic = 'force-dynamic'
+  if (!token || !username) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-4">Invalid password reset link</h2>
+          <a href="/forgot-password" className="text-teal-600 hover:underline">Request a new reset link</a>
+        </div>
+      </div>
+    );
+  }
 
-export default function LoginPage() {
   return (
     <div>
       <Navbar />
@@ -38,17 +51,19 @@ export default function LoginPage() {
               <span className="mx-auto mb-2 w-8 h-8 rounded-full bg-gray-200 dark:bg-neutral-700 flex items-center justify-center">
                 <span className="text-2xl font-bold text-teal-600">+</span>
               </span>
-              <h2 className="text-3xl font-bold">Welcome back!</h2>
-              <p className="text-gray-500">Please enter your details</p>
+              <h2 className="text-3xl font-bold">Reset Password</h2>
+              <p className="text-gray-500">Enter your new password below.</p>
             </div>
-            <LoginForm onForgotPassword={() => window.location.href = '/forgot-password'} onRegister={() => window.location.href = '/register'} />
+            <ResetPasswordSetForm
+              username={username as string}
+              token={token as string}
+              onSuccess={() => router.push('/login')}
+            />
           </div>
         </div>
       </div>
       <Footer />
       <Toaster />
     </div>
-  )
+  );
 }
-
-

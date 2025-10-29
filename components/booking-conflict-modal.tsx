@@ -1,11 +1,11 @@
-"use client"
+﻿"use client"
 
 import { useState } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Calendar, Clock, Users, Edit, Plus, X } from 'lucide-react'
+import { Calendar, Users, Edit, Plus, X } from 'lucide-react'
 
 interface ExistingBooking {
   itemIndex: number
@@ -183,7 +183,7 @@ export function BookingConflictModal({
           <div className="bg-amber-50 p-3 rounded-lg">
             <h4 className="font-medium text-amber-900 mb-2">Existing booking{existingBookings.length > 1 ? 's' : ''} in cart:</h4>
             <div className="space-y-2">
-              {existingBookings.map((booking, index) => (
+              {existingBookings.map((booking) => (
                 <div key={booking.itemIndex} className="text-sm text-amber-800 bg-white p-2 rounded border">
                   <div className="flex items-center gap-2 mb-1">
                     <Calendar className="h-4 w-4" />
@@ -268,7 +268,7 @@ export function BookingConflictModal({
                   <SelectValue placeholder="Choose booking" />
                 </SelectTrigger>
                 <SelectContent>
-                  {existingBookings.map((booking, index) => (
+                  {existingBookings.map((booking) => (
                     <SelectItem key={booking.itemIndex} value={booking.itemIndex.toString()}>
                       {formatDateTime(booking.selectedDate, booking.selectedTime)} - {booking.quantity} guest{booking.quantity > 1 ? 's' : ''}
                     </SelectItem>
@@ -369,3 +369,4 @@ export function BookingConflictModal({
     </Dialog>
   )
 }
+

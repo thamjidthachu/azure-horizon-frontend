@@ -4,7 +4,6 @@ import { useState } from 'react'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { Star, ShoppingCart, Heart, Truck, Shield, RotateCcw } from 'lucide-react'
 import { TrendingHeader } from '@/components/trending-header'
@@ -17,7 +16,7 @@ import { useToast } from '@/components/ui/use-toast'
 export default function ProductDetailPage({ params }: { params: { id: string } }) {
   const [quantity, setQuantity] = useState(1)
   const product = getProductById(params.id)
-  const { dispatch } = useCart()
+  const { addToCart } = useCart()
   const { toast } = useToast()
 
   if (!product) {
@@ -33,20 +32,27 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
     )
   }
 
-  const addToCart = () => {
-    dispatch({
-      type: 'ADD_ITEM',
-      payload: {
-        id: product.id,
-        name: product.name,
-        price: product.price,
-        quantity: quantity
-      }
+  const handleAddToCart = async () => {
+    if (!product.inStock) return
+
+    const numericId = Number(product.id)
+    if (Number.isNaN(numericId)) {
+      toast({
+        title: "Unable to add to cart",
+        description: "This product is missing a valid identifier.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    await addToCart({
+      service_id: numericId,
+      quantity,
     })
-    
+
     toast({
       title: "Added to cart",
-      description: `${quantity} ${product.name}(s) added to your cart.`,
+      description: `${quantity} ${product.name}${quantity > 1 ? 's' : ''} added to your cart.`,
     })
   }
 
@@ -170,7 +176,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
 
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button
-                  onClick={addToCart}
+                  onClick={handleAddToCart}
                   disabled={!product.inStock}
                   className="flex-1"
                   size="lg"

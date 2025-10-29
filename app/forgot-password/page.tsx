@@ -1,15 +1,13 @@
-"use client"
+"use client";
+import { Navbar } from "@/components/navbar";
+import { TrendingHeader } from "@/components/trending-header";
+import { Footer } from "@/components/footer";
+import { Toaster } from "@/components/ui/toaster";
+import ResetPasswordForm from "@/components/reset-password-form";
+import { useRouter } from "next/navigation";
 
-import { Toaster } from "@/components/ui/toaster"
-import LoginForm from "@/components/login-form"
-import { Navbar } from "@/components/navbar"
-import { TrendingHeader } from "@/components/trending-header"
-import { Footer } from "@/components/footer"
-
-// Force dynamic rendering to prevent prerendering issues with useSearchParams
-export const dynamic = 'force-dynamic'
-
-export default function LoginPage() {
+export default function ForgotPasswordPage() {
+  const router = useRouter();
   return (
     <div>
       <Navbar />
@@ -38,17 +36,18 @@ export default function LoginPage() {
               <span className="mx-auto mb-2 w-8 h-8 rounded-full bg-gray-200 dark:bg-neutral-700 flex items-center justify-center">
                 <span className="text-2xl font-bold text-teal-600">+</span>
               </span>
-              <h2 className="text-3xl font-bold">Welcome back!</h2>
-              <p className="text-gray-500">Please enter your details</p>
+              <h2 className="text-3xl font-bold">Forgot Password</h2>
+              <p className="text-gray-500">Enter your email to receive reset instructions</p>
             </div>
-            <LoginForm onForgotPassword={() => window.location.href = '/forgot-password'} onRegister={() => window.location.href = '/register'} />
+            <ResetPasswordForm onSuccess={() => router.push('/login')} />
+            <div className="text-center text-sm mt-6">
+              <a href="/login" className="text-teal-600 hover:underline">Back to Login</a>
+            </div>
           </div>
         </div>
       </div>
       <Footer />
       <Toaster />
     </div>
-  )
+  );
 }
-
-

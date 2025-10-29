@@ -1,17 +1,11 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useState } from 'react'
-import Image from 'next/image'
-import Link from 'next/link'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Star, ShoppingCart } from 'lucide-react'
 import { TrendingHeader } from '@/components/trending-header'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
-import { products } from '@/lib/products'
+import { products, type Product } from '@/lib/products'
 import { useCart } from '@/components/cart-provider'
 import { useToast } from '@/components/ui/use-toast'
 import ProductsList from "./products-list"
@@ -48,12 +42,22 @@ export default function ProductsPage() {
       }
     })
 
+  const handleAddToCart = async (product: Product) => {
+    const serviceId = Number(product.id)
+    if (Number.isNaN(serviceId)) {
+      toast({
+        title: "Unable to add to cart",
+        description: "This product is missing a valid identifier.",
+        variant: "destructive",
+      })
+      return
+    }
 
-  const handleAddToCart = (product: any) => {
-    addToCart({
-      service_id: product.id,
-      quantity: 1
+    await addToCart({
+      service_id: serviceId,
+      quantity: 1,
     })
+
     toast({
       title: "Added to cart",
       description: `${product.name} has been added to your cart.`,
@@ -99,10 +103,17 @@ export default function ProductsPage() {
         </div>
 
         {/* Products List */}
-        <ProductsList />
+        <ProductsList products={filteredProducts} onAddToCart={handleAddToCart} />
       </div>
 
       <Footer />
     </div>
   )
 }
+
+
+
+
+
+
+

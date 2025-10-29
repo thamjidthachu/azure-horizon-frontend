@@ -8,9 +8,9 @@ import { Button } from "@/components/ui/button"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
 import { TrendingHeader } from "@/components/trending-header"
-import { Sparkles, Utensils, Waves, Calendar } from "lucide-react"
+import { Sparkles, Utensils, Waves } from "lucide-react"
 import { authFetch } from "@/utils/authFetch"
-import { HotReloadTest } from "@/components/hot-reload-test"
+
 
 type Service = {
   id: number
@@ -220,7 +220,7 @@ export default function HomePage() {
       </section>
 
       <Footer />
-      <HotReloadTest />
+
     </div>
   )
 }

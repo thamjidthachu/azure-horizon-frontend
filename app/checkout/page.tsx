@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
@@ -7,7 +7,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Textarea } from '@/components/ui/textarea'
 import { CreditCard, User, Calendar } from 'lucide-react'
@@ -21,7 +20,6 @@ export default function CheckoutPage() {
   const router = useRouter()
   const { toast } = useToast()
   const [isProcessing, setIsProcessing] = useState(false)
-  const [paymentMethod, setPaymentMethod] = useState('card')
   const [mounted, setMounted] = useState(false)
   const { items, subtotal, total, vat, checkoutCart, isLoading } = useCart()
 
@@ -163,11 +161,11 @@ export default function CheckoutPage() {
                         <div className="flex-1">
                           <p className="font-medium">{item.service_name}</p>
                           <p className="text-sm text-gray-600">
-                            {item.quantity} guest{item.quantity > 1 ? 's' : ''}{item.service_duration ? ` • ${item.service_duration}` : ''}
+                            {item.quantity} guest{item.quantity > 1 ? 's' : ''}{item.service_duration ? ` - ${item.service_duration}` : ''}
                           </p>
                           {item.booking_date && (
                             <p className="text-sm text-teal-600">
-                              📅 {item.booking_date}{item.booking_time ? ` at ${item.booking_time}` : ''}
+                              Schedule: {item.booking_date}{item.booking_time ? ` at ${item.booking_time}` : ''}
                             </p>
                           )}
                         </div>
@@ -198,7 +196,7 @@ export default function CheckoutPage() {
                     type="submit" 
                     className="w-full" 
                     size="lg"
-                    disabled={isProcessing}
+                    disabled={isProcessing || isLoading}
                   >
                     {isProcessing ? 'Processing...' : `Complete Booking - $${total.toFixed(2)}`}
                   </Button>
@@ -217,3 +215,6 @@ export default function CheckoutPage() {
     </div>
   )
 }
+
+
+

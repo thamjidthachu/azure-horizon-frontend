@@ -1,4 +1,4 @@
-
+﻿
 "use client";
 
 
@@ -7,16 +7,12 @@ import { useSearchParams } from "next/navigation";
 import { BookingAPIService } from "@/lib/booking-api";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-
-
 import dynamic from "next/dynamic";
-const Confetti = dynamic(() => import("react-confetti"), { ssr: false });
-
-
 import { Navbar } from "@/components/navbar";
-
-
 import { Suspense } from "react";
+import { Phone, Mail, MessageCircle } from "lucide-react";
+
+const Confetti = dynamic(() => import("react-confetti"), { ssr: false });
 
 function PaymentSuccessContent() {
   const searchParams = useSearchParams();
@@ -25,6 +21,20 @@ function PaymentSuccessContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [details, setDetails] = useState<any>(null);
+  const [viewport, setViewport] = useState({ width: 0, height: 0 });
+
+  useEffect(() => {
+    const updateViewport = () => {
+      setViewport({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    };
+
+    updateViewport();
+    window.addEventListener("resize", updateViewport);
+    return () => window.removeEventListener("resize", updateViewport);
+  }, []);
 
   useEffect(() => {
     async function verify() {
@@ -63,7 +73,16 @@ function PaymentSuccessContent() {
   }, [sessionId, bookingNumber]);
 
   return (
-    <Card className="p-0 md:p-0 shadow border border-border">
+    <>
+      {details && viewport.width > 0 && viewport.height > 0 && (
+        <Confetti
+          width={viewport.width}
+          height={viewport.height}
+          recycle={false}
+          numberOfPieces={250}
+        />
+      )}
+      <Card className="p-0 md:p-0 shadow border border-border">
       {loading ? (
         <div className="flex flex-col items-center py-16">
           <svg className="animate-spin mb-4 text-primary" width="48" height="48" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg>
@@ -96,9 +115,9 @@ function PaymentSuccessContent() {
             </div>
             <div className="flex flex-col gap-2">
               <div className="font-semibold text-foreground flex items-center gap-2"><span>Need Help?</span></div>
-              <div className="text-sm text-muted-foreground flex items-center gap-2"><span>📞</span> <span>+1 (888) 232-4535</span></div>
-              <div className="text-sm text-muted-foreground flex items-center gap-2"><span>✉️</span> <a href="mailto:support@azurehorizon.com" className="underline hover:text-primary">Email Us</a></div>
-              <div className="text-sm text-muted-foreground flex items-center gap-2"><span>💬</span> <a href="/contact" className="underline hover:text-primary">Chat With Us</a></div>
+              <div className="text-sm text-muted-foreground flex items-center gap-2"><Phone className="h-4 w-4" /> <span>+1 (888) 232-4535</span></div>
+              <div className="text-sm text-muted-foreground flex items-center gap-2"><Mail className="h-4 w-4" /> <a href="mailto:support@azurehorizon.com" className="underline hover:text-primary">Email Us</a></div>
+              <div className="text-sm text-muted-foreground flex items-center gap-2"><MessageCircle className="h-4 w-4" /> <a href="/contact" className="underline hover:text-primary">Chat With Us</a></div>
             </div>
           </div>
           <div className="flex flex-col md:flex-row md:justify-between items-center gap-2 text-xs text-muted-foreground border-t border-border pt-4">
@@ -108,6 +127,7 @@ function PaymentSuccessContent() {
         </div>
       ) : null}
     </Card>
+    </>
   );
 }
 
@@ -125,3 +145,5 @@ export default function PaymentSuccessPage() {
     </>
   );
 }
+
+

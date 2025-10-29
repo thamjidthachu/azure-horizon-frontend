@@ -409,7 +409,7 @@ export function BookingProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'SET_LOADING', payload: true })
     try {
       const response = await BookingAPIService.getMyBookings()
-      dispatch({ type: 'SET_USER_BOOKINGS', payload: response.bookings })
+      dispatch({ type: 'SET_USER_BOOKINGS', payload: response.results })
     } catch (error: any) {
       dispatch({ type: 'SET_ERROR', payload: error.message })
       toast({

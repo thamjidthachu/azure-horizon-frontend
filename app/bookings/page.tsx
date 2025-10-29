@@ -6,14 +6,12 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
-import { 
-  Calendar, 
-  Clock, 
-  Users, 
-  MapPin, 
-  CreditCard, 
-  Eye, 
-  Download,
+import {
+  Calendar,
+  Clock,
+  Users,
+  CreditCard,
+  Eye,
   X
 } from 'lucide-react'
 import { TrendingHeader } from '@/components/trending-header'
@@ -21,7 +19,7 @@ import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 // import { useBooking } from '@/components/booking-provider'
 import { useAuth } from '@/hooks/useAuth'
-import { BookingAPIService, type Booking } from '@/lib/booking-api'
+import { BookingAPIService } from '@/lib/booking-api'
 import { useToast } from '@/components/ui/use-toast'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
 import { Textarea } from '@/components/ui/textarea'
@@ -35,7 +33,6 @@ export default function MyBookingsPage() {
 
   // Cancel the booking and update state
   const confirmCancellation = async (bookingNumber: string) => {
-    setCancellingBooking(bookingNumber);
     try {
       setIsLoading(true);
       setError(null);
@@ -60,14 +57,12 @@ export default function MyBookingsPage() {
       });
     } finally {
       setIsLoading(false);
-      setCancellingBooking(null);
       setCancelReason('');
     }
   };
   const { user, isAuthenticated, loading: authLoading } = useAuth()
   const { toast } = useToast()
   const [mounted, setMounted] = useState(false)
-  const [cancellingBooking, setCancellingBooking] = useState<string | null>(null)
   const [cancelReason, setCancelReason] = useState('')
   const [bookings, setBookings] = useState<any[]>([])
   const [count, setCount] = useState(0)
