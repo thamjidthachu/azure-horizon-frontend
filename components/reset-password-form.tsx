@@ -54,12 +54,12 @@ export default function ResetPasswordForm({ onSuccess }: ResetPasswordFormProps)
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
-      <div>
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="space-y-0.5">
         <Label htmlFor="reset-email" className="text-sm font-medium">Email</Label>
-        <Input id="reset-email" type="email" value={email} onChange={e => setEmail(e.target.value)} required autoFocus className="mt-1"/>
+        <Input id="reset-email" type="email" value={email} onChange={e => setEmail(e.target.value)} required autoFocus />
       </div>
-      <Button type="submit" className="w-full rounded-full py-2 text-base font-semibold mt-2" disabled={loading}>
+      <Button type="submit" className="w-full rounded py-2 text-base font-semibold mt-2" disabled={loading}>
         {loading ? "Sending..." : "Send Reset Link"}
       </Button>
     </form>

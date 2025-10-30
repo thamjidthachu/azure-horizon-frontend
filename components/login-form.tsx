@@ -59,14 +59,14 @@ export default function LoginForm({ onForgotPassword, onRegister }: LoginFormPro
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
-      <div>
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="space-y-0.5">
         <Label htmlFor="username" className="text-sm font-medium">Email</Label>
-        <Input id="username" name="username" type="email" value={form.username} onChange={handleChange} required autoFocus className="mt-1"/>
+        <Input id="username" name="username" type="email" value={form.username} onChange={handleChange} required autoFocus />
       </div>
-      <div>
+      <div className="space-y-0.5">
         <Label htmlFor="password" className="text-sm font-medium">Password</Label>
-        <Input id="password" name="password" type="password" value={form.password} onChange={handleChange} required className="mt-1"/>
+        <Input id="password" name="password" type="password" value={form.password} onChange={handleChange} required />
       </div>
       <div className="flex items-center justify-between text-xs text-gray-500">
         <label className="flex items-center gap-2 cursor-pointer select-none">
@@ -77,7 +77,7 @@ export default function LoginForm({ onForgotPassword, onRegister }: LoginFormPro
           Forgot password?
         </button>
       </div>
-      <Button type="submit" className="w-full rounded-full py-2 text-base font-semibold mt-2" disabled={loading}>
+      <Button type="submit" className="w-full rounded py-2 text-base font-semibold mt-2" disabled={loading}>
         {loading ? "Logging in..." : "Log In"}
       </Button>
       <div className="flex items-center gap-2 my-2">

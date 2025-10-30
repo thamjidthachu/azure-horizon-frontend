@@ -85,6 +85,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     booking_date?: string
     booking_time?: string
   }) => {
+    console.log('[DEBUG] addToCart called', serviceData);
+    console.log('[DEBUG] isAuthenticated:', isAuthenticated);
     if (!isAuthenticated) {
       toast({
         title: "Login Required",
@@ -98,6 +100,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setError(null)
     
     try {
+      console.log('[DEBUG] Calling CartAPIService.addToCart');
       const updatedCart = await CartAPIService.addToCart(serviceData)
       setCart(updatedCart)
       toast({
@@ -302,29 +305,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     subtotal,
     vat,
     itemCount
-  }
-
-  if (!mounted) {
-    return (
-      <CartContext.Provider value={{
-        cart: null,
-        items: [],
-        isLoading: false,
-        error: null,
-        addToCart: async () => {},
-        updateCartItem: async () => {},
-        removeFromCart: async () => {},
-        clearCart: async () => {},
-        refreshCart: async () => {},
-        checkoutCart: async () => null,
-        total: 0,
-        subtotal: 0,
-        vat: 0,
-        itemCount: 0
-      }}>
-        {children}
-      </CartContext.Provider>
-    )
   }
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>
