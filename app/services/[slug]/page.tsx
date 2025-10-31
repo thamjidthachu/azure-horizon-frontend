@@ -2,6 +2,12 @@
 
 import { useEffect, useState } from "react"
 import Image from "next/image"
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Thumbs, Navigation, Pagination } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/thumbs';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
@@ -19,6 +25,7 @@ import { useCart } from '@/components/cart-provider'
 import { BookingConflictModal } from "@/components/booking-conflict-modal"
 
 export default function ServiceDetailPage() {
+  const [thumbsSwiper, setThumbsSwiper] = useState<any>(null);
   const params = useParams<{ slug: string }>()
   const [service, setService] = useState<any>(null)
   const [loading, setLoading] = useState(true)
@@ -123,6 +130,11 @@ export default function ServiceDetailPage() {
       </div>
     )
   }
+
+  // Prepare images array
+  const images: string[] = Array.isArray(service.files) && service.files.length > 0
+    ? service.files.map((f: any) => f.images)
+    : ["/placeholder.svg"];
 
 
   // Helper to convert 12-hour time (e.g., '09:00 AM') to 24-hour format ('09:00')
@@ -249,16 +261,86 @@ export default function ServiceDetailPage() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 dark:bg-background">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Service Image */}
+          {/* Service Image Gallery */}
           <div className="space-y-4">
-            <div className="relative">
-              <Image
-                src={service.files?.[0]?.images || "/placeholder.svg"}
-                alt={service.name || "Service-Image"}
-                width={600}
-                height={400}
-                className="w-full h-72 md:h-96 lg:h-[500px] object-cover rounded-lg"
-              />
+            {/* Desktop: Main Swiper with Thumbs */}
+            <div className="hidden sm:block">
+              <Swiper
+                style={{ '--swiper-navigation-color': '#14b8a6', '--swiper-pagination-color': '#14b8a6' } as any}
+                spaceBetween={10}
+                navigation
+                pagination={{ clickable: true }}
+                thumbs={{ swiper: thumbsSwiper && !thumbsSwiper.destroyed ? thumbsSwiper : null }}
+                modules={[Thumbs, Navigation, Pagination]}
+                className="rounded-lg"
+              >
+                {images.map((img, idx) => (
+                  <SwiperSlide key={idx}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={img}
+                      alt={service.name || `Service Image ${idx+1}`}
+                      className="w-full h-72 md:h-96 lg:h-[500px] object-cover rounded-lg"
+                    />
+                  </SwiperSlide>
+                ))}
+              </Swiper>
+              {/* Thumbnails */}
+              {images.length > 1 && (
+                <Swiper
+                  onSwiper={setThumbsSwiper}
+                  spaceBetween={8}
+                  slidesPerView={Math.min(images.length, 6)}
+                  watchSlidesProgress
+                  slideToClickedSlide
+                  modules={[Thumbs]}
+                  className="mt-4 flex justify-center gap-2 lg:gap-4 lg:justify-start"
+                >
+                  {images.map((img, idx) => (
+                    <SwiperSlide key={idx} className="!w-auto">
+                      {() => {
+                        // Use thumbsSwiper?.realIndex for robust highlight
+                        // Swiper's realIndex can be undefined on first render, so fallback to Swiper's activeIndex
+                        const activeIdx = (typeof thumbsSwiper?.realIndex === 'number' ? thumbsSwiper.realIndex : thumbsSwiper?.activeIndex) ?? 0;
+                        const highlight = activeIdx === idx;
+                        return (
+                          <img
+                            src={img}
+                            alt={service.name || `Thumbnail ${idx+1}`}
+                            className={
+                              `w-16 h-14 lg:w-24 lg:h-20 object-cover rounded-lg border-2 transition-all duration-200 cursor-pointer ` +
+                              (highlight
+                                ? 'border-teal-500 ring-2 ring-teal-400 ring-offset-2 ring-offset-white shadow-xl scale-105 z-10 bg-white'
+                                : 'border-gray-200 opacity-70 hover:opacity-100')
+                            }
+                          />
+                        );
+                      }}
+                    </SwiperSlide>
+                  ))}
+                </Swiper>
+              )}
+              <Badge className="absolute top-4 left-4 bg-teal-500 text-white">
+                {service.category || "Category"}
+              </Badge>
+            </div>
+            {/* Mobile: Swiper with Pagination only */}
+            <div className="block sm:hidden">
+              <Swiper
+                pagination={{ clickable: true }}
+                modules={[Pagination]}
+                className="rounded-lg"
+              >
+                {images.map((img, idx) => (
+                  <SwiperSlide key={idx}>
+                    <img
+                      src={img}
+                      alt={service.name || `Service Image ${idx+1}`}
+                      className="w-full h-56 object-cover rounded-lg"
+                    />
+                  </SwiperSlide>
+                ))}
+              </Swiper>
               <Badge className="absolute top-4 left-4 bg-teal-500 text-white">
                 {service.category || "Category"}
               </Badge>
