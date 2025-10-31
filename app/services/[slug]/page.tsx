@@ -257,7 +257,7 @@ export default function ServiceDetailPage() {
                 alt={service.name || "Service-Image"}
                 width={600}
                 height={400}
-                className="w-full h-96 lg:h-[500px] object-cover rounded-lg"
+                className="w-full h-72 md:h-96 lg:h-[500px] object-cover rounded-lg"
               />
               <Badge className="absolute top-4 left-4 bg-teal-500 text-white">
                 {service.category || "Category"}
@@ -359,7 +359,7 @@ export default function ServiceDetailPage() {
                   >
                     -
                   </Button>
-                  <span className="px-4 py-2 text-center min-w-[60px]">{quantity}</span>
+                  <span className="px-4 py-2 text-center min-w-[40px] sm:min-w-[60px]">{quantity}</span>
                   <Button
                     variant="ghost"
                     size="sm"

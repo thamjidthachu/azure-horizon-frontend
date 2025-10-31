@@ -212,7 +212,7 @@ export default function CartPage() {
                           >
                             <Minus className="h-4 w-4"/>
                           </Button>
-                          <span className="px-4 py-2 text-center min-w-[60px]">
+                          <span className="px-4 py-2 text-center min-w-[40px] sm:min-w-[60px]">
                             {item.quantity} guest{item.quantity > 1 ? 's' : ''}
                           </span>
                           <Button
