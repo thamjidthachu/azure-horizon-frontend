@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import { CartProvider } from '@/components/cart-provider'
 import { ThemeProvider } from '@/components/theme-provider'
+import { Toaster } from '@/components/ui/toaster'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -27,6 +28,7 @@ export default function RootLayout({
           <CartProvider>
             <main className="min-h-screen bg-background font-sans antialiased">
               {children}
+              <Toaster />
             </main>
           </CartProvider>
         </ThemeProvider>

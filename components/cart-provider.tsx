@@ -60,13 +60,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       setError(null)
     }
   }, [isAuthenticated, user])
-
   const refreshCart = async () => {
     if (!isAuthenticated) return
-    
+
     setIsLoading(true)
     setError(null)
-    
+
     try {
       const activeCart = await CartAPIService.getActiveCart()
       setCart(activeCart)
@@ -101,11 +100,25 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     
     try {
       console.log('[DEBUG] Calling CartAPIService.addToCart');
-      const updatedCart = await CartAPIService.addToCart(serviceData)
-      setCart(updatedCart)
+      const response = await CartAPIService.addToCart(serviceData)
+      
+      if (response.error) {
+        // Show API error message
+        toast({
+          title: "Error",
+          description: response.error,
+          variant: "destructive"
+        })
+        setError(response.error)
+        return
+      }
+      
+      setCart(response.cart)
+      
+      // Show success message from API or default message
       toast({
-        title: "Service added to cart!",
-        description: "Item has been added to your cart successfully.",
+        title: "Success",
+        description: response.message || "Item has been added to your cart successfully.",
         variant: "success"
       })
     } catch (err: any) {
@@ -135,12 +148,26 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(true)
     setError(null)
     try {
-      await CartAPIService.updateCartItem(itemId, quantity, booking_date, booking_time)
+      const response = await CartAPIService.updateCartItem(itemId, quantity, booking_date, booking_time)
+      
+      if (response.error) {
+        // Show API error message
+        toast({
+          title: "Error",
+          description: response.error,
+          variant: "destructive"
+        })
+        setError(response.error)
+        return
+      }
+      
       // Refresh cart to get updated totals
       await refreshCart()
+      
+      // Show success message from API or default message
       toast({
-        title: "Cart Updated!",
-        description: "Cart item updated successfully.",
+        title: "Success",
+        description: response.message || "Cart item updated successfully.",
         variant: "success"
       })
     } catch (err: any) {
@@ -171,12 +198,26 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setError(null)
     
     try {
-      await CartAPIService.removeFromCart(itemId)
+      const response = await CartAPIService.removeFromCart(itemId)
+      
+      if (response.error) {
+        // Show API error message
+        toast({
+          title: "Error",
+          description: response.error,
+          variant: "destructive"
+        })
+        setError(response.error)
+        return
+      }
+      
       // Refresh cart to get updated state
       await refreshCart()
+      
+      // Show success message from API or default message
       toast({
-        title: "Item Removed",
-        description: "Item has been removed from your cart.",
+        title: "Success",
+        description: response.message || "Item has been removed from your cart.",
         variant: "default"
       })
     } catch (err: any) {

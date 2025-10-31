@@ -55,7 +55,7 @@ export default function HomePage() {
         {/* Background Image */}
         <div className="absolute inset-0">
           <Image
-            src="/resort-hero.png"
+            src="/hero.jpg"
             alt="Azure Horizon"
             fill
             className="object-cover"

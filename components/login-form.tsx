@@ -39,18 +39,22 @@ export default function LoginForm({ onForgotPassword, onRegister }: LoginFormPro
       localStorage.setItem("access_token", data.access)
       localStorage.setItem("refresh_token", data.refresh)
       await checkAuth()
+      
+      // Show success message from API response
       toast({ 
-        title: "Login successful!", 
-        description: "Welcome back!",
+        title: "Success", 
+        description: data.message || "Login successful! Welcome back!",
         variant: "success",
         duration: 3000
       })
       router.push(redirectUrl)
     } else {
       const err = await res.json()
+      
+      // Show error message from API response
       toast({ 
         title: "Login failed", 
-        description: err.detail || "Invalid credentials.", 
+        description: err.error || err.message || err.detail || "Invalid credentials.", 
         variant: "destructive",
         duration: 3000
       })

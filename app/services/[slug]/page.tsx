@@ -16,6 +16,7 @@ import { useParams } from "next/navigation"
 import { ReviewSection } from "@/components/ui/review-section"
 import { authFetch } from "@/utils/authFetch"
 import { useCart } from '@/components/cart-provider'
+import { BookingConflictModal } from "@/components/booking-conflict-modal"
 
 export default function ServiceDetailPage() {
   const params = useParams<{ slug: string }>()
@@ -26,7 +27,16 @@ export default function ServiceDetailPage() {
   const [selectedTime, setSelectedTime] = useState('')
   const [isAddingToCart, setIsAddingToCart] = useState(false)
   const { toast } = useToast()
-  const { addToCart, isLoading } = useCart()
+  const { addToCart, updateCartItem, cart, isLoading } = useCart()
+  
+  // Modal state
+  const [showConflictModal, setShowConflictModal] = useState(false)
+  const [existingBookings, setExistingBookings] = useState<any[]>([])
+  const [pendingBookingData, setPendingBookingData] = useState<{
+    selectedDate: string
+    selectedTime: string
+    quantity: number
+  } | null>(null)
   
   // Auto-set date and time for testing in development
   useEffect(() => {
@@ -51,11 +61,52 @@ export default function ServiceDetailPage() {
           console.log('Service keys:', Object.keys(data))
           console.log('Service ID fields:', { id: data.id, pk: data.pk, slug: data.slug })
         }
+        
+        // Show API messages in toast
+        if (data.message) {
+          toast({
+            title: "Success",
+            description: data.message,
+            variant: "success"
+          })
+        }
+        if (data.error) {
+          toast({
+            title: "Error",
+            description: data.error,
+            variant: "destructive"
+          })
+        }
+        
         setService(data)
         setLoading(false)
       })
-      .catch(() => setLoading(false))
-  }, [params?.slug])
+      .catch((error) => {
+        console.error('Failed to fetch service:', error)
+        setLoading(false)
+        
+        // Try to show error message from API response
+        if (error?.response?.data?.error) {
+          toast({
+            title: "Error",
+            description: error.response.data.error,
+            variant: "destructive"
+          })
+        } else if (error?.response?.data?.message) {
+          toast({
+            title: "Error", 
+            description: error.response.data.message,
+            variant: "destructive"
+          })
+        } else {
+          toast({
+            title: "Error",
+            description: "Failed to load service details. Please try again.",
+            variant: "destructive"
+          })
+        }
+      })
+  }, [params?.slug, toast])
 
   if (loading) {
     return (
@@ -101,6 +152,31 @@ export default function ServiceDetailPage() {
       });
       return;
     }
+
+    // Check for existing bookings of the same service
+    const existingBookingsForService = cart?.items?.filter(item => item.service_id === service.id) || [];
+    
+    if (existingBookingsForService.length > 0) {
+      // Show conflict modal
+      const formattedExistingBookings = existingBookingsForService.map((item, index) => ({
+        itemIndex: item.id,
+        selectedDate: item.booking_date || '',
+        selectedTime: item.booking_time || '',
+        quantity: item.quantity
+      }));
+      
+      setExistingBookings(formattedExistingBookings);
+      setPendingBookingData({
+        selectedDate,
+        selectedTime,
+        quantity
+      });
+      setShowConflictModal(true);
+      setIsAddingToCart(false);
+      return;
+    }
+
+    // No conflicts, add directly
     try {
       await addToCart({
         service_id: service.id,
@@ -108,22 +184,57 @@ export default function ServiceDetailPage() {
         booking_date: selectedDate,
         booking_time: to24Hour(selectedTime)
       });
-      toast({
-        title: "Service added to cart!",
-        description: `${quantity}x ${service.name} added to your cart.`,
-      });
+      // Success toast is now handled by cart provider
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to add service to cart. Please try again.",
-        variant: "destructive"
-      });
+      // Error toast is now handled by cart provider
     } finally {
       setTimeout(() => setIsAddingToCart(false), 500);
     }
   }
 
+  // Modal action handlers
+  const handleCreateNew = async (bookingData: { selectedDate: string; selectedTime: string; quantity: number }) => {
+    try {
+      const response = await addToCart({
+        service_id: service.id,
+        quantity: bookingData.quantity,
+        booking_date: bookingData.selectedDate,
+        booking_time: to24Hour(bookingData.selectedTime)
+      });
+      
+      // The addToCart function in cart-provider now handles showing API messages
+      // No need to show additional toast here
+    } catch (error) {
+      // Error handling is done in cart-provider
+    }
+  };
 
+  const handleAddToExisting = async (itemId: number, additionalQuantity: number) => {
+    try {
+      const existingItem = cart?.items?.find(item => item.id === itemId);
+      if (existingItem) {
+        const response = await updateCartItem(itemId, existingItem.quantity + additionalQuantity);
+        // The updateCartItem function in cart-provider now handles showing API messages
+      }
+    } catch (error) {
+      // Error handling is done in cart-provider
+    }
+  };
+
+  const handleEditExisting = async (itemId: number, newBookingData: { selectedDate: string; selectedTime: string; quantity: number }) => {
+    try {
+      const response = await updateCartItem(itemId, newBookingData.quantity, newBookingData.selectedDate, to24Hour(newBookingData.selectedTime));
+      // The updateCartItem function in cart-provider now handles showing API messages
+    } catch (error) {
+      // Error handling is done in cart-provider
+    }
+  };
+
+  const handleModalClose = () => {
+    setShowConflictModal(false);
+    setExistingBookings([]);
+    setPendingBookingData(null);
+  };
 
   const timeSlots = [
     '09:00 AM', '10:00 AM', '11:00 AM', '12:00 PM',
@@ -285,6 +396,17 @@ export default function ServiceDetailPage() {
       </div>
       <Footer />
       
+
+      <BookingConflictModal
+        isOpen={showConflictModal}
+        onClose={handleModalClose}
+        onCreateNew={handleCreateNew}
+        onAddToExisting={handleAddToExisting}
+        onEditExisting={handleEditExisting}
+        service={service}
+        existingBookings={existingBookings}
+        newBookingData={pendingBookingData}
+      />
 
     </div>
   )
