@@ -1,13 +1,11 @@
 "use client"
 
 import { useRouter } from "next/navigation"
+import { Suspense } from "react"
 import { LoginView } from "@/app/authentication/_components/login-view"
 import { AuthView } from "@/app/authentication/_components/types"
 
-// Force dynamic rendering to prevent prerendering issues with useSearchParams
-export const dynamic = 'force-dynamic'
-
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter()
 
   const handleNavigate = (next: AuthView) => {
@@ -22,4 +20,20 @@ export default function LoginPage() {
   }
 
   return <LoginView onNavigate={handleNavigate} />
+}
+
+function LoginLoading() {
+  return (
+    <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
+      <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-teal-600"></div>
+    </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<LoginLoading />}>
+      <LoginContent />
+    </Suspense>
+  );
 }

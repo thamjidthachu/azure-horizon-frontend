@@ -1,9 +1,10 @@
 "use client";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 import { ResetPasswordView } from "@/app/authentication/_components/reset-password-view";
 import { AuthView } from "@/app/authentication/_components/types";
 
-export default function ResetPasswordPage() {
+function ResetPasswordContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const token = searchParams.get("token");
@@ -33,4 +34,20 @@ export default function ResetPasswordPage() {
   };
 
   return <ResetPasswordView username={username} token={token} onNavigate={handleNavigate} />;
+}
+
+function ResetPasswordLoading() {
+  return (
+    <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
+      <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-teal-600"></div>
+    </div>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={<ResetPasswordLoading />}>
+      <ResetPasswordContent />
+    </Suspense>
+  );
 }

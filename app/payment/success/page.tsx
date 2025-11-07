@@ -223,7 +223,16 @@ function PaymentSuccessContent() {
 
 export default function PaymentSuccessPage() {
   return (
-    <Suspense>
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <TrendingHeader />
+        <Navbar />
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-teal-600"></div>
+        </div>
+        <Footer />
+      </div>
+    }>
       <PaymentSuccessContent />
     </Suspense>
   );

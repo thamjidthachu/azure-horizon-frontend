@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ForgotPasswordView } from "./_components/forgot-password-view";
 import { LoginView } from "./_components/login-view";
@@ -8,7 +8,7 @@ import { RegisterView } from "./_components/register-view";
 import { ResetPasswordView } from "./_components/reset-password-view";
 import { AuthView, isAuthView } from "./_components/types";
 
-export default function AuthenticationPage() {
+function AuthenticationContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [view, setView] = useState<AuthView>(() => {
@@ -75,4 +75,21 @@ export default function AuthenticationPage() {
   }
 
   return <LoginView onNavigate={navigate} />;
+}
+
+// Loading component for Suspense fallback
+function AuthenticationLoading() {
+  return (
+    <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
+      <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-teal-600"></div>
+    </div>
+  );
+}
+
+export default function AuthenticationPage() {
+  return (
+    <Suspense fallback={<AuthenticationLoading />}>
+      <AuthenticationContent />
+    </Suspense>
+  );
 }
