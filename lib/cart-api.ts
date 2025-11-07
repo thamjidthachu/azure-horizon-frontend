@@ -43,6 +43,12 @@ export interface OrderItem {
   subtotal: string
 }
 
+export interface CartApiResponse {
+  cart: Cart | null
+  message?: string
+  error?: string
+}
+
 export interface OrderDetail {
   id: number
   user: number
@@ -115,7 +121,7 @@ export class CartAPIService {
     quantity: number
     booking_date?: string
     booking_time?: string
-  }): Promise<Cart> {
+  }): Promise<CartApiResponse> {
     console.log('🛒 CartAPI: Adding item to cart:', serviceData)
     
     try {
@@ -127,15 +133,27 @@ export class CartAPIService {
         body: JSON.stringify(serviceData)
       })
       
+      const responseData = await response.json()
+
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        console.error('❌ CartAPI: Add to cart failed:', response.status, errorData)
-        throw new Error(errorData.detail || errorData.error || `Failed to add to cart: ${response.status}`)
+        console.error('❌ CartAPI: Add to cart failed:', response.status, responseData)
+        const errMsg = responseData.error || responseData.message || responseData.messege || responseData.detail || `Failed to add to cart: ${response.status}`
+        return {
+          cart: null,
+          error: errMsg
+        }
       }
-      
-      const cart = await response.json()
-      console.log('✅ CartAPI: Item added to cart:', cart)
-      return cart
+
+      // Backend may return either the raw cart or a wrapper { message/messege, data }
+      const cartPayload = responseData?.data ?? responseData
+      const msg = responseData?.message || responseData?.messege || (responseData?.data && (responseData.data.message || responseData.data.messege))
+
+      console.log('✅ CartAPI: Item added to cart:', cartPayload)
+      return {
+        cart: cartPayload,
+        message: msg,
+        error: responseData.error
+      }
     } catch (error: any) {
       console.error('❌ CartAPI: Error adding to cart:', error)
       throw new Error(`Failed to add to cart: ${error.message}`)
@@ -150,7 +168,7 @@ export class CartAPIService {
     quantity: number,
     booking_date?: string,
     booking_time?: string
-  ): Promise<CartItem> {
+  ): Promise<CartApiResponse> {
     console.log('🛒 CartAPI: Updating cart item:', { itemId, quantity, booking_date, booking_time })
     try {
       const body: any = { quantity }
@@ -163,13 +181,27 @@ export class CartAPIService {
         },
         body: JSON.stringify(body)
       })
+      
+        const responseData = await response.json()
+
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        throw new Error(errorData.detail || errorData.error || `Failed to update cart item: ${response.status}`)
+        console.error('❌ CartAPI: Update cart item failed:', response.status, responseData)
+        const errMsg = responseData.error || responseData.message || responseData.detail || `Failed to update cart item: ${response.status}`
+        return {
+          cart: null,
+          error: errMsg
+        }
       }
-      const cartItem = await response.json()
-      console.log('✅ CartAPI: Cart item updated:', cartItem)
-      return cartItem
+
+        const cartPayload = responseData?.data ?? responseData
+        const msg = responseData?.message || responseData?.messege || (responseData?.data && (responseData.data.message || responseData.data.messege))
+
+        console.log('✅ CartAPI: Cart item updated:', cartPayload)
+        return {
+          cart: cartPayload,
+          message: msg,
+          error: responseData.error
+        }
     } catch (error: any) {
       console.error('❌ CartAPI: Error updating cart item:', error)
       throw new Error(`Failed to update cart item: ${error.message}`)
@@ -179,7 +211,7 @@ export class CartAPIService {
   /**
    * Remove item from cart
    */
-  static async removeFromCart(itemId: number): Promise<{ message: string }> {
+  static async removeFromCart(itemId: number): Promise<CartApiResponse> {
     console.log('🛒 CartAPI: Removing item from cart:', itemId)
     
     try {
@@ -187,14 +219,38 @@ export class CartAPIService {
         method: 'DELETE'
       })
       
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        throw new Error(errorData.detail || errorData.error || `Failed to remove from cart: ${response.status}`)
+      // Some DELETE endpoints return an empty body (204) or non-JSON body.
+      // Safely read text first and try to parse JSON only if present to avoid
+      // `Unexpected end of JSON input` errors.
+      const text = await response.text()
+      let responseData: any = {}
+      if (text) {
+        try {
+          responseData = JSON.parse(text)
+        } catch (parseErr) {
+          // If parsing fails, log it and keep responseData as empty object
+          console.warn('⚠️ CartAPI: removeFromCart returned non-JSON response:', parseErr)
+          responseData = {}
+        }
       }
-      
-      const result = await response.json()
-      console.log('✅ CartAPI: Item removed from cart:', result)
-      return result
+
+      if (!response.ok) {
+        console.error('❌ CartAPI: Remove from cart failed:', response.status, responseData)
+        return {
+          cart: null,
+          error: responseData.error || responseData.message || responseData.detail || `Failed to remove from cart: ${response.status}`
+        }
+      }
+
+      const cartPayload = (responseData && Object.keys(responseData).length > 0) ? (responseData?.data ?? responseData) : null
+      const msg = responseData?.message || responseData?.messege || (responseData?.data && (responseData.data.message || responseData.data.messege))
+
+      console.log('✅ CartAPI: Item removed from cart:', cartPayload)
+      return {
+        cart: cartPayload,
+        message: msg,
+        error: responseData.error
+      }
     } catch (error: any) {
       console.error('❌ CartAPI: Error removing from cart:', error)
       throw new Error(`Failed to remove from cart: ${error.message}`)

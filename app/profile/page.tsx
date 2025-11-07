@@ -35,7 +35,7 @@ export default function ProfilePage() {
       <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
         <div className="relative h-48 bg-gradient-to-r from-cyan-500 to-blue-500">
           <Image
-            src="/resort-hero.png"
+            src="/hero.jpg"
             alt="Cover Photo"
             layout="fill"
             objectFit="cover"

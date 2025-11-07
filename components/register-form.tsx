@@ -46,9 +46,10 @@ export default function RegisterForm({ onLogin }: RegisterFormProps) {
       body: data,
     });
     if (res.status === 200 || res.status === 201) {
+      const data = await res.json()
       toast({
-        title: "Registration successful!",
-        description: "You have successfully registered. Redirecting to login...",
+        title: "Success",
+        description: data.message || "Registration successful! You have successfully registered. Redirecting to login...",
         variant: "success",
         duration: 3000,
       });
@@ -64,14 +65,10 @@ export default function RegisterForm({ onLogin }: RegisterFormProps) {
         password2: "",
       });
     } else {
-      let errMsg = "Registration failed. Please check your input.";
-      try {
-        const err = await res.json();
-        errMsg = err.detail || errMsg;
-      } catch {}
+      const err = await res.json().catch(() => ({}))
       toast({
         title: "Registration failed",
-        description: errMsg,
+        description: err.error || err.message || err.detail || "Registration failed. Please check your input.",
         variant: "destructive",
         duration: 3000,
       });

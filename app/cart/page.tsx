@@ -2,6 +2,11 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
+
+// Read NEXT_PUBLIC_API_BASE_URL for client usage
+const API_BASE_URL = (typeof window !== 'undefined' && window.location && window.location.origin)
+  ? `${window.location.origin}`
+  : '';
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
@@ -168,7 +173,15 @@ export default function CartPage() {
               <Card key={item.id}>
                 <CardContent className="p-6">
                   <div className="flex flex-col sm:flex-row gap-4">
-                    <Image
+                    <Link
+                      href={
+                        item.service_slug
+                          ? `/services/${item.service_slug}`
+                          : `/services/${item.service_id}`
+                      }
+                      passHref
+                    >
+                      <Image
                       src={
                         item.service_image && typeof item.service_image === 'string' && item.service_image.trim() && item.service_image !== 'null'
                           ? (item.service_image.startsWith('/media/')
@@ -182,6 +195,7 @@ export default function CartPage() {
                       className="w-full sm:w-30 h-30 object-cover rounded-lg"
                       onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/placeholder.svg' }}
                     />
+                    </Link>
                     
                     <div className="flex-1 space-y-4">
                       <div>
@@ -212,7 +226,7 @@ export default function CartPage() {
                           >
                             <Minus className="h-4 w-4"/>
                           </Button>
-                          <span className="px-4 py-2 text-center min-w-[60px]">
+                          <span className="px-4 py-2 text-center min-w-[40px] sm:min-w-[60px]">
                             {item.quantity} guest{item.quantity > 1 ? 's' : ''}
                           </span>
                           <Button

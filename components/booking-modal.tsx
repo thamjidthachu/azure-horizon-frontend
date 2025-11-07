@@ -141,7 +141,7 @@ export function BookingModal({ isOpen, onClose, onConfirm, service }: BookingMod
                 >
                   -
                 </Button>
-                <span className="px-4 py-2 text-center min-w-[60px] flex items-center gap-1">
+                <span className="px-4 py-2 text-center min-w-[40px] sm:min-w-[60px] flex items-center gap-1">
                   <Users className="h-4 w-4" />
                   {quantity}
                 </span>

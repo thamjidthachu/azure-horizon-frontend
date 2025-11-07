@@ -50,12 +50,12 @@ export default function HomePage() {
       <TrendingHeader />
       <Navbar />
 
-      {/* Hero Section */}
-      <section className="relative text-white overflow-hidden min-h-[600px] flex items-center">
+  {/* Hero Section */}
+  <section className="relative text-white overflow-hidden min-h-[420px] md:min-h-[600px] flex items-center">
         {/* Background Image */}
         <div className="absolute inset-0">
           <Image
-            src="/resort-hero.png"
+            src="/hero.jpg"
             alt="Azure Horizon"
             fill
             className="object-cover"
@@ -66,7 +66,7 @@ export default function HomePage() {
 
         {/* Content */}
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 w-full">
-          <div className="max-w-2xl backdrop-blur-md bg-white/10 p-8 rounded-2xl border border-white/20">
+                      <div className="max-w-2xl backdrop-blur-md bg-white/10 p-8 rounded-2xl border border-white/20">
             <h1 className="text-4xl md:text-6xl font-bold mb-6 text-white drop-shadow-lg">
               Beyond rest, into peace.
             </h1>
@@ -176,7 +176,7 @@ export default function HomePage() {
                             : "/placeholder.svg"
                         }
                         alt={service.name}
-                        className="w-full h-48 object-cover rounded-lg"
+                        className="w-full h-40 md:h-48 object-cover rounded-lg"
                       />
                     </div>
                     <h3 className="font-semibold text-xl mb-2 group-hover:text-teal-600 transition-colors">

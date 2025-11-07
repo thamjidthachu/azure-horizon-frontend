@@ -2,6 +2,12 @@
 
 import { useEffect, useState } from "react"
 import Image from "next/image"
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Thumbs, Navigation, Pagination } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/thumbs';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
@@ -16,8 +22,10 @@ import { useParams } from "next/navigation"
 import { ReviewSection } from "@/components/ui/review-section"
 import { authFetch } from "@/utils/authFetch"
 import { useCart } from '@/components/cart-provider'
+import { BookingConflictModal } from "@/components/booking-conflict-modal"
 
 export default function ServiceDetailPage() {
+  const [thumbsSwiper, setThumbsSwiper] = useState<any>(null);
   const params = useParams<{ slug: string }>()
   const [service, setService] = useState<any>(null)
   const [loading, setLoading] = useState(true)
@@ -26,7 +34,16 @@ export default function ServiceDetailPage() {
   const [selectedTime, setSelectedTime] = useState('')
   const [isAddingToCart, setIsAddingToCart] = useState(false)
   const { toast } = useToast()
-  const { addToCart, isLoading } = useCart()
+  const { addToCart, updateCartItem, cart, isLoading } = useCart()
+  
+  // Modal state
+  const [showConflictModal, setShowConflictModal] = useState(false)
+  const [existingBookings, setExistingBookings] = useState<any[]>([])
+  const [pendingBookingData, setPendingBookingData] = useState<{
+    selectedDate: string
+    selectedTime: string
+    quantity: number
+  } | null>(null)
   
   // Auto-set date and time for testing in development
   useEffect(() => {
@@ -51,11 +68,52 @@ export default function ServiceDetailPage() {
           console.log('Service keys:', Object.keys(data))
           console.log('Service ID fields:', { id: data.id, pk: data.pk, slug: data.slug })
         }
+        
+        // Show API messages in toast
+        if (data.message) {
+          toast({
+            title: "Success",
+            description: data.message,
+            variant: "success"
+          })
+        }
+        if (data.error) {
+          toast({
+            title: "Error",
+            description: data.error,
+            variant: "destructive"
+          })
+        }
+        
         setService(data)
         setLoading(false)
       })
-      .catch(() => setLoading(false))
-  }, [params?.slug])
+      .catch((error) => {
+        console.error('Failed to fetch service:', error)
+        setLoading(false)
+        
+        // Try to show error message from API response
+        if (error?.response?.data?.error) {
+          toast({
+            title: "Error",
+            description: error.response.data.error,
+            variant: "destructive"
+          })
+        } else if (error?.response?.data?.message) {
+          toast({
+            title: "Error", 
+            description: error.response.data.message,
+            variant: "destructive"
+          })
+        } else {
+          toast({
+            title: "Error",
+            description: "Failed to load service details. Please try again.",
+            variant: "destructive"
+          })
+        }
+      })
+  }, [params?.slug, toast])
 
   if (loading) {
     return (
@@ -72,6 +130,11 @@ export default function ServiceDetailPage() {
       </div>
     )
   }
+
+  // Prepare images array
+  const images: string[] = Array.isArray(service.files) && service.files.length > 0
+    ? service.files.map((f: any) => f.images)
+    : ["/placeholder.svg"];
 
 
   // Helper to convert 12-hour time (e.g., '09:00 AM') to 24-hour format ('09:00')
@@ -101,6 +164,31 @@ export default function ServiceDetailPage() {
       });
       return;
     }
+
+    // Check for existing bookings of the same service
+    const existingBookingsForService = cart?.items?.filter(item => item.service_id === service.id) || [];
+    
+    if (existingBookingsForService.length > 0) {
+      // Show conflict modal
+      const formattedExistingBookings = existingBookingsForService.map((item, index) => ({
+        itemIndex: item.id,
+        selectedDate: item.booking_date || '',
+        selectedTime: item.booking_time || '',
+        quantity: item.quantity
+      }));
+      
+      setExistingBookings(formattedExistingBookings);
+      setPendingBookingData({
+        selectedDate,
+        selectedTime,
+        quantity
+      });
+      setShowConflictModal(true);
+      setIsAddingToCart(false);
+      return;
+    }
+
+    // No conflicts, add directly
     try {
       await addToCart({
         service_id: service.id,
@@ -108,22 +196,57 @@ export default function ServiceDetailPage() {
         booking_date: selectedDate,
         booking_time: to24Hour(selectedTime)
       });
-      toast({
-        title: "Service added to cart!",
-        description: `${quantity}x ${service.name} added to your cart.`,
-      });
+      // Success toast is now handled by cart provider
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to add service to cart. Please try again.",
-        variant: "destructive"
-      });
+      // Error toast is now handled by cart provider
     } finally {
       setTimeout(() => setIsAddingToCart(false), 500);
     }
   }
 
+  // Modal action handlers
+  const handleCreateNew = async (bookingData: { selectedDate: string; selectedTime: string; quantity: number }) => {
+    try {
+      const response = await addToCart({
+        service_id: service.id,
+        quantity: bookingData.quantity,
+        booking_date: bookingData.selectedDate,
+        booking_time: to24Hour(bookingData.selectedTime)
+      });
+      
+      // The addToCart function in cart-provider now handles showing API messages
+      // No need to show additional toast here
+    } catch (error) {
+      // Error handling is done in cart-provider
+    }
+  };
 
+  const handleAddToExisting = async (itemId: number, additionalQuantity: number) => {
+    try {
+      const existingItem = cart?.items?.find(item => item.id === itemId);
+      if (existingItem) {
+        const response = await updateCartItem(itemId, existingItem.quantity + additionalQuantity);
+        // The updateCartItem function in cart-provider now handles showing API messages
+      }
+    } catch (error) {
+      // Error handling is done in cart-provider
+    }
+  };
+
+  const handleEditExisting = async (itemId: number, newBookingData: { selectedDate: string; selectedTime: string; quantity: number }) => {
+    try {
+      const response = await updateCartItem(itemId, newBookingData.quantity, newBookingData.selectedDate, to24Hour(newBookingData.selectedTime));
+      // The updateCartItem function in cart-provider now handles showing API messages
+    } catch (error) {
+      // Error handling is done in cart-provider
+    }
+  };
+
+  const handleModalClose = () => {
+    setShowConflictModal(false);
+    setExistingBookings([]);
+    setPendingBookingData(null);
+  };
 
   const timeSlots = [
     '09:00 AM', '10:00 AM', '11:00 AM', '12:00 PM',
@@ -138,16 +261,86 @@ export default function ServiceDetailPage() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 dark:bg-background">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Service Image */}
+          {/* Service Image Gallery */}
           <div className="space-y-4">
-            <div className="relative">
-              <Image
-                src={service.files?.[0]?.images || "/placeholder.svg"}
-                alt={service.name || "Service-Image"}
-                width={600}
-                height={400}
-                className="w-full h-96 lg:h-[500px] object-cover rounded-lg"
-              />
+            {/* Desktop: Main Swiper with Thumbs */}
+            <div className="hidden sm:block">
+              <Swiper
+                style={{ '--swiper-navigation-color': '#14b8a6', '--swiper-pagination-color': '#14b8a6' } as any}
+                spaceBetween={10}
+                navigation
+                pagination={{ clickable: true }}
+                thumbs={{ swiper: thumbsSwiper && !thumbsSwiper.destroyed ? thumbsSwiper : null }}
+                modules={[Thumbs, Navigation, Pagination]}
+                className="rounded-lg"
+              >
+                {images.map((img, idx) => (
+                  <SwiperSlide key={idx}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={img}
+                      alt={service.name || `Service Image ${idx+1}`}
+                      className="w-full h-72 md:h-96 lg:h-[500px] object-cover rounded-lg"
+                    />
+                  </SwiperSlide>
+                ))}
+              </Swiper>
+              {/* Thumbnails */}
+              {images.length > 1 && (
+                <Swiper
+                  onSwiper={setThumbsSwiper}
+                  spaceBetween={8}
+                  slidesPerView={Math.min(images.length, 6)}
+                  watchSlidesProgress
+                  slideToClickedSlide
+                  modules={[Thumbs]}
+                  className="mt-4 flex justify-center gap-2 lg:gap-4 lg:justify-start"
+                >
+                  {images.map((img, idx) => (
+                    <SwiperSlide key={idx} className="!w-auto">
+                      {() => {
+                        // Use thumbsSwiper?.realIndex for robust highlight
+                        // Swiper's realIndex can be undefined on first render, so fallback to Swiper's activeIndex
+                        const activeIdx = (typeof thumbsSwiper?.realIndex === 'number' ? thumbsSwiper.realIndex : thumbsSwiper?.activeIndex) ?? 0;
+                        const highlight = activeIdx === idx;
+                        return (
+                          <img
+                            src={img}
+                            alt={service.name || `Thumbnail ${idx+1}`}
+                            className={
+                              `w-16 h-14 lg:w-24 lg:h-20 object-cover rounded-lg border-2 transition-all duration-200 cursor-pointer ` +
+                              (highlight
+                                ? 'border-teal-500 ring-2 ring-teal-400 ring-offset-2 ring-offset-white shadow-xl scale-105 z-10 bg-white'
+                                : 'border-gray-200 opacity-70 hover:opacity-100')
+                            }
+                          />
+                        );
+                      }}
+                    </SwiperSlide>
+                  ))}
+                </Swiper>
+              )}
+              <Badge className="absolute top-4 left-4 bg-teal-500 text-white">
+                {service.category || "Category"}
+              </Badge>
+            </div>
+            {/* Mobile: Swiper with Pagination only */}
+            <div className="block sm:hidden">
+              <Swiper
+                pagination={{ clickable: true }}
+                modules={[Pagination]}
+                className="rounded-lg"
+              >
+                {images.map((img, idx) => (
+                  <SwiperSlide key={idx}>
+                    <img
+                      src={img}
+                      alt={service.name || `Service Image ${idx+1}`}
+                      className="w-full h-56 object-cover rounded-lg"
+                    />
+                  </SwiperSlide>
+                ))}
+              </Swiper>
               <Badge className="absolute top-4 left-4 bg-teal-500 text-white">
                 {service.category || "Category"}
               </Badge>
@@ -248,7 +441,7 @@ export default function ServiceDetailPage() {
                   >
                     -
                   </Button>
-                  <span className="px-4 py-2 text-center min-w-[60px]">{quantity}</span>
+                  <span className="px-4 py-2 text-center min-w-[40px] sm:min-w-[60px]">{quantity}</span>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -285,6 +478,17 @@ export default function ServiceDetailPage() {
       </div>
       <Footer />
       
+
+      <BookingConflictModal
+        isOpen={showConflictModal}
+        onClose={handleModalClose}
+        onCreateNew={handleCreateNew}
+        onAddToExisting={handleAddToExisting}
+        onEditExisting={handleEditExisting}
+        service={service}
+        existingBookings={existingBookings}
+        newBookingData={pendingBookingData}
+      />
 
     </div>
   )
