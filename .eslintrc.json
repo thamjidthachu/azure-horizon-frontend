@@ -1,0 +1,28 @@
+{
+  "extends": [
+    "eslint:recommended"
+  ],
+  "parserOptions": {
+    "ecmaVersion": 2020,
+    "sourceType": "module"
+  },
+  "env": {
+    "browser": true,
+    "es6": true,
+    "node": true
+  },
+  "rules": {
+    "no-unused-vars": "warn",
+    "no-console": "warn",
+    "no-undef": "off"
+  },
+  "ignorePatterns": [
+    ".next/**",
+    "node_modules/**",
+    "out/**",
+    "dist/**",
+    "**/*.d.ts",
+    "**/*.ts",
+    "**/*.tsx"
+  ]
+}
