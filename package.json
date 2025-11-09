@@ -10,6 +10,7 @@
     "dev:debug": "NODE_OPTIONS='--inspect' next dev",
     "lint": "next lint",
     "start": "next start",
+    "test": "echo 'No tests specified' && exit 0",
     "fullstack": "./dev-start.sh start",
     "fullstack:stop": "./dev-start.sh stop",
     "fullstack:status": "./dev-start.sh status",
