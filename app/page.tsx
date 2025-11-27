@@ -30,7 +30,7 @@ export default function HomePage() {
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        const res = await authFetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/services/`)
+        const res = await authFetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/services/`)
         if (!res.ok) throw new Error('Failed to fetch services')
         const data = await res.json()
         setServices(Array.isArray(data) ? data : [])
@@ -50,8 +50,8 @@ export default function HomePage() {
       <TrendingHeader />
       <Navbar />
 
-  {/* Hero Section */}
-  <section className="relative text-white overflow-hidden min-h-[420px] md:min-h-[600px] flex items-center">
+      {/* Hero Section */}
+      <section className="relative text-white overflow-hidden min-h-[420px] md:min-h-[600px] flex items-center">
         {/* Background Image */}
         <div className="absolute inset-0">
           <Image
@@ -66,7 +66,7 @@ export default function HomePage() {
 
         {/* Content */}
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 w-full">
-                      <div className="max-w-2xl backdrop-blur-md bg-white/10 p-8 rounded-2xl border border-white/20">
+          <div className="max-w-2xl backdrop-blur-md bg-white/10 p-8 rounded-2xl border border-white/20">
             <h1 className="text-4xl md:text-6xl font-bold mb-6 text-white drop-shadow-lg">
               Beyond rest, into peace.
             </h1>
@@ -82,7 +82,7 @@ export default function HomePage() {
                 </Button>
               </Link>
               <Link href="/services">
-                <Button variant="outline" className="w-full text-gray-700 hover:text-teal-600">
+                <Button variant="outline" className="w-full bg-white/90 dark:bg-gray-800 dark:text-white dark:border-gray-600 text-gray-700 hover:text-teal-600 dark:hover:text-teal-400 dark:hover:bg-gray-700">
                   View Gallery
                 </Button>
               </Link>
@@ -96,29 +96,29 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center">
-              <div className="bg-teal-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Sparkles className="h-8 w-8 text-teal-600"/>
+              <div className="bg-teal-100 dark:bg-teal-900/30 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Sparkles className="h-8 w-8 text-teal-600 dark:text-teal-400" />
               </div>
-              <h3 className="text-xl font-semibold mb-2">Luxury Spa</h3>
-              <p className="text-gray-600">
+              <h3 className="text-xl font-semibold mb-2 dark:text-white">Luxury Spa</h3>
+              <p className="text-gray-600 dark:text-gray-400">
                 World-class spa treatments and wellness experiences
               </p>
             </div>
             <div className="text-center">
-              <div className="bg-teal-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Utensils className="h-8 w-8 text-teal-600"/>
+              <div className="bg-teal-100 dark:bg-teal-900/30 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Utensils className="h-8 w-8 text-teal-600 dark:text-teal-400" />
               </div>
-              <h3 className="text-xl font-semibold mb-2">Fine Dining</h3>
-              <p className="text-gray-600">
+              <h3 className="text-xl font-semibold mb-2 dark:text-white">Fine Dining</h3>
+              <p className="text-gray-600 dark:text-gray-400">
                 Gourmet cuisine with ocean views and sunset dining
               </p>
             </div>
             <div className="text-center">
-              <div className="bg-teal-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Waves className="h-8 w-8 text-teal-600"/>
+              <div className="bg-teal-100 dark:bg-teal-900/30 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Waves className="h-8 w-8 text-teal-600 dark:text-teal-400" />
               </div>
-              <h3 className="text-xl font-semibold mb-2">Water Adventures</h3>
-              <p className="text-gray-600">
+              <h3 className="text-xl font-semibold mb-2 dark:text-white">Water Adventures</h3>
+              <p className="text-gray-600 dark:text-gray-400">
                 Exciting water sports and island exploration
               </p>
             </div>
@@ -133,7 +133,7 @@ export default function HomePage() {
             <h2 className="text-3xl font-bold text-gray-900 mb-4 dark:text-white">
               Our Top Services
             </h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
+            <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
               Discover our most popular experiences designed to create
               unforgettable memories
             </p>
@@ -154,18 +154,18 @@ export default function HomePage() {
                 </Card>
               ))
             ) : error ? (
-              <div className="col-span-3 text-center text-gray-600">
+              <div className="col-span-3 text-center text-gray-600 dark:text-gray-400">
                 {error}
               </div>
             ) : services.length === 0 ? (
-              <div className="col-span-3 text-center text-gray-600">
+              <div className="col-span-3 text-center text-gray-600 dark:text-gray-400">
                 No services available at the moment.
               </div>
             ) : (
               services.map((service) => (
                 <Card
                   key={service.id}
-                  className="group hover:shadow-lg transition-shadow dark:bg-gray-900"
+                  className="group hover:shadow-lg transition-shadow dark:bg-card dark:border-border"
                 >
                   <CardContent className="p-6">
                     <div className="relative mb-4">
@@ -179,10 +179,10 @@ export default function HomePage() {
                         className="w-full h-40 md:h-48 object-cover rounded-lg"
                       />
                     </div>
-                    <h3 className="font-semibold text-xl mb-2 group-hover:text-teal-600 transition-colors">
+                    <h3 className="font-semibold text-xl mb-2 group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors dark:text-white">
                       {service.name}
                     </h3>
-                    <p className="text-gray-600">{service.synopsis}</p>
+                    <p className="text-gray-600 dark:text-gray-400">{service.synopsis}</p>
                     <Link href={`/services/${service.slug}`}>
                       <Button variant="outline">View Details</Button>
                     </Link>
@@ -195,25 +195,25 @@ export default function HomePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 bg-primary text-primary-foreground  shadow-sm bg-teal-500">
+      <section className="py-16 bg-teal-500 dark:bg-teal-900 text-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl font-bold mb-4">
             Ready for Your Azure Experience?
           </h2>
-          <p className="text-xl mb-8 text-teal-100">
+          <p className="text-xl mb-8 text-teal-100 dark:text-teal-200">
             Book your dream vacation today and create memories that will last a
             lifetime
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/services">
-              <Button variant="outline" className="w-full text-gray-700 hover:text-teal-600">
-                  Book Services
-                </Button>
+              <Button variant="outline" className="w-full bg-white dark:bg-gray-800 text-gray-700 dark:text-white hover:text-teal-600 dark:hover:text-teal-400 dark:border-gray-600 dark:hover:bg-gray-700">
+                Book Services
+              </Button>
             </Link>
             <Link href="/contact">
-              <Button variant="outline" className="w-full text-gray-700 hover:text-teal-600">
-                  Contact Us
-                </Button>
+              <Button variant="outline" className="w-full bg-white dark:bg-gray-800 text-gray-700 dark:text-white hover:text-teal-600 dark:hover:text-teal-400 dark:border-gray-600 dark:hover:bg-gray-700">
+                Contact Us
+              </Button>
             </Link>
           </div>
         </div>

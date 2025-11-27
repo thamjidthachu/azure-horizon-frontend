@@ -72,7 +72,7 @@ export class CartAPIService {
   static async cancelBooking(bookingNumber: string, reason?: string): Promise<any> {
     console.log('🛒 CartAPI: Cancelling booking:', bookingNumber, reason)
     try {
-      const response = await authFetch(`${API_BASE_URL}/api/cart/orders/${bookingNumber}/cancel/`, {
+      const response = await authFetch(`${API_BASE_URL}/api/v1/cart/orders/${bookingNumber}/cancel/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -96,14 +96,14 @@ export class CartAPIService {
    */
   static async getActiveCart(): Promise<Cart> {
     console.log('🛒 CartAPI: Getting active cart...')
-    
+
     try {
-      const response = await authFetch(`${API_BASE_URL}/api/cart/get-my-cart/`)
-      
+      const response = await authFetch(`${API_BASE_URL}/api/v1/cart/get-my-cart/`)
+
       if (!response.ok) {
         throw new Error(`Failed to get active cart: ${response.status} ${response.statusText}`)
       }
-      
+
       const cart = await response.json()
       console.log('✅ CartAPI: Active cart retrieved:', cart)
       return cart
@@ -123,16 +123,16 @@ export class CartAPIService {
     booking_time?: string
   }): Promise<CartApiResponse> {
     console.log('🛒 CartAPI: Adding item to cart:', serviceData)
-    
+
     try {
-      const response = await authFetch(`${API_BASE_URL}/api/cart/add-to-cart/`, {
+      const response = await authFetch(`${API_BASE_URL}/api/v1/cart/add-to-cart/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(serviceData)
       })
-      
+
       const responseData = await response.json()
 
       if (!response.ok) {
@@ -174,15 +174,15 @@ export class CartAPIService {
       const body: any = { quantity }
       if (booking_date !== undefined) body.booking_date = booking_date
       if (booking_time !== undefined) body.booking_time = booking_time
-      const response = await authFetch(`${API_BASE_URL}/api/cart/items/${itemId}/`, {
+      const response = await authFetch(`${API_BASE_URL}/api/v1/cart/items/${itemId}/`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(body)
       })
-      
-        const responseData = await response.json()
+
+      const responseData = await response.json()
 
       if (!response.ok) {
         console.error('❌ CartAPI: Update cart item failed:', response.status, responseData)
@@ -193,15 +193,15 @@ export class CartAPIService {
         }
       }
 
-        const cartPayload = responseData?.data ?? responseData
-        const msg = responseData?.message || responseData?.messege || (responseData?.data && (responseData.data.message || responseData.data.messege))
+      const cartPayload = responseData?.data ?? responseData
+      const msg = responseData?.message || responseData?.messege || (responseData?.data && (responseData.data.message || responseData.data.messege))
 
-        console.log('✅ CartAPI: Cart item updated:', cartPayload)
-        return {
-          cart: cartPayload,
-          message: msg,
-          error: responseData.error
-        }
+      console.log('✅ CartAPI: Cart item updated:', cartPayload)
+      return {
+        cart: cartPayload,
+        message: msg,
+        error: responseData.error
+      }
     } catch (error: any) {
       console.error('❌ CartAPI: Error updating cart item:', error)
       throw new Error(`Failed to update cart item: ${error.message}`)
@@ -213,12 +213,12 @@ export class CartAPIService {
    */
   static async removeFromCart(itemId: number): Promise<CartApiResponse> {
     console.log('🛒 CartAPI: Removing item from cart:', itemId)
-    
+
     try {
-      const response = await authFetch(`${API_BASE_URL}/api/cart/items/${itemId}/remove/`, {
+      const response = await authFetch(`${API_BASE_URL}/api/v1/cart/items/${itemId}/remove/`, {
         method: 'DELETE'
       })
-      
+
       // Some DELETE endpoints return an empty body (204) or non-JSON body.
       // Safely read text first and try to parse JSON only if present to avoid
       // `Unexpected end of JSON input` errors.
@@ -262,17 +262,17 @@ export class CartAPIService {
    */
   static async clearCart(): Promise<{ message: string }> {
     console.log('🛒 CartAPI: Clearing cart...')
-    
+
     try {
-      const response = await authFetch(`${API_BASE_URL}/api/cart/clear-cart/`, {
+      const response = await authFetch(`${API_BASE_URL}/api/v1/cart/clear-cart/`, {
         method: 'DELETE'
       })
-      
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}))
         throw new Error(errorData.detail || errorData.error || `Failed to clear cart: ${response.status}`)
       }
-      
+
       const result = await response.json()
       console.log('✅ CartAPI: Cart cleared:', result)
       return result
@@ -292,22 +292,22 @@ export class CartAPIService {
     special_requests?: string
   }): Promise<OrderDetail> {
     console.log('🛒 CartAPI: Checking out cart:', guestInfo)
-    
+
     try {
-      const response = await authFetch(`${API_BASE_URL}/api/cart/checkout/`, {
+      const response = await authFetch(`${API_BASE_URL}/api/v1/cart/checkout/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(guestInfo)
       })
-      
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}))
         console.error('❌ CartAPI: Checkout failed:', response.status, errorData)
         throw new Error(errorData.detail || errorData.error || `Failed to checkout: ${response.status}`)
       }
-      
+
       const order = await response.json()
       console.log('✅ CartAPI: Cart checked out successfully:', order)
       return order
@@ -322,14 +322,14 @@ export class CartAPIService {
    */
   static async getUserOrders(): Promise<OrderDetail[]> {
     console.log('🛒 CartAPI: Getting user orders...')
-    
+
     try {
-      const response = await authFetch(`${API_BASE_URL}/api/cart/orders/`)
-      
+      const response = await authFetch(`${API_BASE_URL}/api/v1/cart/orders/`)
+
       if (!response.ok) {
         throw new Error(`Failed to get orders: ${response.status} ${response.statusText}`)
       }
-      
+
       const orders = await response.json()
       console.log('✅ CartAPI: User orders retrieved:', orders)
       return orders
@@ -344,15 +344,15 @@ export class CartAPIService {
    */
   static async getOrderDetail(orderId: number): Promise<OrderDetail> {
     console.log('🛒 CartAPI: Getting order detail:', orderId)
-    
+
     try {
-      const response = await authFetch(`${API_BASE_URL}/api/cart/orders/${orderId}/`)
-      
+      const response = await authFetch(`${API_BASE_URL}/api/v1/cart/orders/${orderId}/`)
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}))
         throw new Error(errorData.detail || errorData.error || `Failed to get order: ${response.status}`)
       }
-      
+
       const order = await response.json()
       console.log('✅ CartAPI: Order detail retrieved:', order)
       return order
@@ -367,21 +367,21 @@ export class CartAPIService {
    */
   static async completePayment(orderId: number, paymentData?: any): Promise<OrderDetail> {
     console.log('🛒 CartAPI: Completing payment for order:', orderId)
-    
+
     try {
-      const response = await authFetch(`${API_BASE_URL}/api/cart/orders/${orderId}/complete-payment/`, {
+      const response = await authFetch(`${API_BASE_URL}/api/v1/cart/orders/${orderId}/complete-payment/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(paymentData || {})
       })
-      
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}))
         throw new Error(errorData.detail || errorData.error || `Failed to complete payment: ${response.status}`)
       }
-      
+
       const order = await response.json()
       console.log('✅ CartAPI: Payment completed successfully:', order)
       return order

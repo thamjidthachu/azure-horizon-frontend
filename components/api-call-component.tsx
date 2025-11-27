@@ -6,9 +6,9 @@ const ApiCallComponent = () => {
 
   const fetchData = async () => {
     try {
-      const response = await fetch('/api/endpoint');
+      const response = await fetch('/api/v1/endpoint');
       const data = await response.json();
-      
+
       // Handle API response based on status
       if (response.ok) {
         // Success response - show success toast

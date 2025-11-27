@@ -35,7 +35,7 @@ export default function ServiceDetailPage() {
   const [isAddingToCart, setIsAddingToCart] = useState(false)
   const { toast } = useToast()
   const { addToCart, updateCartItem, cart, isLoading } = useCart()
-  
+
   // Modal state
   const [showConflictModal, setShowConflictModal] = useState(false)
   const [existingBookings, setExistingBookings] = useState<any[]>([])
@@ -44,7 +44,7 @@ export default function ServiceDetailPage() {
     selectedTime: string
     quantity: number
   } | null>(null)
-  
+
   // Auto-set date and time for testing in development
   useEffect(() => {
     if (process.env.NODE_ENV === 'development') {
@@ -60,7 +60,7 @@ export default function ServiceDetailPage() {
 
   useEffect(() => {
     if (!params?.slug) return
-    authFetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/services/${params.slug}/`)
+    authFetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/services/${params.slug}/`)
       .then(res => res.json())
       .then(data => {
         if (process.env.NODE_ENV === 'development') {
@@ -68,7 +68,7 @@ export default function ServiceDetailPage() {
           console.log('Service keys:', Object.keys(data))
           console.log('Service ID fields:', { id: data.id, pk: data.pk, slug: data.slug })
         }
-        
+
         // Show API messages in toast
         if (data.message) {
           toast({
@@ -84,14 +84,14 @@ export default function ServiceDetailPage() {
             variant: "destructive"
           })
         }
-        
+
         setService(data)
         setLoading(false)
       })
       .catch((error) => {
         console.error('Failed to fetch service:', error)
         setLoading(false)
-        
+
         // Try to show error message from API response
         if (error?.response?.data?.error) {
           toast({
@@ -101,7 +101,7 @@ export default function ServiceDetailPage() {
           })
         } else if (error?.response?.data?.message) {
           toast({
-            title: "Error", 
+            title: "Error",
             description: error.response.data.message,
             variant: "destructive"
           })
@@ -167,7 +167,7 @@ export default function ServiceDetailPage() {
 
     // Check for existing bookings of the same service
     const existingBookingsForService = cart?.items?.filter(item => item.service_id === service.id) || [];
-    
+
     if (existingBookingsForService.length > 0) {
       // Show conflict modal
       const formattedExistingBookings = existingBookingsForService.map((item, index) => ({
@@ -176,7 +176,7 @@ export default function ServiceDetailPage() {
         selectedTime: item.booking_time || '',
         quantity: item.quantity
       }));
-      
+
       setExistingBookings(formattedExistingBookings);
       setPendingBookingData({
         selectedDate,
@@ -213,7 +213,7 @@ export default function ServiceDetailPage() {
         booking_date: bookingData.selectedDate,
         booking_time: to24Hour(bookingData.selectedTime)
       });
-      
+
       // The addToCart function in cart-provider now handles showing API messages
       // No need to show additional toast here
     } catch (error) {
@@ -279,7 +279,7 @@ export default function ServiceDetailPage() {
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={img}
-                      alt={service.name || `Service Image ${idx+1}`}
+                      alt={service.name || `Service Image ${idx + 1}`}
                       className="w-full h-72 md:h-96 lg:h-[500px] object-cover rounded-lg"
                     />
                   </SwiperSlide>
@@ -306,7 +306,7 @@ export default function ServiceDetailPage() {
                         return (
                           <img
                             src={img}
-                            alt={service.name || `Thumbnail ${idx+1}`}
+                            alt={service.name || `Thumbnail ${idx + 1}`}
                             className={
                               `w-16 h-14 lg:w-24 lg:h-20 object-cover rounded-lg border-2 transition-all duration-200 cursor-pointer ` +
                               (highlight
@@ -335,7 +335,7 @@ export default function ServiceDetailPage() {
                   <SwiperSlide key={idx}>
                     <img
                       src={img}
-                      alt={service.name || `Service Image ${idx+1}`}
+                      alt={service.name || `Service Image ${idx + 1}`}
                       className="w-full h-56 object-cover rounded-lg"
                     />
                   </SwiperSlide>
@@ -358,11 +358,10 @@ export default function ServiceDetailPage() {
                   {[...Array(5)].map((_, i) => (
                     <Star
                       key={i}
-                      className={`h-5 w-5 ${
-                        i < Math.floor(service.rating ?? 0)
+                      className={`h-5 w-5 ${i < Math.floor(service.rating ?? 0)
                           ? 'text-yellow-400 fill-current'
                           : 'text-gray-300'
-                      }`}
+                        }`}
                     />
                   ))}
                 </div>
@@ -372,15 +371,15 @@ export default function ServiceDetailPage() {
               </div>
               <div className="flex items-center space-x-6 mb-6 text-gray-600">
                 <div className="flex items-center">
-                  <Clock className="h-5 w-5 mr-2"/>
+                  <Clock className="h-5 w-5 mr-2" />
                   {service.time || 0} hours
                 </div>
                 <div className="flex items-center">
-                  <Users className="h-5 w-5 mr-2"/>
+                  <Users className="h-5 w-5 mr-2" />
                   Up to {service.max_people || 0} guests
                 </div>
                 <div className="flex items-center">
-                  <MapPin className="h-5 w-5 mr-2"/>
+                  <MapPin className="h-5 w-5 mr-2" />
                   {service.location || "Location not specified"}
                 </div>
               </div>
@@ -457,27 +456,27 @@ export default function ServiceDetailPage() {
                 className="w-full"
                 size="lg"
               >
-                <Calendar className="h-5 w-5 mr-2"/>
+                <Calendar className="h-5 w-5 mr-2" />
                 {isAddingToCart || isLoading ? 'Adding to Cart...' : `Add to Cart - $${(service.price ?? 0) * quantity}`}
               </Button>
             </div>
             <Separator />
             {/* Service Info */}
             <div
-                className="text-gray-600 leading-relaxed prose"
-                dangerouslySetInnerHTML={{ __html: service.policy || "<p>No policy information available.</p>" }}
-              />
+              className="text-gray-600 leading-relaxed prose"
+              dangerouslySetInnerHTML={{ __html: service.policy || "<p>No policy information available.</p>" }}
+            />
           </div>
-          <Separator /> 
+          <Separator />
           {/* Reviews Section */}
           <div id="reviews" className="mt-8">
-  <h3 className="text-lg font-semibold mb-4">Rate this service</h3>
-    <ReviewSection serviceSlug={service.slug} />
-    </div>
-    </div>
+            <h3 className="text-lg font-semibold mb-4">Rate this service</h3>
+            <ReviewSection serviceSlug={service.slug} />
+          </div>
+        </div>
       </div>
       <Footer />
-      
+
 
       <BookingConflictModal
         isOpen={showConflictModal}

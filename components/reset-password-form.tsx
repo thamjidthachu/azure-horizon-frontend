@@ -18,7 +18,7 @@ export default function ResetPasswordForm({ onSuccess }: ResetPasswordFormProps)
     e.preventDefault()
     setLoading(true)
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/forgot-password/`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/auth/forgot-password/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username: email })

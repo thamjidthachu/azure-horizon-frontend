@@ -10,7 +10,7 @@ export function TrendingHeader() {
 
   // Fetch messages from API
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/services/advertisement/`)
+    fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/services/advertisement/`)
       .then((res) => res.json())
       .then((data) => {
         // Only keep active messages
@@ -41,7 +41,7 @@ export function TrendingHeader() {
           onClick={() => setIsVisible(false)}
           className="absolute right-4 hover:bg-white/20 rounded-full p-1"
         >
-          <X className="h-4 w-4"/>
+          <X className="h-4 w-4" />
         </button>
       </div>
     </div>

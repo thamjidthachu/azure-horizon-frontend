@@ -77,10 +77,10 @@ export default function ServicesPage() {
     const fetchServices = async () => {
       try {
         setLoading(true)
-        const apiUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/services/list/`
+        const apiUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/services/list/`
         console.log('🌐 Attempting to fetch services from:', apiUrl)
         console.log('🔧 API Base URL:', process.env.NEXT_PUBLIC_API_BASE_URL)
-        
+
         // First test if the API is reachable
         try {
           const testRes = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/`)
@@ -89,20 +89,20 @@ export default function ServicesPage() {
           console.error('❌ Backend API not reachable:', testError)
           throw new Error('Backend API server is not running or not accessible')
         }
-        
+
         const res = await authFetch(apiUrl)
         console.log('📡 Services API response status:', res.status, res.statusText)
-        
+
         if (!res.ok) throw new Error('Failed to fetch services')
         const data = await res.json()
         console.log('📊 Services API response:', data)
-        
+
         if (process.env.NODE_ENV === 'development' && data.length > 0) {
           console.log('🏨 First service from list API:', data[0])
           console.log('🔍 Service keys:', Object.keys(data[0]))
           console.log('🆔 Service ID fields:', { id: data[0].id, pk: data[0].pk, slug: data[0].slug })
         }
-        
+
         setServices(data)
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load services')
@@ -181,7 +181,7 @@ export default function ServicesPage() {
     quantity: number
   }) => {
     if (!selectedService) return
-    
+
     if (!isAuthenticated) {
       toast({
         title: "Login Required",
@@ -198,7 +198,7 @@ export default function ServicesPage() {
       booking_date: bookingData.selectedDate,
       booking_time: to24Hour(bookingData.selectedTime)
     }
-    
+
     if (process.env.NODE_ENV === 'development') {
       console.log('🏨 Services page adding service to cart via API:', {
         original: selectedService,
@@ -206,7 +206,7 @@ export default function ServicesPage() {
         bookingData
       })
     }
-    
+
     // Use the cart API to add the item
     await addToCart(cartData)
 
@@ -225,9 +225,9 @@ export default function ServicesPage() {
     selectedTime: string
     quantity: number
   }) => {
-  addServiceToCart(bookingData)
-  setIsConflictModalOpen(false)
-  setConflictData(null)
+    addServiceToCart(bookingData)
+    setIsConflictModalOpen(false)
+    setConflictData(null)
   }
 
   const handleConflictAddToExisting = (itemIndex: number, additionalQuantity: number) => {
@@ -322,7 +322,7 @@ export default function ServicesPage() {
           <div className="flex flex-col sm:flex-row gap-4 mb-6">
             <Select value={filterBy} onValueChange={setFilterBy}>
               <SelectTrigger className="w-full sm:w-48">
-                <SelectValue placeholder="Filter by category"/>
+                <SelectValue placeholder="Filter by category" />
               </SelectTrigger>
               <SelectContent>
                 {categories.map(category => (
@@ -334,7 +334,7 @@ export default function ServicesPage() {
             </Select>
             <Select value={sortBy} onValueChange={setSortBy}>
               <SelectTrigger className="w-full sm:w-48">
-                <SelectValue placeholder="Sort by"/>
+                <SelectValue placeholder="Sort by" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="name">Name</SelectItem>
@@ -384,7 +384,7 @@ export default function ServicesPage() {
                   <span className="text-sm text-gray-500 ml-2">({service.review_count ?? 20})</span>
                 </div>
                 <div className="flex items-center mb-3 text-sm text-gray-600">
-                  <Clock className="h-4 w-4 mr-1"/>
+                  <Clock className="h-4 w-4 mr-1" />
                   {service.time ?? 0} hours
                 </div>
                 <p className="text-gray-600 text-sm mb-4 line-clamp-2">
@@ -412,7 +412,7 @@ export default function ServicesPage() {
                     onClick={() => handleQuickBook(service)}
                     className="flex-1"
                   >
-                    <Calendar className="h-4 w-4 mr-2"/>
+                    <Calendar className="h-4 w-4 mr-2" />
                     Book Now
                   </Button>
                 </div>
@@ -422,7 +422,7 @@ export default function ServicesPage() {
         </div>
       </div>
       <Footer />
-      
+
       {/* Booking Modal */}
       <BookingModal
         isOpen={isModalOpen}
