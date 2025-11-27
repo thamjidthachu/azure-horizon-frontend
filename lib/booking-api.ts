@@ -62,12 +62,12 @@ export class BookingAPIService {
    */
   static async createBooking(bookingData: BookingData): Promise<BookingResponse> {
     try {
-      const apiUrl = `${API_BASE_URL}/bookings/create/`
+      const apiUrl = `${API_BASE_URL}/api/v1/bookings/create/`
       console.log('📤 Booking API URL:', apiUrl)
       console.log('📤 API_BASE_URL:', API_BASE_URL)
       console.log('📤 Booking data being sent:', JSON.stringify(bookingData, null, 2))
       console.log('📋 Service IDs in request:', bookingData.services.map(s => ({ service_id: s.service_id, quantity: s.quantity })))
-      
+
       const response = await authFetch(apiUrl, {
         method: 'POST',
         headers: {
@@ -80,12 +80,12 @@ export class BookingAPIService {
         const errorData = await response.json()
         console.log('❌ Booking creation error response:', response.status, response.statusText)
         console.log('❌ Full error details:', JSON.stringify(errorData, null, 2))
-        
+
         // Show service_id specific error if it exists
         if (errorData.details && errorData.details.services) {
           console.log('🔍 Service validation errors:', errorData.details.services)
         }
-        
+
         throw new Error(errorData.error || errorData.message || `Failed to create booking: ${response.status}`)
       }
 
@@ -101,7 +101,7 @@ export class BookingAPIService {
    */
   static async getMyBookings(page: number = 1): Promise<{ results: Booking[], count: number, next: string | null, previous: string | null }> {
     try {
-      const response = await authFetch(`${API_BASE_URL}/bookings/my-bookings/?page=${page}`)
+      const response = await authFetch(`${API_BASE_URL}/api/v1/bookings/my-bookings/?page=${page}`)
 
       if (!response.ok) {
         throw new Error(`Failed to fetch bookings: ${response.status}`)
@@ -119,7 +119,7 @@ export class BookingAPIService {
    */
   static async getBookingDetail(bookingNumber: string): Promise<Booking> {
     try {
-      const response = await authFetch(`${API_BASE_URL}/bookings/${bookingNumber}/details/`)
+      const response = await authFetch(`${API_BASE_URL}/api/v1/bookings/${bookingNumber}/details/`)
 
       if (!response.ok) {
         throw new Error(`Failed to fetch booking: ${response.status}`)
@@ -137,7 +137,7 @@ export class BookingAPIService {
    */
   static async cancelBooking(bookingNumber: string, reason?: string): Promise<{ message: string }> {
     try {
-      const response = await authFetch(`${API_BASE_URL}/bookings/${bookingNumber}/cancel/`, {
+      const response = await authFetch(`${API_BASE_URL}${bookingNumber}/cancel/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -162,7 +162,7 @@ export class BookingAPIService {
    */
   static async createCheckoutSession(bookingNumber: string, successUrl?: string, cancelUrl?: string): Promise<PaymentSession> {
     try {
-      const response = await authFetch(`${API_BASE_URL}/bookings/${bookingNumber}/create-checkout-session/`, {
+      const response = await authFetch(`${API_BASE_URL}/api/v1/bookings/${bookingNumber}/create-checkout-session/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -190,7 +190,7 @@ export class BookingAPIService {
    */
   static async getPaymentStatus(bookingNumber: string): Promise<{ payment_status: string, stripe_session_id?: string }> {
     try {
-      const response = await authFetch(`${API_BASE_URL}/bookings/${bookingNumber}/payment-status/`)
+      const response = await authFetch(`${API_BASE_URL}/api/v1/bookings/${bookingNumber}/payment-status/`)
 
       if (!response.ok) {
         throw new Error(`Failed to fetch payment status: ${response.status}`)
@@ -213,7 +213,7 @@ export class BookingAPIService {
       if (typeof arguments[1] === 'string' && arguments[1]) {
         data.booking_number = arguments[1];
       }
-      const response = await authFetch(`${API_BASE_URL}/bookings/verify-payment/`, {
+      const response = await authFetch(`${API_BASE_URL}/api/v1/bookings/verify-payment/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -242,11 +242,11 @@ export class BookingAPIService {
    * Update booking status (admin/staff only)
    */
   static async updateBookingStatus(
-    bookingNumber: string, 
+    bookingNumber: string,
     status: 'pending' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled'
   ): Promise<{ message: string }> {
     try {
-      const response = await authFetch(`${API_BASE_URL}/bookings/${bookingNumber}/update-status/`, {
+      const response = await authFetch(`${API_BASE_URL}/api/v1/bookings/${bookingNumber}/update-status/`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -298,24 +298,24 @@ export class BookingAPIService {
 
     // Calculate the primary booking date from the first item with a date
     const primaryDate = validItems.find(item => item.selectedDate)?.selectedDate || new Date().toISOString().split('T')[0]
-    
+
     // Calculate total guests from all items
     const totalGuests = validItems.reduce((sum, item) => sum + (item.quantity || 1), 0)
 
     // Helper function to convert 12-hour time to 24-hour format
     const convertTimeTo24Hour = (time12h: string): string => {
       if (!time12h) return '09:00'
-      
+
       const [time, period] = time12h.split(' ')
       const [hours, minutes] = time.split(':')
       let hour24 = parseInt(hours)
-      
+
       if (period?.toUpperCase() === 'PM' && hour24 !== 12) {
         hour24 += 12
       } else if (period?.toUpperCase() === 'AM' && hour24 === 12) {
         hour24 = 0
       }
-      
+
       return `${hour24.toString().padStart(2, '0')}:${minutes || '00'}`
     }
 
@@ -326,7 +326,7 @@ export class BookingAPIService {
         console.log(`✅ Using stored service_id: ${item.service_id} for service: ${item.name || item.slug}`)
         return item.service_id
       }
-      
+
       // Log the item structure for debugging
       console.log('🔍 Looking for service ID in item:', {
         keys: Object.keys(item),
@@ -335,7 +335,7 @@ export class BookingAPIService {
         slug: item.slug,
         name: item.name
       })
-      
+
       // Check other possible numeric ID fields
       if (typeof item.id === 'number') {
         console.log(`✅ Using numeric item.id: ${item.id}`)
@@ -345,7 +345,7 @@ export class BookingAPIService {
         console.log(`✅ Using item.pk: ${item.pk}`)
         return item.pk
       }
-      
+
       // Try to parse string IDs
       if (typeof item.service_id === 'string' && !isNaN(Number(item.service_id))) {
         const parsed = Number(item.service_id)
@@ -357,7 +357,7 @@ export class BookingAPIService {
         console.log(`✅ Parsed string item.id '${item.id}' to number: ${parsed}`)
         return parsed
       }
-      
+
       // TEMPORARY FIX: Create a slug-to-ID mapping for common services
       const slugToIdMapping: { [key: string]: number } = {
         'couples-yoga-sessions': 1,
@@ -369,19 +369,19 @@ export class BookingAPIService {
         'helicopter-tour': 7,
         'cooking-class': 8
       }
-      
+
       if (item.slug && slugToIdMapping[item.slug]) {
         const mappedId = slugToIdMapping[item.slug]
         console.log(`🗺️ Using slug-to-ID mapping: ${item.slug} → ${mappedId}`)
         return mappedId
       }
-      
+
       if (item.id && slugToIdMapping[item.id]) {
         const mappedId = slugToIdMapping[item.id]
         console.log(`🗺️ Using id-to-ID mapping: ${item.id} → ${mappedId}`)
         return mappedId
       }
-      
+
       // This should not happen with our new implementation
       console.error('❌ Could not find valid numeric service ID in cart item:', item)
       throw new Error(`Missing service_id in cart item. Item has keys: ${Object.keys(item).join(', ')}. Please ensure the backend API returns numeric service IDs or update the slug-to-ID mapping.`)
@@ -401,14 +401,14 @@ export class BookingAPIService {
       services: validItems.map(item => {
         const serviceId = getServiceId(item)
         const convertedTime = item.selectedTime ? convertTimeTo24Hour(item.selectedTime) : undefined
-        
+
         const serviceData = {
           service_id: serviceId,
           quantity: item.quantity || 1,
           service_date: item.selectedDate || undefined,
           service_time: convertedTime
         }
-        
+
         console.log(`📋 Mapping cart item to booking service:`, {
           cartItem: {
             name: item.name,
@@ -418,7 +418,7 @@ export class BookingAPIService {
           },
           bookingService: serviceData
         })
-        
+
         return serviceData
       })
     }

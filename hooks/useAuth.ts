@@ -25,7 +25,7 @@ export function useAuth() {
       }
 
       // Try to fetch user profile
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/profile/`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/auth/profile/`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -41,7 +41,7 @@ export function useAuth() {
         // Token might be expired, try to refresh
         const refreshToken = localStorage.getItem('refresh_token')
         if (refreshToken) {
-          const refreshRes = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/token/refresh/`, {
+          const refreshRes = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/auth/token/refresh/`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ refresh: refreshToken })
@@ -51,14 +51,14 @@ export function useAuth() {
             const { access } = await refreshRes.json()
             localStorage.setItem('access_token', access)
             // Retry fetching profile with new token
-            const retryRes = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/profile/`, {
+            const retryRes = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/auth/profile/`, {
               headers: {
                 'Authorization': `Bearer ${access}`,
                 'Content-Type': 'application/json'
               },
               credentials: 'include'
             })
-            
+
             if (retryRes.ok) {
               const userData = await retryRes.json()
               setUser(userData)
@@ -81,10 +81,10 @@ export function useAuth() {
   const logout = async () => {
     try {
       const token = localStorage.getItem('access_token')
-      
+
       // Call logout API
       if (token) {
-        await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/logout/`, {
+        await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/auth/logout/`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -101,7 +101,7 @@ export function useAuth() {
       localStorage.removeItem('refresh_token')
       setUser(null)
       setIsAuthenticated(false)
-      
+
       // Redirect to login page
       router.push('/login')
     }

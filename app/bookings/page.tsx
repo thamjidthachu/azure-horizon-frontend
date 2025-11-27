@@ -66,8 +66,8 @@ export default function MyBookingsPage() {
   const [cancelReason, setCancelReason] = useState('')
   const [bookings, setBookings] = useState<any[]>([])
   const [count, setCount] = useState(0)
-  const [next, setNext] = useState<string|null>(null)
-  const [previous, setPrevious] = useState<string|null>(null)
+  const [next, setNext] = useState<string | null>(null)
+  const [previous, setPrevious] = useState<string | null>(null)
   const [page, setPage] = useState(1)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -99,11 +99,11 @@ export default function MyBookingsPage() {
         <TrendingHeader />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="animate-pulse space-y-4">
-            <div className="h-8 bg-gray-200 rounded w-1/4"></div>
-            <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+            <div className="h-8 bg-gray-200 dark:bg-zinc-800 rounded w-1/4"></div>
+            <div className="h-4 bg-gray-200 dark:bg-zinc-800 rounded w-3/4"></div>
             <div className="space-y-3">
-              <div className="h-32 bg-gray-200 rounded"></div>
-              <div className="h-32 bg-gray-200 rounded"></div>
+              <div className="h-32 bg-gray-200 dark:bg-zinc-800 rounded"></div>
+              <div className="h-32 bg-gray-200 dark:bg-zinc-800 rounded"></div>
             </div>
           </div>
         </div>
@@ -119,8 +119,8 @@ export default function MyBookingsPage() {
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <Card className="text-center">
             <CardContent className="p-8">
-              <h1 className="text-2xl font-bold mb-4">Please Log In</h1>
-              <p className="text-gray-600 mb-6">
+              <h1 className="text-2xl font-bold mb-4 dark:text-white">Please Log In</h1>
+              <p className="text-gray-600 dark:text-gray-400 mb-6">
                 You need to be logged in to view your bookings.
               </p>
               <Link href="/login?redirect=/bookings">
@@ -133,7 +133,7 @@ export default function MyBookingsPage() {
     )
   }
 
-// ...existing code...
+  // ...existing code...
 
   const getStatusColor = (status: string) => {
     const statusInfo = BookingAPIService.formatBookingStatus(status)
@@ -149,38 +149,38 @@ export default function MyBookingsPage() {
     <div className="min-h-screen bg-gray-50 dark:bg-black">
       <Navbar />
       <TrendingHeader />
-      
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">My Bookings</h1>
-            <p className="text-gray-600 mt-2">Manage your Azure Horizon reservations</p>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">My Bookings</h1>
+            <p className="text-gray-600 dark:text-gray-400 mt-2">Manage your Azure Horizon reservations</p>
           </div>
           <Link href="/services">
             <Button>Book New Service</Button>
           </Link>
         </div>
 
-  {isLoading ? (
+        {isLoading ? (
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
-              <Card key={i} className="animate-pulse">
+              <Card key={i} className="animate-pulse dark:bg-zinc-900">
                 <CardContent className="p-6">
                   <div className="space-y-3">
-                    <div className="h-4 bg-gray-200 rounded w-1/4"></div>
-                    <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                    <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                    <div className="h-4 bg-gray-200 dark:bg-zinc-700 rounded w-1/4"></div>
+                    <div className="h-4 bg-gray-200 dark:bg-zinc-700 rounded w-3/4"></div>
+                    <div className="h-4 bg-gray-200 dark:bg-zinc-700 rounded w-1/2"></div>
                   </div>
                 </CardContent>
               </Card>
             ))}
           </div>
-  ) : (!bookings || bookings.length === 0) ? (
-          <Card className="text-center">
+        ) : (!bookings || bookings.length === 0) ? (
+          <Card className="text-center dark:bg-zinc-900">
             <CardContent className="p-8">
-              <Calendar className="h-16 w-16 text-gray-400 mx-auto mb-4"/>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">No Bookings Yet</h2>
-              <p className="text-gray-600 mb-6">
+              <Calendar className="h-16 w-16 text-gray-400 dark:text-gray-600 mx-auto mb-4" />
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">No Bookings Yet</h2>
+              <p className="text-gray-600 dark:text-gray-400 mb-6">
                 You haven't made any bookings yet. Explore our services to create your perfect getaway!
               </p>
               <Link href="/services">
@@ -191,25 +191,25 @@ export default function MyBookingsPage() {
         ) : (
           <div className="space-y-6">
             {(bookings || []).map((booking) => (
-              <Card key={booking.id} className="overflow-hidden">
-                <CardHeader className="bg-gradient-to-r from-teal-50 to-blue-50">
+              <Card key={booking.id} className="overflow-hidden dark:bg-zinc-900 dark:border-zinc-800">
+                <CardHeader className="bg-gradient-to-r from-teal-50 to-blue-50 dark:from-teal-950/30 dark:to-blue-950/30">
                   <div className="flex justify-between items-start">
                     <div>
-                      <CardTitle className="text-xl font-bold">
+                      <CardTitle className="text-xl font-bold dark:text-white">
                         Booking #{booking.booking_number}
                       </CardTitle>
-                      <p className="text-gray-600 mt-1">
+                      <p className="text-gray-600 dark:text-gray-400 mt-1">
                         Booked on {new Date(booking.created_at).toLocaleDateString()}
                       </p>
                     </div>
                     <div className="flex gap-2">
-                      <Badge 
+                      <Badge
                         variant="secondary"
                         className={`bg-${getStatusColor(booking.status)}-100 text-${getStatusColor(booking.status)}-800`}
                       >
                         {BookingAPIService.formatBookingStatus(booking.status).label}
                       </Badge>
-                      <Badge 
+                      <Badge
                         variant="outline"
                         className={`bg-${getPaymentStatusColor(booking.payment_status)}-100 text-${getPaymentStatusColor(booking.payment_status)}-800`}
                       >
@@ -223,10 +223,10 @@ export default function MyBookingsPage() {
                   {/* Booking Details */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                     <div className="flex items-center">
-                      <Calendar className="h-5 w-5 text-gray-400 mr-3"/>
+                      <Calendar className="h-5 w-5 text-gray-400 dark:text-gray-600 mr-3" />
                       <div>
-                        <p className="text-sm text-gray-500">Date</p>
-                        <p className="font-medium">
+                        <p className="text-sm text-gray-500 dark:text-gray-400">Date</p>
+                        <p className="font-medium dark:text-white">
                           {new Date(booking.booking_date).toLocaleDateString()}
                         </p>
                       </div>
@@ -234,19 +234,19 @@ export default function MyBookingsPage() {
 
                     {booking.booking_time && (
                       <div className="flex items-center">
-                        <Clock className="h-5 w-5 text-gray-400 mr-3"/>
+                        <Clock className="h-5 w-5 text-gray-400 dark:text-gray-600 mr-3" />
                         <div>
-                          <p className="text-sm text-gray-500">Time</p>
-                          <p className="font-medium">{booking.booking_time}</p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">Time</p>
+                          <p className="font-medium dark:text-white">{booking.booking_time}</p>
                         </div>
                       </div>
                     )}
 
                     <div className="flex items-center">
-                      <Users className="h-5 w-5 text-gray-400 mr-3"/>
+                      <Users className="h-5 w-5 text-gray-400 dark:text-gray-600 mr-3" />
                       <div>
-                        <p className="text-sm text-gray-500">Guests</p>
-                        <p className="font-medium">{booking.number_of_guests}</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">Guests</p>
+                        <p className="font-medium dark:text-white">{booking.number_of_guests}</p>
                       </div>
                     </div>
                   </div>
@@ -256,17 +256,17 @@ export default function MyBookingsPage() {
                   <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
                     <Link href={`/bookings/${booking.booking_number}`}>
                       <Button variant="outline" size="sm">
-                        <Eye className="h-4 w-4 mr-1"/>
+                        <Eye className="h-4 w-4 mr-1" />
                         View Details
                       </Button>
                     </Link>
                     {booking.payment_status === 'unpaid' && (
-                      <Button 
+                      <Button
                         onClick={() => handlePayNow(booking.booking_number)}
                         size="sm"
                         className="bg-green-600 hover:bg-green-700"
                       >
-                        <CreditCard className="h-4 w-4 mr-1"/>
+                        <CreditCard className="h-4 w-4 mr-1" />
                         Pay Now
                       </Button>
                     )}
@@ -274,7 +274,7 @@ export default function MyBookingsPage() {
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
                           <Button variant="destructive" size="sm">
-                            <X className="h-4 w-4 mr-1"/>
+                            <X className="h-4 w-4 mr-1" />
                             Cancel Booking
                           </Button>
                         </AlertDialogTrigger>
@@ -299,7 +299,7 @@ export default function MyBookingsPage() {
                             <AlertDialogCancel onClick={() => setCancelReason('')}>
                               Keep Booking
                             </AlertDialogCancel>
-                            <AlertDialogAction 
+                            <AlertDialogAction
                               onClick={() => confirmCancellation(booking.booking_number)}
                               className="bg-red-600 hover:bg-red-700"
                             >
@@ -310,28 +310,28 @@ export default function MyBookingsPage() {
                       </AlertDialog>
                     )}
                   </div>
-        {/* Pagination */}
-        {count > bookings.length && (
-          <div className="flex justify-center mt-8 gap-2">
-            <Button variant="outline" size="sm" disabled={!previous} onClick={() => setPage(page - 1)}>
-              Previous
-            </Button>
-            <span className="px-3 py-2 text-sm text-muted-foreground">Page {page}</span>
-            <Button variant="outline" size="sm" disabled={!next} onClick={() => setPage(page + 1)}>
-              Next
-            </Button>
-          </div>
-        )}
+                  {/* Pagination */}
+                  {count > bookings.length && (
+                    <div className="flex justify-center mt-8 gap-2">
+                      <Button variant="outline" size="sm" disabled={!previous} onClick={() => setPage(page - 1)}>
+                        Previous
+                      </Button>
+                      <span className="px-3 py-2 text-sm text-muted-foreground">Page {page}</span>
+                      <Button variant="outline" size="sm" disabled={!next} onClick={() => setPage(page + 1)}>
+                        Next
+                      </Button>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             ))}
           </div>
         )}
 
-  {error && (
-          <Card className="mt-6 border-red-200 bg-red-50">
+        {error && (
+          <Card className="mt-6 border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/30">
             <CardContent className="p-4">
-              <p className="text-red-600 text-center">{error}</p>
+              <p className="text-red-600 dark:text-red-400 text-center">{error}</p>
             </CardContent>
           </Card>
         )}

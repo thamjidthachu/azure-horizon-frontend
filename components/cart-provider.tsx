@@ -11,7 +11,7 @@ interface CartContextType {
   items: CartItem[]
   isLoading: boolean
   error: string | null
-  
+
   // Cart actions
   addToCart: (serviceData: {
     service_id: number
@@ -23,7 +23,7 @@ interface CartContextType {
   removeFromCart: (itemId: number) => Promise<void>
   clearCart: () => Promise<void>
   refreshCart: () => Promise<void>
-  
+
   // Checkout
   checkoutCart: (guestInfo: {
     customer_name: string
@@ -31,7 +31,7 @@ interface CartContextType {
     customer_phone: string
     special_requests?: string
   }) => Promise<OrderDetail | null>
-  
+
   // Computed values
   total: number
   subtotal: number
@@ -97,11 +97,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
     setIsLoading(true)
     setError(null)
-    
+
     try {
       console.log('[DEBUG] Calling CartAPIService.addToCart');
       const response = await CartAPIService.addToCart(serviceData)
-      
+
       if (response.error) {
         // Show API error message
         toast({
@@ -112,9 +112,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         setError(response.error)
         return
       }
-      
+
       setCart(response.cart)
-      
+
       // Show success message from API or default message
       toast({
         title: "Success",
@@ -149,7 +149,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setError(null)
     try {
       const response = await CartAPIService.updateCartItem(itemId, quantity, booking_date, booking_time)
-      
+
       if (response.error) {
         // Show API error message
         toast({
@@ -160,10 +160,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         setError(response.error)
         return
       }
-      
+
       // Refresh cart to get updated totals
       await refreshCart()
-      
+
       // Show success message from API or default message
       toast({
         title: "Success",
@@ -196,10 +196,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
     setIsLoading(true)
     setError(null)
-    
+
     try {
       const response = await CartAPIService.removeFromCart(itemId)
-      
+
       if (response.error) {
         // Show API error message
         toast({
@@ -210,10 +210,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         setError(response.error)
         return
       }
-      
+
       // Refresh cart to get updated state
       await refreshCart()
-      
+
       // Show success message from API or default message
       toast({
         title: "Success",
@@ -246,11 +246,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
     setIsLoading(true)
     setError(null)
-    
+
     try {
       await CartAPIService.clearCart()
       setCart(null)
-      
+
       toast({
         title: "Cart Cleared",
         description: "All items have been removed from your cart.",
@@ -289,7 +289,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     try {
       // Use authFetch to include the token
       const response = await (await import('@/utils/authFetch')).authFetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'}/api/cart/checkout/`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'}/api/v1/cart/checkout/`,
         {
           method: 'POST',
           headers: {

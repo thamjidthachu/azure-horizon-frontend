@@ -28,29 +28,29 @@ export function ReviewSection({ serviceSlug }: { serviceSlug: string }) {
   }, [])
 
   // Fetch reviews with pagination
-useEffect(() => {
-  let isMounted = true
-  setLoading(true)
-  const url = nextUrl || `${process.env.NEXT_PUBLIC_API_BASE_URL}/services/${serviceSlug}/reviews/?page=${page}`
-  authFetch(url)
-    .then(res => res.json())
-    .then(data => {
-      if (!isMounted) return
-      if (Array.isArray(data.results)) {
-        setReviews(prev => [...prev, ...data.results])
-      } else {
-        setReviews(prev => [...prev, ...(data.results || [])])
-      }
-      setHasMore(!!data.next)
-      setNextUrl(data.next)
-      setLoading(false)
-    })
-    .catch(() => setLoading(false))
+  useEffect(() => {
+    let isMounted = true
+    setLoading(true)
+    const url = nextUrl || `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/services/${serviceSlug}/reviews/?page=${page}`
+    authFetch(url)
+      .then(res => res.json())
+      .then(data => {
+        if (!isMounted) return
+        if (Array.isArray(data.results)) {
+          setReviews(prev => [...prev, ...data.results])
+        } else {
+          setReviews(prev => [...prev, ...(data.results || [])])
+        }
+        setHasMore(!!data.next)
+        setNextUrl(data.next)
+        setLoading(false)
+      })
+      .catch(() => setLoading(false))
 
-  return () => {
-    isMounted = false
-  }
-}, [page, serviceSlug])
+    return () => {
+      isMounted = false
+    }
+  }, [page, serviceSlug])
 
   // Scroll to new reviews when loaded
   useEffect(() => {
@@ -64,7 +64,7 @@ useEffect(() => {
     e.preventDefault()
     if (!rating || !message.trim()) return
     setPosting(true)
-    const res = await authFetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/services/${serviceSlug}/reviews/`, {
+    const res = await authFetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/services/${serviceSlug}/reviews/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ rating, message }),
@@ -112,7 +112,7 @@ useEffect(() => {
           <form onSubmit={handlePost} className="mb-8 p-4 bg-white rounded-lg shadow flex flex-col gap-4 animate-fade-in dark:bg-gray-800">
             <span className="font-small">Tell others what you think</span>
             <div className="flex items-center gap-1">
-              {[1,2,3,4,5].map(i => (
+              {[1, 2, 3, 4, 5].map(i => (
                 <button
                   type="button"
                   key={i}
@@ -125,9 +125,8 @@ useEffect(() => {
                   }}
                 >
                   <Star
-                    className={`h-6 w-6 cursor-pointer transition-colors duration-150 ${
-                      (hoverRating || rating) >= i ? "text-yellow-400 fill-current" : "text-gray-300"
-                    }`}
+                    className={`h-6 w-6 cursor-pointer transition-colors duration-150 ${(hoverRating || rating) >= i ? "text-yellow-400 fill-current" : "text-gray-300"
+                      }`}
                     fill={(hoverRating || rating) >= i ? "#eed51dff" : "none"}
                   />
                 </button>
@@ -177,7 +176,7 @@ useEffect(() => {
                 <span className="text-xs text-gray-400">{review.created_at ? formatDate(review.created_at) : ""}</span>
               </div>
               <div className="flex items-center gap-1 mb-2">
-                {[1,2,3,4,5].map(i => (
+                {[1, 2, 3, 4, 5].map(i => (
                   <Star
                     key={i}
                     className={`h-4 w-4 ${review.rating >= i ? "text-yellow-400 fill-current" : "text-gray-300"}`}

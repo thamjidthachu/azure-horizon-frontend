@@ -8,13 +8,13 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
-import { 
-  Calendar, 
-  Clock, 
-  Users, 
-  Phone, 
-  Mail, 
-  CreditCard, 
+import {
+  Calendar,
+  Clock,
+  Users,
+  Phone,
+  Mail,
+  CreditCard,
   ArrowLeft,
   Download,
   X,
@@ -89,7 +89,7 @@ export default function BookingDetailPage() {
               <p className="text-gray-600 mb-6">
                 You need to be logged in to view booking details.
               </p>
-              <Link href={`/login?redirect=/bookings/${bookingNumber}`}>
+              <Link href={`/login?redirect=/api/v1/bookings/${bookingNumber}`}>
                 <Button size="lg">Log In</Button>
               </Link>
             </CardContent>
@@ -105,11 +105,11 @@ export default function BookingDetailPage() {
         <Navbar />
         <TrendingHeader />
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <Card className="text-center">
+          <Card className="text-center dark:bg-zinc-900 dark:border-zinc-800">
             <CardContent className="p-8">
-              <AlertCircle className="h-16 w-16 text-red-500 mx-auto mb-4"/>
-              <h1 className="text-2xl font-bold mb-2">Booking Not Found</h1>
-              <p className="text-gray-600 mb-6">
+              <AlertCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
+              <h1 className="text-2xl font-bold mb-2 dark:text-white">Booking Not Found</h1>
+              <p className="text-gray-600 dark:text-gray-400 mb-6">
                 The booking you're looking for doesn't exist or you don't have permission to view it.
               </p>
               <Link href="/bookings">
@@ -174,8 +174,8 @@ export default function BookingDetailPage() {
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
               Booking #{booking.booking_number}
             </h1>
-            <p className="text-gray-600 dark:text-gray-300 mt-1">
-              Created on {new Date(booking.created_at).toLocaleDateString()} &middot; Status: <span className={`inline-flex items-center gap-2 font-semibold text-${getStatusColor(booking.status)}-600`}>{getStatusIcon(booking.status)}{BookingAPIService.formatBookingStatus(booking.status).label}</span>
+            <p className="text-gray-600 dark:text-gray-400 mt-1">
+              Created on {new Date(booking.created_at).toLocaleDateString()} &middot; Status: <span className={`inline-flex items-center gap-2 font-semibold text-${getStatusColor(booking.status)}-600 dark:text-${getStatusColor(booking.status)}-400`}>{getStatusIcon(booking.status)}{BookingAPIService.formatBookingStatus(booking.status).label}</span>
             </p>
           </div>
         </div>
@@ -184,69 +184,69 @@ export default function BookingDetailPage() {
           {/* Main Details */}
           <div className="lg:col-span-2 space-y-6">
             {/* Booking & Order Info */}
-            <Card className="shadow-xl border-2 border-blue-100">
+            <Card className="shadow-xl border-2 border-blue-100 dark:border-blue-900/30 dark:bg-zinc-900">
               <CardHeader>
-                <CardTitle>Booking & Order Details</CardTitle>
+                <CardTitle className="dark:text-white">Booking & Order Details</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="flex items-center">
                     <Calendar className="h-5 w-5 text-blue-400 mr-3" />
                     <div>
-                      <p className="text-sm text-gray-500">Booking Date</p>
-                      <p className="font-medium">{new Date(booking.booking_date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">Booking Date</p>
+                      <p className="font-medium dark:text-white">{new Date(booking.booking_date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
                     </div>
                   </div>
                   <div className="flex items-center">
                     <Clock className="h-5 w-5 text-blue-400 mr-3" />
                     <div>
-                      <p className="text-sm text-gray-500">Time</p>
-                      <p className="font-medium">{booking.booking_time}</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">Time</p>
+                      <p className="font-medium dark:text-white">{booking.booking_time}</p>
                     </div>
                   </div>
                   <div className="flex items-center">
                     <Users className="h-5 w-5 text-blue-400 mr-3" />
                     <div>
-                      <p className="text-sm text-gray-500">Guests</p>
-                      <p className="font-medium">{booking.number_of_guests}</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">Guests</p>
+                      <p className="font-medium dark:text-white">{booking.number_of_guests}</p>
                     </div>
                   </div>
                   <div className="flex items-center">
                     <Mail className="h-5 w-5 text-blue-400 mr-3" />
                     <div>
-                      <p className="text-sm text-gray-500">Email</p>
-                      <p className="font-medium">{booking.order?.customer_email || ''}</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">Email</p>
+                      <p className="font-medium dark:text-white">{booking.order?.customer_email || ''}</p>
                     </div>
                   </div>
                   <div className="flex items-center">
                     <Phone className="h-5 w-5 text-blue-400 mr-3" />
                     <div>
-                      <p className="text-sm text-gray-500">Phone</p>
-                      <p className="font-medium">{booking.order?.customer_phone || ''}</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">Phone</p>
+                      <p className="font-medium dark:text-white">{booking.order?.customer_phone || ''}</p>
                     </div>
                   </div>
                 </div>
                 <Separator />
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <p className="text-sm text-gray-500">Order Number</p>
-                    <p className="font-medium">{booking.order?.order_number}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Order Number</p>
+                    <p className="font-medium dark:text-white">{booking.order?.order_number}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500">Order Status</p>
-                    <Badge className={`bg-${getStatusColor(booking.order?.status)}-100 text-${getStatusColor(booking.order?.status)}-800`}>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Order Status</p>
+                    <Badge className={`bg-${getStatusColor(booking.order?.status)}-100 text-${getStatusColor(booking.order?.status)}-800 dark:bg-${getStatusColor(booking.order?.status)}-900/30 dark:text-${getStatusColor(booking.order?.status)}-400`}>
                       {BookingAPIService.formatBookingStatus(booking.order?.status).label}
                     </Badge>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500">Payment Status</p>
-                    <Badge className={`bg-${getPaymentStatusColor(booking.order?.payment_status)}-100 text-${getPaymentStatusColor(booking.order?.payment_status)}-800`}>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Payment Status</p>
+                    <Badge className={`bg-${getPaymentStatusColor(booking.order?.payment_status)}-100 text-${getPaymentStatusColor(booking.order?.payment_status)}-800 dark:bg-${getPaymentStatusColor(booking.order?.payment_status)}-900/30 dark:text-${getPaymentStatusColor(booking.order?.payment_status)}-400`}>
                       {BookingAPIService.formatPaymentStatus(booking.order?.payment_status).label}
                     </Badge>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500">Order Date</p>
-                    <p className="font-medium">{booking.order?.order_date ? new Date(booking.order.order_date).toLocaleString() : ''}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Order Date</p>
+                    <p className="font-medium dark:text-white">{booking.order?.order_date ? new Date(booking.order.order_date).toLocaleString() : ''}</p>
                   </div>
                 </div>
               </CardContent>
@@ -254,26 +254,26 @@ export default function BookingDetailPage() {
 
             {/* Order Items (Services) */}
             {booking.order?.order_items && booking.order.order_items.length > 0 && (
-              <Card className="shadow-lg border border-blue-100">
+              <Card className="shadow-lg border border-blue-100 dark:border-blue-900/30 dark:bg-zinc-900">
                 <CardHeader>
-                  <CardTitle>Booked Services</CardTitle>
+                  <CardTitle className="dark:text-white">Booked Services</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     {booking.order.order_items.map((item: any) => (
-                      <div key={item.id} className="flex items-center gap-4 p-4 bg-white dark:bg-gray-900 rounded-lg border border-gray-100 dark:border-gray-800">
-                        <img src={item.service?.files?.[0]?.images} alt={item.service?.name} className="w-20 h-20 object-cover rounded-lg border" />
+                      <div key={item.id} className="flex items-center gap-4 p-4 bg-white dark:bg-zinc-800 rounded-lg border border-gray-100 dark:border-zinc-700">
+                        <img src={item.service?.files?.[0]?.images} alt={item.service?.name} className="w-20 h-20 object-cover rounded-lg border dark:border-zinc-600" />
                         <div className="flex-1">
-                          <h3 className="font-semibold text-lg">{item.service?.name}</h3>
-                          <p className="text-sm text-gray-500 mb-1">{item.service?.synopsis}</p>
-                          <div className="flex items-center gap-4 text-xs text-gray-400">
+                          <h3 className="font-semibold text-lg dark:text-white">{item.service?.name}</h3>
+                          <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">{item.service?.synopsis}</p>
+                          <div className="flex items-center gap-4 text-xs text-gray-400 dark:text-gray-500">
                             <span>Qty: {item.quantity}</span>
                             <span className="flex items-center gap-1">Unit Price: <DirhamIcon className="h-4 w-4 inline-block align-text-bottom" />{item.unit_price}</span>
                             <span className="flex items-center gap-1">Total: <DirhamIcon className="h-4 w-4 inline-block align-text-bottom" />{item.total_price}</span>
                           </div>
                         </div>
                         <div className="text-right">
-                          <span className="font-bold text-lg text-blue-600 flex items-center gap-1"><DirhamIcon className="h-5 w-5 inline-block align-text-bottom" />{item.total_price}</span>
+                          <span className="font-bold text-lg text-blue-600 dark:text-blue-400 flex items-center gap-1"><DirhamIcon className="h-5 w-5 inline-block align-text-bottom" />{item.total_price}</span>
                         </div>
                       </div>
                     ))}
@@ -284,25 +284,25 @@ export default function BookingDetailPage() {
 
             {/* Payments */}
             {booking.payments && booking.payments.length > 0 && (
-              <Card className="shadow-lg border border-green-100">
+              <Card className="shadow-lg border border-green-100 dark:border-green-900/30 dark:bg-zinc-900">
                 <CardHeader>
-                  <CardTitle>Payments</CardTitle>
+                  <CardTitle className="dark:text-white">Payments</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     {booking.payments.map((payment: any) => (
-                      <div key={payment.id} className="flex flex-col md:flex-row md:items-center md:justify-between p-4 bg-green-50 dark:bg-green-900 rounded-lg border border-green-200 dark:border-green-800">
+                      <div key={payment.id} className="flex flex-col md:flex-row md:items-center md:justify-between p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800/30">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
-                            <CreditCard className="h-4 w-4 text-green-600" />
-                            <span className="font-medium">{payment.payment_method?.toUpperCase()}</span>
+                            <CreditCard className="h-4 w-4 text-green-600 dark:text-green-400" />
+                            <span className="font-medium dark:text-white">{payment.payment_method?.toUpperCase()}</span>
                           </div>
-                          <div className="text-sm text-gray-500">{payment.notes}</div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400">{payment.notes}</div>
                         </div>
                         <div className="flex flex-col items-end mt-2 md:mt-0">
-                          <span className="font-bold text-green-700 dark:text-green-300 text-lg flex items-center gap-1"><DirhamIcon className="h-5 w-5 inline-block align-text-bottom" />{payment.amount}</span>
-                          <span className="text-xs text-gray-400">{payment.payment_status}</span>
-                          <span className="text-xs text-gray-400">{payment.payment_date ? new Date(payment.payment_date).toLocaleString() : ''}</span>
+                          <span className="font-bold text-green-700 dark:text-green-400 text-lg flex items-center gap-1"><DirhamIcon className="h-5 w-5 inline-block align-text-bottom" />{payment.amount}</span>
+                          <span className="text-xs text-gray-400 dark:text-gray-500">{payment.payment_status}</span>
+                          <span className="text-xs text-gray-400 dark:text-gray-500">{payment.payment_date ? new Date(payment.payment_date).toLocaleString() : ''}</span>
                         </div>
                       </div>
                     ))}
@@ -313,12 +313,12 @@ export default function BookingDetailPage() {
 
             {/* Special Requests */}
             {booking.special_requests && (
-              <Card className="shadow border border-yellow-100">
+              <Card className="shadow border border-yellow-100 dark:border-yellow-900/30 dark:bg-zinc-900">
                 <CardHeader>
-                  <CardTitle>Special Requests</CardTitle>
+                  <CardTitle className="dark:text-white">Special Requests</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="p-4 bg-yellow-50 dark:bg-yellow-900 rounded-lg">
+                  <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
                     <p className="text-gray-700 dark:text-yellow-100">{booking.special_requests}</p>
                   </div>
                 </CardContent>
@@ -329,22 +329,22 @@ export default function BookingDetailPage() {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Payment Summary */}
-            <Card className="shadow border-2 border-green-100">
+            <Card className="shadow border-2 border-green-100 dark:border-green-900/30 dark:bg-zinc-900">
               <CardHeader>
-                <CardTitle>Payment Summary</CardTitle>
+                <CardTitle className="dark:text-white">Payment Summary</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
+                  <div className="flex justify-between dark:text-gray-300">
                     <span>Subtotal:</span>
                     <span className="flex items-center gap-1"><DirhamIcon className="h-4 w-4 inline-block align-text-bottom" />{booking.order?.subtotal || '0.00'}</span>
                   </div>
-                  <div className="flex justify-between">
+                  <div className="flex justify-between dark:text-gray-300">
                     <span>Tax:</span>
                     <span className="flex items-center gap-1"><DirhamIcon className="h-4 w-4 inline-block align-text-bottom" />{booking.order?.tax || '0.00'}</span>
                   </div>
-                  <Separator />
-                  <div className="flex justify-between font-bold text-base">
+                  <Separator className="dark:bg-zinc-700" />
+                  <div className="flex justify-between font-bold text-base dark:text-white">
                     <span>Total:</span>
                     <span className="flex items-center gap-1"><DirhamIcon className="h-5 w-5 inline-block align-text-bottom" />{booking.order?.total_amount || '0.00'}</span>
                   </div>
@@ -360,12 +360,12 @@ export default function BookingDetailPage() {
             </Card>
 
             {/* Actions */}
-            <Card className="shadow border border-gray-200">
+            <Card className="shadow border border-gray-200 dark:border-zinc-800 dark:bg-zinc-900">
               <CardHeader>
-                <CardTitle>Actions</CardTitle>
+                <CardTitle className="dark:text-white">Actions</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <Button variant="outline" className="w-full">
+                <Button variant="outline" className="w-full dark:border-zinc-700 dark:text-white dark:hover:bg-zinc-800">
                   <Download className="h-4 w-4 mr-2" />
                   Download Receipt
                 </Button>
@@ -378,25 +378,25 @@ export default function BookingDetailPage() {
                         Cancel Booking
                       </Button>
                     </AlertDialogTrigger>
-                    <AlertDialogContent>
+                    <AlertDialogContent className="dark:bg-zinc-900 dark:border-zinc-800">
                       <AlertDialogHeader>
-                        <AlertDialogTitle>Cancel Booking</AlertDialogTitle>
-                        <AlertDialogDescription>
+                        <AlertDialogTitle className="dark:text-white">Cancel Booking</AlertDialogTitle>
+                        <AlertDialogDescription className="dark:text-gray-400">
                           Are you sure you want to cancel this booking? This action cannot be undone.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <div className="py-4">
-                        <Label htmlFor="cancelReason">Cancellation Reason (Optional)</Label>
+                        <Label htmlFor="cancelReason" className="dark:text-gray-300">Cancellation Reason (Optional)</Label>
                         <Textarea
                           id="cancelReason"
                           placeholder="Please let us know why you're cancelling..."
                           value={cancelReason}
                           onChange={(e) => setCancelReason(e.target.value)}
-                          className="mt-2"
+                          className="mt-2 dark:bg-zinc-800 dark:border-zinc-700 dark:text-white"
                         />
                       </div>
                       <AlertDialogFooter>
-                        <AlertDialogCancel onClick={() => setCancelReason('')}>
+                        <AlertDialogCancel onClick={() => setCancelReason('')} className="dark:bg-zinc-800 dark:text-white dark:hover:bg-zinc-700">
                           Keep Booking
                         </AlertDialogCancel>
                         <AlertDialogAction onClick={handleCancelBooking} className="bg-red-600 hover:bg-red-700">
@@ -410,16 +410,16 @@ export default function BookingDetailPage() {
             </Card>
 
             {/* Contact Support */}
-            <Card className="shadow border border-blue-200">
+            <Card className="shadow border border-blue-200 dark:border-blue-900/30 dark:bg-zinc-900">
               <CardHeader>
-                <CardTitle>Need Help?</CardTitle>
+                <CardTitle className="dark:text-white">Need Help?</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
                   Have questions about your booking? Our support team is here to help.
                 </p>
                 <Link href="/contact">
-                  <Button variant="outline" className="w-full">
+                  <Button variant="outline" className="w-full dark:border-zinc-700 dark:text-white dark:hover:bg-zinc-800">
                     Contact Support
                   </Button>
                 </Link>

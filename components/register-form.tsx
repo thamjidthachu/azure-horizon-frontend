@@ -19,7 +19,7 @@ export default function RegisterForm({ onLogin }: RegisterFormProps) {
   })
   const [loading, setLoading] = useState(false)
   const { toast } = useToast()
-    // Removed fileInputRef and avatar logic
+  // Removed fileInputRef and avatar logic
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -41,7 +41,7 @@ export default function RegisterForm({ onLogin }: RegisterFormProps) {
     Object.entries(form).forEach(([k, v]) => {
       if (v) data.append(k, v);
     });
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/register/`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/auth/register/`, {
       method: "POST",
       body: data,
     });
@@ -77,18 +77,18 @@ export default function RegisterForm({ onLogin }: RegisterFormProps) {
   };
 
   return (
-  <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="flex flex-col sm:flex-row gap-2">
-          <div className="flex-1 space-y-0.5">
-            <Label htmlFor="username">Username</Label>
-            <Input id="username" name="username" value={form.username} onChange={handleChange} required autoFocus />
-          </div>
-    <div className="flex-1 space-y-0.5">
-            <Label htmlFor="full_name">Name</Label>
-            <Input id="full_name" name="full_name" value={form.full_name} onChange={handleChange} required />
-          </div>
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="flex flex-col sm:flex-row gap-2">
+        <div className="flex-1 space-y-0.5">
+          <Label htmlFor="username">Username</Label>
+          <Input id="username" name="username" value={form.username} onChange={handleChange} required autoFocus />
         </div>
-  <div className="space-y-0.5">
+        <div className="flex-1 space-y-0.5">
+          <Label htmlFor="full_name">Name</Label>
+          <Input id="full_name" name="full_name" value={form.full_name} onChange={handleChange} required />
+        </div>
+      </div>
+      <div className="space-y-0.5">
         <Label htmlFor="email">Email</Label>
         <Input id="email" name="email" type="email" value={form.email} onChange={handleChange} required />
       </div>
@@ -96,16 +96,16 @@ export default function RegisterForm({ onLogin }: RegisterFormProps) {
         <Label htmlFor="phone">Phone</Label>
         <Input id="phone" name="phone" type="tel" value={form.phone} onChange={handleChange} required />
       </div>
-        <div className="flex flex-col sm:flex-row gap-2">
-          <div className="flex-1 space-y-0.5">
-            <Label htmlFor="password">Password</Label>
-            <Input id="password" name="password" type="password" value={form.password} onChange={handleChange} required minLength={6} />
-          </div>
-    <div className="flex-1 space-y-0.5">
-            <Label htmlFor="password2">Confirm Password</Label>
-            <Input id="password2" name="password2" type="password" value={form.password2} onChange={handleChange} required minLength={6} />
-          </div>
+      <div className="flex flex-col sm:flex-row gap-2">
+        <div className="flex-1 space-y-0.5">
+          <Label htmlFor="password">Password</Label>
+          <Input id="password" name="password" type="password" value={form.password} onChange={handleChange} required minLength={6} />
         </div>
+        <div className="flex-1 space-y-0.5">
+          <Label htmlFor="password2">Confirm Password</Label>
+          <Input id="password2" name="password2" type="password" value={form.password2} onChange={handleChange} required minLength={6} />
+        </div>
+      </div>
       <Button
         type="submit"
         className="w-full mt-2 rounded py-2 text-base font-semibold"

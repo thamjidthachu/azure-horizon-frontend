@@ -283,7 +283,6 @@
 /* Minimal button styles for dark mode */
 :is(.dark) button:not(.btn-ghost),
 :is(.dark) .btn:not(.btn-ghost) {
-  background-color: var(--primary);
   color: var(--primary-foreground);
   border: 1px solid transparent;
   transition: all 0.2s ease;
@@ -451,4 +450,24 @@
 :is(.dark) .ring-2,
 :is(.dark) .ring-1 {
   --tw-ring-color: var(--ring);
+}
+
+/* Dark mode skeleton loading states */
+:is(.dark) .animate-pulse .bg-gray-200 {
+  background-color: var(--muted) !important;
+}
+
+/* Ensure proper contrast for all text in dark mode */
+:is(.dark) h1,
+:is(.dark) h2,
+:is(.dark) h3,
+:is(.dark) h4,
+:is(.dark) h5,
+:is(.dark) h6 {
+  color: var(--foreground);
+}
+
+/* Better link hover states in dark mode */
+:is(.dark) a:hover {
+  color: var(--primary);
 }

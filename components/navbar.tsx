@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { Menu, Calendar, User, Heart, LogOut, ShoppingCart } from "lucide-react"
+import { Menu, Calendar, User, Heart, LogOut, ShoppingCart, ChevronDown } from "lucide-react"
 import ThemeToggle from "@/components/ui/theme-toggler"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -64,8 +64,18 @@ export function Navbar() {
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center space-x-2">
             <Button variant="ghost" size="icon" aria-label="Wishlist">
-              <Heart className="h-5 w-5"/>
+              <Heart className="h-5 w-5" />
             </Button>
+            <Link href="/cart">
+              <Button variant="ghost" size="icon" className="relative" aria-label="Cart">
+                <ShoppingCart className="h-5 w-5" />
+                {items.length > 0 && (
+                  <Badge className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs">
+                    {items.reduce((sum, item) => sum + item.quantity, 0)}
+                  </Badge>
+                )}
+              </Button>
+            </Link>
             {/* Authenticated User Display or Auth Popover */}
             {!loading && (
               isAuthenticated && user ? (
@@ -74,16 +84,6 @@ export function Navbar() {
                 <AuthPopover />
               )
             )}
-            <Link href="/cart">
-              <Button variant="ghost" size="icon" className="relative" aria-label="Cart">
-                <ShoppingCart className="h-5 w-5"/>
-                {items.length > 0 && (
-                  <Badge className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs">
-                    {items.reduce((sum, item) => sum + item.quantity, 0)}
-                  </Badge>
-                )}
-              </Button>
-            </Link>
           </div>
 
           {/* Mobile menu */}
@@ -91,7 +91,7 @@ export function Navbar() {
             <ThemeToggle />
             <Link href="/cart">
               <Button variant="ghost" size="icon" className="relative" aria-label="Cart">
-                <ShoppingCart className="h-5 w-5"/>
+                <ShoppingCart className="h-5 w-5" />
                 {items.length > 0 && (
                   <Badge className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs">
                     {items.reduce((sum, item) => sum + item.quantity, 0)}
@@ -102,7 +102,7 @@ export function Navbar() {
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" aria-label="Open menu">
-                  <Menu className="h-8 w-8"/>
+                  <Menu className="h-8 w-8" />
                 </Button>
               </SheetTrigger>
               <SheetContent side="right" className="w-full max-w-xs sm:max-w-sm p-0">
@@ -165,27 +165,33 @@ export function Navbar() {
 
 function UserProfileSection({ user, onLogout }: { user: any, onLogout: () => void }) {
   return (
-    <div className="flex items-center space-x-3">
-      <span className="text-sm font-medium text-foreground">
-        Hey! <span className="text-primary font-semibold">{user.username}</span>
-      </span>
+    <div className="flex items-center">
       <Popover>
         <PopoverTrigger asChild>
-          <Button variant="ghost" size="icon" className="relative">
-            <Avatar className="h-10 w-10 min-w-[2.5rem] min-h-[2.5rem] bg-muted text-foreground dark:bg-zinc-800 dark:text-zinc-200">
+          <Button variant="ghost" className="flex items-center gap-3 px-2 py-1.5 h-auto hover:bg-transparent">
+            <Avatar className="h-9 w-9 rounded-md bg-muted text-foreground dark:bg-zinc-800 dark:text-zinc-200">
               <AvatarImage
                 src={user.avatar ? `${process.env.NEXT_PUBLIC_API_BASE_URL}${user.avatar}` : undefined}
                 alt={user.username}
-                className="object-cover w-full h-full rounded-full"
+                className="object-cover w-full h-full rounded-md"
                 style={{ imageRendering: 'auto' }}
                 width={80}
                 height={80}
                 loading="eager"
               />
-              <AvatarFallback className="bg-muted text-foreground dark:bg-zinc-800 dark:text-zinc-200">
+              <AvatarFallback className="bg-muted text-foreground dark:bg-zinc-800 dark:text-zinc-200 rounded-md">
                 {user.username.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
+            <div className="hidden sm:flex flex-col items-start">
+              <span className="text-sm font-medium text-foreground leading-tight">
+                {user.full_name || user.username}
+              </span>
+              <span className="text-xs text-muted-foreground leading-tight">
+                @{user.username}
+              </span>
+            </div>
+            <ChevronDown className="h-4 w-4 text-muted-foreground hidden sm:block" />
           </Button>
         </PopoverTrigger>
         <PopoverContent align="end" className="w-48 p-2">
@@ -232,9 +238,9 @@ function MobileUserSection({ user, onLogout, onClose }: { user: any, onLogout: (
         </Button>
       </Link>
       <div className="h-2"></div> {/* Added gap */}
-      <Button 
-        variant="destructive" 
-        className="w-full justify-start" 
+      <Button
+        variant="destructive"
+        className="w-full justify-start"
         onClick={() => { onLogout(); onClose(); }}
       >
         <LogOut className="h-4 w-4 mr-2" />
@@ -249,7 +255,7 @@ function AuthPopover() {
     <Popover>
       <PopoverTrigger asChild>
         <Button variant="ghost" size="icon" aria-label="Account">
-          <User className="h-6 w-6"/>
+          <User className="h-6 w-6" />
         </Button>
       </PopoverTrigger>
       <PopoverContent align="end" className="w-40 p-2">
