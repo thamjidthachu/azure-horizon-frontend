@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
@@ -62,7 +63,7 @@ export function BookingModal({ isOpen, onClose, onConfirm, service }: BookingMod
   const generateDateOptions = () => {
     const dates = []
     const today = new Date()
-    
+
     for (let i = 0; i < 30; i++) {
       const date = new Date(today)
       date.setDate(today.getDate() + i)
@@ -74,7 +75,7 @@ export function BookingModal({ isOpen, onClose, onConfirm, service }: BookingMod
       })
       dates.push({ value: dateString, label: displayDate })
     }
-    
+
     return dates
   }
 
@@ -89,7 +90,7 @@ export function BookingModal({ isOpen, onClose, onConfirm, service }: BookingMod
             Book {service.name}
           </DialogTitle>
         </DialogHeader>
-        
+
         <div className="space-y-4">
           {/* Date Selection */}
           <div className="space-y-2">
@@ -161,25 +162,27 @@ export function BookingModal({ isOpen, onClose, onConfirm, service }: BookingMod
           <div className="bg-gray-50 p-3 rounded-lg">
             <div className="flex justify-between items-center">
               <span className="text-sm text-gray-600">Total Price:</span>
-              <span className="font-semibold text-lg text-teal-600">
-                ${((service.price ?? 0) * quantity).toFixed(2)}
+              <span className="font-semibold text-lg text-teal-600 flex items-center gap-1">
+                <Image src="/uae-dirham.svg" alt="AED" width={16} height={16} className="inline-block" />
+                {((service.price ?? 0) * quantity).toFixed(2)}
               </span>
             </div>
-            <div className="text-xs text-gray-500 mt-1">
-              ${service.price ?? 0} × {quantity} guest{quantity > 1 ? 's' : ''}
+            <div className="text-xs text-gray-500 mt-1 flex items-center gap-1">
+              <Image src="/uae-dirham.svg" alt="AED" width={12} height={12} className="inline-block" />
+              {service.price ?? 0} × {quantity} guest{quantity > 1 ? 's' : ''}
             </div>
           </div>
 
           {/* Action Buttons */}
           <div className="flex gap-2 pt-4">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={handleClose}
               className="flex-1"
             >
               Cancel
             </Button>
-            <Button 
+            <Button
               onClick={handleConfirm}
               disabled={!selectedDate || !selectedTime}
               className="flex-1"

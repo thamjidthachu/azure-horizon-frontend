@@ -59,6 +59,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       setCart(null)
       setError(null)
     }
+
+    // Listen for auth state changes
+    const handleAuthChange = (event: CustomEvent) => {
+      if (event.detail?.isAuthenticated) {
+        refreshCart()
+      }
+    }
+
+    window.addEventListener('auth-state-changed', handleAuthChange as EventListener)
+    return () => {
+      window.removeEventListener('auth-state-changed', handleAuthChange as EventListener)
+    }
   }, [isAuthenticated, user])
   const refreshCart = async () => {
     if (!isAuthenticated) return

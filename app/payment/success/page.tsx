@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from 'react'
+import Image from 'next/image'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
@@ -12,6 +13,7 @@ import { Footer } from '@/components/footer'
 import { StripePaymentService } from '@/lib/stripe-payment'
 import { useToast } from '@/components/ui/use-toast'
 import { type Booking } from '@/lib/booking-api'
+import { useCart } from '@/components/cart-provider'
 
 
 import { Suspense } from 'react';
@@ -19,6 +21,7 @@ import { Suspense } from 'react';
 function PaymentSuccessContent() {
   const searchParams = useSearchParams()
   const { toast } = useToast()
+  const { refreshCart } = useCart()
   const [booking, setBooking] = useState<Booking | null>(null)
   const [isVerifying, setIsVerifying] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -34,10 +37,11 @@ function PaymentSuccessContent() {
         }
 
         if (sessionId) {
-          // Verify payment with session ID
           const result = await StripePaymentService.verifyPayment(sessionId)
           if (result?.booking) {
             setBooking(result.booking)
+            // Refresh cart to clear items after successful payment
+            await refreshCart()
             toast({
               title: "Payment Successful!",
               description: `Your booking ${result.booking.booking_number} has been confirmed.`,
@@ -156,8 +160,11 @@ function PaymentSuccessContent() {
               <p className="text-gray-600 mb-1">
                 Date: <span className="font-medium">{new Date(booking.booking_date).toLocaleDateString()}</span>
               </p>
-              <p className="text-gray-600 mb-1">
-                Total: <span className="font-medium">${booking.total_amount.toFixed(2)}</span>
+              <p className="text-gray-600 mb-1 flex items-center justify-center gap-1">
+                Total: <span className="font-medium flex items-center gap-1">
+                  <Image src="/uae-dirham.svg" alt="AED" width={14} height={14} className="inline-block" />
+                  {booking.total_amount.toFixed(2)}
+                </span>
               </p>
               <p className="text-gray-600">Confirmation email sent to {booking.customer_email}</p>
             </div>

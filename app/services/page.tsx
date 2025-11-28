@@ -392,8 +392,9 @@ export default function ServicesPage() {
                 </p>
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center space-x-2">
-                    <span className="text-xl font-bold text-teal-600">
-                      ${service.price ?? 0}
+                    <span className="text-xl font-bold text-teal-600 flex items-center gap-1">
+                      <Image src="/uae-dirham.svg" alt="AED" width={18} height={18} className="inline-block" />
+                      {service.price ?? 0}
                     </span>
                     <span className="text-sm text-gray-500">
                       / {service.unit ?? 'per unit'}
