@@ -8,14 +8,15 @@ on:
     types: [closed]
     branches:
       - master
+  pull_request:
+    types: [closed]
+    branches:
+      - master
 
   workflow_dispatch:
 
 jobs:
   deploy:
-    # Only run if it's a direct push OR a merged PR
-    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
-
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -70,15 +71,4 @@ jobs:
 
       - name: Notify deployment success
         if: success()
-        run: |
-          echo "✅ 🎉 Deployment to production successful!"
-          echo "Deployed commit: ${{ github.sha }}"
-          echo "Deployed by: ${{ github.actor }}"
-
-      - name: Notify deployment failure
-        if: failure()
-        run: |
-          echo "❌ Deployment to production failed!"
-          echo "Please check the logs above for details."
-          exit 1
-
+        run: echo "Deployment to production successful!"
