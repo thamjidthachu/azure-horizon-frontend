@@ -266,7 +266,7 @@ export default function ServiceDetailPage() {
             {/* Desktop: Main Swiper with Thumbs */}
             <div className="hidden sm:block">
               <Swiper
-                style={{ '--swiper-navigation-color': '#14b8a6', '--swiper-pagination-color': '#14b8a6' } as any}
+                style={{ '--swiper-navigation-color': 'oklch(0.5 0.2 240)', '--swiper-pagination-color': 'oklch(0.5 0.2 240)' } as any}
                 spaceBetween={10}
                 navigation
                 pagination={{ clickable: true }}
@@ -310,8 +310,8 @@ export default function ServiceDetailPage() {
                             className={
                               `w-16 h-14 lg:w-24 lg:h-20 object-cover rounded-lg border-2 transition-all duration-200 cursor-pointer ` +
                               (highlight
-                                ? 'border-teal-500 ring-2 ring-teal-400 ring-offset-2 ring-offset-white shadow-xl scale-105 z-10 bg-white'
-                                : 'border-gray-200 opacity-70 hover:opacity-100')
+                                ? 'border-primary ring-2 ring-primary ring-offset-2 ring-offset-background shadow-xl scale-105 z-10 bg-background'
+                                : 'border-border opacity-70 hover:opacity-100')
                             }
                           />
                         );
@@ -320,7 +320,7 @@ export default function ServiceDetailPage() {
                   ))}
                 </Swiper>
               )}
-              <Badge className="absolute top-4 left-4 bg-teal-500 text-white">
+              <Badge className="absolute top-4 left-4 bg-primary text-primary-foreground">
                 {service.category || "Category"}
               </Badge>
             </div>
@@ -341,7 +341,7 @@ export default function ServiceDetailPage() {
                   </SwiperSlide>
                 ))}
               </Swiper>
-              <Badge className="absolute top-4 left-4 bg-teal-500 text-white">
+              <Badge className="absolute top-4 left-4 bg-primary text-primary-foreground">
                 {service.category || "Category"}
               </Badge>
             </div>
@@ -359,8 +359,8 @@ export default function ServiceDetailPage() {
                     <Star
                       key={i}
                       className={`h-5 w-5 ${i < Math.floor(service.rating ?? 0)
-                          ? 'text-yellow-400 fill-current'
-                          : 'text-gray-300'
+                        ? 'text-yellow-400 fill-current'
+                        : 'text-gray-300'
                         }`}
                     />
                   ))}
@@ -384,8 +384,9 @@ export default function ServiceDetailPage() {
                 </div>
               </div>
               <div className="flex items-center space-x-4 mb-6">
-                <span className="text-3xl font-bold text-teal-600">
-                  ${service.price ?? 0}
+                <span className="text-3xl font-bold text-primary flex items-center gap-2">
+                  <Image src="/uae-dirham.svg" alt="AED" width={24} height={24} className="inline-block" />
+                  {service.price ?? 0}
                 </span>
                 <span className="text-lg text-gray-500">
                   per {service.unit || "unit"}
@@ -421,7 +422,7 @@ export default function ServiceDetailPage() {
                     id="time"
                     value={selectedTime}
                     onChange={(e) => setSelectedTime(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                   >
                     <option value="">Choose time</option>
                     {timeSlots.map(time => (
@@ -457,7 +458,11 @@ export default function ServiceDetailPage() {
                 size="lg"
               >
                 <Calendar className="h-5 w-5 mr-2" />
-                {isAddingToCart || isLoading ? 'Adding to Cart...' : `Add to Cart - $${(service.price ?? 0) * quantity}`}
+                {isAddingToCart || isLoading ? 'Adding to Cart...' : (
+                  <span className="flex items-center gap-2">
+                    Add to Cart - <Image src="/uae-dirham.svg" alt="AED" width={16} height={16} className="inline-block" /> {(service.price ?? 0) * quantity}
+                  </span>
+                )}
               </Button>
             </div>
             <Separator />

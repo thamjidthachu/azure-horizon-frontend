@@ -1,6 +1,7 @@
 ﻿"use client"
 
 import { useEffect, useState } from "react"
+import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -76,10 +77,10 @@ export default function CheckoutPage() {
     <div className="min-h-screen bg-gray-50 dark:bg-black">
       <Navbar />
       <TrendingHeader />
-      
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-8">Complete Your Booking</h1>
-        
+
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Checkout Form */}
@@ -88,7 +89,7 @@ export default function CheckoutPage() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center">
-                    <User className="h-5 w-5 mr-2"/>
+                    <User className="h-5 w-5 mr-2" />
                     Guest Information
                   </CardTitle>
                 </CardHeader>
@@ -122,7 +123,7 @@ export default function CheckoutPage() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center">
-                    <CreditCard className="h-5 w-5 mr-2"/>
+                    <CreditCard className="h-5 w-5 mr-2" />
                     Payment Information
                   </CardTitle>
                 </CardHeader>
@@ -149,7 +150,7 @@ export default function CheckoutPage() {
               <Card className="sticky top-4">
                 <CardHeader>
                   <CardTitle className="flex items-center">
-                    <Calendar className="h-5 w-5 mr-2"/>
+                    <Calendar className="h-5 w-5 mr-2" />
                     Booking Summary
                   </CardTitle>
                 </CardHeader>
@@ -169,7 +170,10 @@ export default function CheckoutPage() {
                             </p>
                           )}
                         </div>
-                        <p className="font-medium">${(parseFloat(item.service_price) * item.quantity).toFixed(2)}</p>
+                        <p className="font-medium flex items-center gap-1">
+                          <Image src="/uae-dirham.svg" alt="AED" width={14} height={14} className="inline-block" />
+                          {(parseFloat(item.service_price) * item.quantity).toFixed(2)}
+                        </p>
                       </div>
                     ))}
                   </div>
@@ -180,25 +184,38 @@ export default function CheckoutPage() {
                   <div className="space-y-2">
                     <div className="flex justify-between">
                       <span>Subtotal</span>
-                      <span>${subtotal.toFixed(2)}</span>
+                      <span className="flex items-center gap-1">
+                        <Image src="/uae-dirham.svg" alt="AED" width={14} height={14} className="inline-block" />
+                        {subtotal.toFixed(2)}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span>Vat</span>
-                      <span>${vat.toFixed(2)}</span>
+                      <span className="flex items-center gap-1">
+                        <Image src="/uae-dirham.svg" alt="AED" width={14} height={14} className="inline-block" />
+                        {vat.toFixed(2)}
+                      </span>
                     </div>
                     <div className="flex justify-between text-lg font-semibold">
                       <span>Total</span>
-                      <span>${total.toFixed(2)}</span>
+                      <span className="flex items-center gap-1">
+                        <Image src="/uae-dirham.svg" alt="AED" width={16} height={16} className="inline-block" />
+                        {total.toFixed(2)}
+                      </span>
                     </div>
                   </div>
 
-                  <Button 
-                    type="submit" 
-                    className="w-full" 
+                  <Button
+                    type="submit"
+                    className="w-full"
                     size="lg"
                     disabled={isProcessing || isLoading}
                   >
-                    {isProcessing ? 'Processing...' : `Complete Booking - $${total.toFixed(2)}`}
+                    {isProcessing ? 'Processing...' : (
+                      <span className="flex items-center gap-2">
+                        Complete Booking - <Image src="/uae-dirham.svg" alt="AED" width={16} height={16} className="inline-block" /> {total.toFixed(2)}
+                      </span>
+                    )}
                   </Button>
 
                   <p className="text-xs text-gray-500 text-center">

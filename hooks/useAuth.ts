@@ -37,6 +37,10 @@ export function useAuth() {
         const userData = await res.json()
         setUser(userData)
         setIsAuthenticated(true)
+        // Dispatch event to notify other components
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('auth-state-changed', { detail: { isAuthenticated: true, user: userData } }))
+        }
       } else {
         // Token might be expired, try to refresh
         const refreshToken = localStorage.getItem('refresh_token')
@@ -63,6 +67,10 @@ export function useAuth() {
               const userData = await retryRes.json()
               setUser(userData)
               setIsAuthenticated(true)
+              // Dispatch event to notify other components
+              if (typeof window !== 'undefined') {
+                window.dispatchEvent(new CustomEvent('auth-state-changed', { detail: { isAuthenticated: true, user: userData } }))
+              }
             }
           } else {
             // Refresh failed, clear tokens

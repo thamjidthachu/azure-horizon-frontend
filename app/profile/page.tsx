@@ -1,17 +1,21 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
+import Image from "next/image"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { authFetch } from "@/utils/authFetch"
 import { Footer } from "@/components/footer"
 import { Navbar } from "@/components/navbar"
 import { TrendingHeader } from "@/components/trending-header"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { Youtube, Instagram, Music, Calendar, Eye, Heart, Share2, MoreHorizontal } from "lucide-react"
+import { Youtube, Instagram, Music, Calendar, Eye, Pencil, Trash2, Upload, X, Save } from "lucide-react"
 import Link from "next/link"
-import { BookingAPIService } from "@/lib/booking-api"
+import { BookingAPIService, type Booking } from "@/lib/booking-api"
+import { useToast } from "@/components/ui/use-toast"
 
 interface ProfileData {
   id: number
@@ -24,45 +28,141 @@ interface ProfileData {
   is_active: boolean
 }
 
-interface Booking {
-  booking_number: string
-  booking_date: string
-  booking_time?: string
-  status: string
-  payment_status: string
-  total_price: string
-  number_of_guests: number
-  services?: any[]
-}
-
 export default function ProfilePage() {
   const [profile, setProfile] = useState<ProfileData | null>(null)
   const [bookings, setBookings] = useState<Booking[]>([])
   const [loading, setLoading] = useState(true)
   const [bookingsLoading, setBookingsLoading] = useState(true)
+  const [isEditing, setIsEditing] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+  const [editedProfile, setEditedProfile] = useState<ProfileData | null>(null)
+  const [avatarFile, setAvatarFile] = useState<File | null>(null)
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const { toast } = useToast()
 
   useEffect(() => {
-    // Fetch profile data
+    fetchProfile()
+    fetchBookings()
+  }, [])
+
+  const fetchProfile = () => {
     authFetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/auth/profile/`, {
       credentials: "include",
     })
       .then(res => res.json())
       .then(data => {
         setProfile(data)
+        setEditedProfile(data)
         setLoading(false)
       })
       .catch(() => setLoading(false))
+  }
 
-    // Fetch bookings
+  const fetchBookings = () => {
     BookingAPIService.getMyBookings(1)
       .then(data => {
-        setBookings(data.results.slice(0, 5)) // Get first 5 bookings
+        setBookings(data.results.slice(0, 5))
         setBookingsLoading(false)
       })
       .catch(() => setBookingsLoading(false))
-  }, [])
+  }
 
-  // Dummy data for collections
+  const handleEditToggle = () => {
+    if (isEditing) {
+      setEditedProfile(profile)
+      setAvatarFile(null)
+      setAvatarPreview(null)
+    }
+    setIsEditing(!isEditing)
+  }
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      // Show preview immediately
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setAvatarPreview(reader.result as string)
+      }
+      reader.readAsDataURL(file)
+
+      // Upload immediately
+      try {
+        const formData = new FormData()
+        formData.append('avatar', file)
+
+        const response = await authFetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/auth/profile/avatar/`, {
+          method: 'PATCH',
+          body: formData,
+        })
+
+        if (response.ok) {
+          toast({ title: "Avatar updated successfully" })
+          fetchProfile()
+          setAvatarFile(null)
+        } else {
+          throw new Error('Failed to update avatar')
+        }
+      } catch (error) {
+        toast({ title: "Failed to update avatar", variant: "destructive" })
+        setAvatarPreview(null) // Revert preview on error
+      }
+    }
+  }
+
+  const handleDeleteAvatar = async () => {
+    try {
+      const response = await authFetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/auth/profile/avatar/`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ avatar: null }),
+      })
+
+      if (response.ok) {
+        toast({ title: "Avatar deleted successfully" })
+        fetchProfile()
+        setAvatarPreview(null)
+        setAvatarFile(null)
+      }
+    } catch (error) {
+      toast({ title: "Failed to delete avatar", variant: "destructive" })
+    }
+  }
+
+  const handleSave = async () => {
+    setIsSaving(true)
+    try {
+      const formData = new FormData()
+
+      if (editedProfile) {
+        formData.append('full_name', editedProfile.full_name)
+        formData.append('phone', editedProfile.phone)
+        formData.append('gender', editedProfile.gender)
+      }
+
+      const response = await authFetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/auth/profile/update/`, {
+        method: 'PATCH',
+        body: formData,
+      })
+
+      if (response.ok) {
+        // Fetch fresh profile data to ensure everything is in sync
+        await fetchProfile()
+        setIsEditing(false)
+        setAvatarFile(null)
+        setAvatarPreview(null)
+        toast({ title: "Profile updated successfully" })
+      } else {
+        throw new Error('Failed to update profile')
+      }
+    } catch (error) {
+      toast({ title: "Failed to update profile", variant: "destructive" })
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
   const collections = [
     { id: 1, title: "Beach Resort", subtitle: "Luxury Stay", image: "/placeholder.svg", color: "bg-yellow-400" },
     { id: 2, title: "Spa Package", subtitle: "Wellness", image: "/placeholder.svg", color: "bg-purple-600" },
@@ -102,13 +202,23 @@ export default function ProfilePage() {
           {/* Left Column - Profile Card */}
           <div className="lg:col-span-1 space-y-6">
             {/* Profile Avatar Card */}
-            <Card className="bg-card dark:bg-zinc-900 border-border overflow-hidden">
-              <CardContent className="p-6">
-                <div className="flex flex-col items-center">
-                  <div className="relative">
-                    <Avatar className="w-48 h-48 rounded-full border-4 border-background dark:border-zinc-800">
+            <Card className="bg-card dark:bg-zinc-900 border-border overflow-hidden relative">
+              <div className="h-32 relative w-full">
+                <Image
+                  src="/hero.jpg"
+                  alt="Cover"
+                  fill
+                  className="object-cover"
+                  priority
+                />
+                <div className="absolute inset-0 bg-black/20" />
+              </div>
+              <CardContent className="p-6 pt-0 relative">
+                <div className="flex flex-col items-center -mt-12">
+                  <div className="relative group">
+                    <Avatar className="w-32 h-32 rounded-full border-4 border-background dark:border-zinc-900 shadow-lg">
                       <AvatarImage
-                        src={profile?.avatar ? `${process.env.NEXT_PUBLIC_API_BASE_URL}${profile.avatar}` : "/placeholder.svg"}
+                        src={avatarPreview || (profile?.avatar ? `${process.env.NEXT_PUBLIC_API_BASE_URL}${profile.avatar}` : "/placeholder.svg")}
                         alt={profile?.username || "User"}
                         className="object-cover"
                         style={{ imageRendering: 'auto' }}
@@ -117,6 +227,37 @@ export default function ProfilePage() {
                         {profile?.full_name?.charAt(0).toUpperCase() || profile?.username?.charAt(0).toUpperCase() || "U"}
                       </AvatarFallback>
                     </Avatar>
+                    {isEditing && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full">
+                        <div className="flex gap-2">
+                          <Button
+                            size="icon"
+                            variant="secondary"
+                            className="rounded-full"
+                            onClick={() => fileInputRef.current?.click()}
+                          >
+                            <Upload className="h-4 w-4" />
+                          </Button>
+                          {(profile?.avatar || avatarPreview) && (
+                            <Button
+                              size="icon"
+                              variant="destructive"
+                              className="rounded-full"
+                              onClick={handleDeleteAvatar}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleAvatarChange}
+                    />
                   </div>
                   <h2 className="text-2xl font-bold text-foreground mt-6 text-center">
                     {profile?.full_name || "Loading..."}
@@ -152,11 +293,28 @@ export default function ProfilePage() {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-lg font-semibold text-foreground">Bio & other details</h3>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-3">
                     <div className="flex items-center gap-2">
                       <div className={`w-2 h-2 ${profile?.is_active ? 'bg-green-500' : 'bg-gray-500'} rounded-full`}></div>
                       <span className="text-sm text-muted-foreground">{profile?.is_active ? 'Active' : 'Inactive'}</span>
                     </div>
+                    {isEditing ? (
+                      <div className="flex gap-2">
+                        <Button size="sm" variant="outline" onClick={handleEditToggle}>
+                          <X className="h-4 w-4 mr-1" />
+                          Cancel
+                        </Button>
+                        <Button size="sm" onClick={handleSave} disabled={isSaving}>
+                          <Save className="h-4 w-4 mr-1" />
+                          {isSaving ? 'Saving...' : 'Save'}
+                        </Button>
+                      </div>
+                    ) : (
+                      <Button size="sm" onClick={handleEditToggle}>
+                        <Pencil className="h-4 w-4 mr-1" />
+                        Edit Profile
+                      </Button>
+                    )}
                   </div>
                 </div>
 
@@ -164,28 +322,36 @@ export default function ProfilePage() {
                   {/* Left Column */}
                   <div className="space-y-6">
                     <div>
-                      <label className="text-sm text-muted-foreground">Full Name</label>
+                      <Label className="text-sm text-muted-foreground">Full Name</Label>
+                      {isEditing ? (
+                        <Input
+                          value={editedProfile?.full_name || ''}
+                          onChange={(e) => setEditedProfile(prev => prev ? { ...prev, full_name: e.target.value } : null)}
+                          className="mt-1"
+                        />
+                      ) : (
+                        <p className="text-base font-medium text-foreground mt-1">
+                          {profile?.full_name || "Not provided"}
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <Label className="text-sm text-muted-foreground">Username</Label>
                       <p className="text-base font-medium text-foreground mt-1">
-                        {profile?.full_name || "Not provided"}
+                        {profile?.username || "Not provided"}
                       </p>
                     </div>
 
                     <div>
-                      <label className="text-sm text-muted-foreground">Username</label>
-                      <p className="text-base font-medium text-foreground mt-1">
-                        @{profile?.username || "Not provided"}
-                      </p>
-                    </div>
-
-                    <div>
-                      <label className="text-sm text-muted-foreground">Email Address</label>
+                      <Label className="text-sm text-muted-foreground">Email Address</Label>
                       <p className="text-base font-medium text-foreground mt-1">
                         {profile?.email || "Not provided"}
                       </p>
                     </div>
 
                     <div>
-                      <label className="text-sm text-muted-foreground">Account Status</label>
+                      <Label className="text-sm text-muted-foreground">Account Status</Label>
                       <div className="flex items-center gap-2 mt-1">
                         <Badge variant="secondary" className={`${profile?.is_active ? 'bg-green-500/20 text-green-400' : 'bg-gray-500/20 text-gray-400'} hover:bg-green-500/30 border-0`}>
                           {profile?.is_active ? 'Active Account' : 'Inactive Account'}
@@ -197,31 +363,44 @@ export default function ProfilePage() {
                   {/* Right Column */}
                   <div className="space-y-6">
                     <div>
-                      <label className="text-sm text-muted-foreground">Phone Number</label>
-                      <p className="text-base font-medium text-foreground mt-1">
-                        {profile?.phone || "Not provided"}
-                      </p>
+                      <Label className="text-sm text-muted-foreground">Phone Number</Label>
+                      {isEditing ? (
+                        <Input
+                          value={editedProfile?.phone || ''}
+                          onChange={(e) => setEditedProfile(prev => prev ? { ...prev, phone: e.target.value } : null)}
+                          className="mt-1"
+                        />
+                      ) : (
+                        <p className="text-base font-medium text-foreground mt-1">
+                          {profile?.phone || "Not provided"}
+                        </p>
+                      )}
                     </div>
 
                     <div>
-                      <label className="text-sm text-muted-foreground">Gender</label>
-                      <p className="text-base font-medium text-foreground mt-1">
-                        {profile?.gender === 'M' ? 'Male' : profile?.gender === 'F' ? 'Female' : 'Not specified'}
-                      </p>
+                      <Label className="text-sm text-muted-foreground">Gender</Label>
+                      {isEditing ? (
+                        <select
+                          value={editedProfile?.gender || ''}
+                          onChange={(e) => setEditedProfile(prev => prev ? { ...prev, gender: e.target.value } : null)}
+                          className="w-full mt-1 px-3 py-2 border border-input bg-background rounded-md text-sm"
+                        >
+                          <option value="">Select gender</option>
+                          <option value="M">Male</option>
+                          <option value="F">Female</option>
+                        </select>
+                      ) : (
+                        <p className="text-base font-medium text-foreground mt-1">
+                          {profile?.gender === 'M' ? 'Male' : profile?.gender === 'F' ? 'Female' : 'Not specified'}
+                        </p>
+                      )}
                     </div>
 
                     <div>
-                      <label className="text-sm text-muted-foreground">User ID</label>
-                      <p className="text-base font-medium text-foreground mt-1">
-                        #{profile?.id || "N/A"}
-                      </p>
-                    </div>
-
-                    <div>
-                      <label className="text-sm text-muted-foreground">Member Type</label>
+                      <Label className="text-sm text-muted-foreground">Member Type</Label>
                       <div className="flex items-center gap-2 mt-1">
                         <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                        <span className="text-base font-medium text-blue-400">Premium Member</span>
+                        <span className="text-base font-medium text-blue-400">Active Member</span>
                       </div>
                     </div>
                   </div>
@@ -290,7 +469,10 @@ export default function ProfilePage() {
                             <Badge variant="secondary" className={`bg-${getStatusColor(booking.status)}-500/20 text-${getStatusColor(booking.status)}-400 border-0 mb-1`}>
                               {BookingAPIService.formatBookingStatus(booking.status).label}
                             </Badge>
-                            <span className="text-sm font-medium text-foreground">${booking.total_price}</span>
+                            <span className="text-sm font-medium text-foreground flex items-center gap-1">
+                              <Image src="/uae-dirham.svg" alt="AED" width={14} height={14} className="inline-block" />
+                              {booking.total_amount}
+                            </span>
                           </div>
                           <Link href={`/bookings/${booking.booking_number}`}>
                             <Button size="icon" variant="ghost" className="h-8 w-8">
@@ -306,7 +488,7 @@ export default function ProfilePage() {
             </Card>
 
             {/* My Collection Card */}
-            <Card className="bg-card dark:bg-zinc-900 border-border">
+            {/* <Card className="bg-card dark:bg-zinc-900 border-border">
               <CardContent className="p-6">
                 <h3 className="text-lg font-semibold text-foreground mb-4">Favorite Services</h3>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
@@ -327,7 +509,7 @@ export default function ProfilePage() {
                   ))}
                 </div>
               </CardContent>
-            </Card>
+            </Card> */}
           </div>
         </div>
       </div>
