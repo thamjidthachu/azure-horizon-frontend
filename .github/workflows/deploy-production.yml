@@ -4,10 +4,18 @@ on:
   push:
     branches:
       - master
+  pull_request:
+    types: [closed]
+    branches:
+      - master
+
   workflow_dispatch:
 
 jobs:
   deploy:
+    # Only run if it's a direct push OR a merged PR
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
+
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -18,14 +26,59 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.PROD_SSH_KEY }}
 
+      - name: Add server to known hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.PROD_HOST }} >> ~/.ssh/known_hosts
+          echo "✅ Added server to known hosts"
+
       - name: Copy files to production server
         run: |
-          rsync -avz --exclude 'logs/' --exclude '.git/' --exclude '.env' ./ ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }}:${{ secrets.PROD_PATH }}
+          echo "📦 Copying files to production server..."
+          rsync -avz --delete --exclude 'logs/' --exclude '.git/' --exclude '.env' --exclude 'node_modules/' --exclude '.next/' ./ ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }}:${{ secrets.PROD_PATH }}
+          echo "✅ Files copied successfully"
 
       - name: Deploy on production server
         run: |
-          ssh ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }} "cd ${{ secrets.PROD_PATH }} && docker compose pull && docker compose down && docker compose up -d --build"
+          echo "🚀 Starting deployment on production server..."
+          ssh ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }} << 'ENDSSH'
+            cd ${{ secrets.PROD_PATH }}
+            
+            # Try docker compose (newer) first, fallback to docker-compose (older)
+            if command -v docker &> /dev/null && docker compose version &> /dev/null; then
+              echo "Using 'docker compose' (newer syntax)"
+              docker compose pull
+              docker compose down
+              docker compose up -d --build
+            elif command -v docker-compose &> /dev/null; then
+              echo "Using 'docker-compose' (older syntax)"
+              docker-compose pull
+              docker-compose down
+              docker-compose up -d --build
+            else
+              echo "❌ Error: Neither 'docker compose' nor 'docker-compose' found"
+              exit 1
+            fi
+            
+            echo "✅ Deployment completed"
+          ENDSSH
+
+      - name: Verify deployment
+        run: |
+          echo "🔍 Verifying deployment..."
+          ssh ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }} "cd ${{ secrets.PROD_PATH }} && docker compose ps || docker-compose ps"
 
       - name: Notify deployment success
         if: success()
-        run: echo "Deployment to production successful!"
+        run: |
+          echo "✅ 🎉 Deployment to production successful!"
+          echo "Deployed commit: ${{ github.sha }}"
+          echo "Deployed by: ${{ github.actor }}"
+
+      - name: Notify deployment failure
+        if: failure()
+        run: |
+          echo "❌ Deployment to production failed!"
+          echo "Please check the logs above for details."
+          exit 1
+
