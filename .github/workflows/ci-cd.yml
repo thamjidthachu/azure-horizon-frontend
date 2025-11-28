@@ -6,6 +6,7 @@ on:
   push:
     branches:
       - master
+  workflow_dispatch:
 
 jobs:
   # ============================================
@@ -77,10 +78,10 @@ jobs:
 
       - name: Check if PR author is repository owner
         id: check_owner
+        env:
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          REPO_OWNER: ${{ github.repository_owner }}
         run: |
-          PR_AUTHOR="${{ github.event.pull_request.user.login }}"
-          REPO_OWNER="${{ github.repository_owner }}"
-          
           echo "PR Author: $PR_AUTHOR"
           echo "Repository Owner: $REPO_OWNER"
           
@@ -153,7 +154,8 @@ jobs:
   # Job 3: Deploy to Production (runs after merge to master)
   # ============================================
   deploy:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    needs: build
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     
     steps:
@@ -163,12 +165,12 @@ jobs:
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.9.0
         with:
-          ssh-private-key: ${{ secrets.PROD_SSH_KEY }}
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: Add server to known hosts
         run: |
           mkdir -p ~/.ssh
-          ssh-keyscan -H ${{ secrets.PROD_HOST }} >> ~/.ssh/known_hosts
+          ssh-keyscan -H ${{ secrets.PRODUCTION_HOST }} >> ~/.ssh/known_hosts
           echo "✅ Added server to known hosts"
 
       - name: Copy files to production server
@@ -180,14 +182,14 @@ jobs:
             --exclude '.env' \
             --exclude 'node_modules/' \
             --exclude '.next/' \
-            ./ ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }}:${{ secrets.PROD_PATH }}
+            ./ ${{ secrets.PRODUCTION_USER }}@${{ secrets.PRODUCTION_HOST }}:${{ secrets.PRODUCTION_PATH }}
           echo "✅ Files synced successfully"
 
       - name: Deploy on production server
         run: |
           echo "🚀 Starting deployment on production server..."
-          ssh ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }} << 'ENDSSH'
-            cd ${{ secrets.PROD_PATH }}
+          ssh ${{ secrets.PRODUCTION_USER }}@${{ secrets.PRODUCTION_HOST }} << 'ENDSSH'
+            cd ${{ secrets.PRODUCTION_PATH }}
             
             # Use docker compose (newer) or docker-compose (older)
             if command -v docker &> /dev/null && docker compose version &> /dev/null; then
@@ -211,8 +213,8 @@ jobs:
       - name: Verify deployment
         run: |
           echo "🔍 Verifying deployment..."
-          ssh ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }} \
-            "cd ${{ secrets.PROD_PATH }} && (docker compose ps || docker-compose ps)"
+          ssh ${{ secrets.PRODUCTION_USER }}@${{ secrets.PRODUCTION_HOST }} \
+            "cd ${{ secrets.PRODUCTION_PATH }} && (docker compose ps || docker-compose ps)"
 
       - name: Notify deployment success
         if: success()
