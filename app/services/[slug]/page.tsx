@@ -23,6 +23,7 @@ import { ReviewSection } from "@/components/ui/review-section"
 import { authFetch } from "@/utils/authFetch"
 import { useCart } from '@/components/cart-provider'
 import { BookingConflictModal } from "@/components/booking-conflict-modal"
+import { FavoriteButton } from "@/components/favorite-button"
 
 export default function ServiceDetailPage() {
   const [thumbsSwiper, setThumbsSwiper] = useState<any>(null);
@@ -60,7 +61,7 @@ export default function ServiceDetailPage() {
 
   useEffect(() => {
     if (!params?.slug) return
-    authFetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/services/${params.slug}/`)
+    authFetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/services/${params.slug}/detail/`)
       .then(res => res.json())
       .then(data => {
         if (process.env.NODE_ENV === 'development') {
@@ -117,8 +118,9 @@ export default function ServiceDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-black flex items-center justify-center">
-        <span>Loading...</span>
+      <div className="min-h-screen bg-gray-50 dark:bg-black flex flex-col items-center justify-center gap-6">
+        <span className="loader" aria-label="Loading service details" role="status" />
+        <p className="text-gray-600 dark:text-gray-300 font-medium">Loading service details...</p>
       </div>
     )
   }
@@ -464,6 +466,14 @@ export default function ServiceDetailPage() {
                   </span>
                 )}
               </Button>
+
+              {/* Favorite Button */}
+              <FavoriteButton
+                serviceId={service.id}
+                variant="compact"
+                className="w-full"
+                isFavorite={Boolean(service.is_favorite)}
+              />
             </div>
             <Separator />
             {/* Service Info */}

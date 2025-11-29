@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import { CartProvider } from '@/components/cart-provider'
+import { FavoritesProvider } from '@/components/favorites-provider'
 import { ThemeProvider } from '@/components/theme-provider'
 import { Toaster } from '@/components/ui/toaster'
 
@@ -26,10 +27,12 @@ export default function RootLayout({
       <body className={inter.className}>
         <ThemeProvider>
           <CartProvider>
-            <main className="min-h-screen bg-background font-sans antialiased">
-              {children}
-              <Toaster />
-            </main>
+            <FavoritesProvider>
+              <main className="min-h-screen bg-background font-sans antialiased">
+                {children}
+                <Toaster />
+              </main>
+            </FavoritesProvider>
           </CartProvider>
         </ThemeProvider>
       </body>

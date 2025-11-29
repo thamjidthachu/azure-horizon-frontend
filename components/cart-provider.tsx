@@ -73,7 +73,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, [isAuthenticated, user])
   const refreshCart = async () => {
-    if (!isAuthenticated) return
+    const hasToken = typeof window !== 'undefined' && localStorage.getItem('access_token');
+    if (!isAuthenticated && !hasToken) return
 
     setIsLoading(true)
     setError(null)
@@ -98,7 +99,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }) => {
     console.log('[DEBUG] addToCart called', serviceData);
     console.log('[DEBUG] isAuthenticated:', isAuthenticated);
-    if (!isAuthenticated) {
+
+    // Check both isAuthenticated state and localStorage token to avoid race conditions
+    const hasToken = typeof window !== 'undefined' && localStorage.getItem('access_token');
+    if (!isAuthenticated && !hasToken) {
       toast({
         title: "Login Required",
         description: "Please log in to add items to your cart.",
@@ -155,7 +159,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }
 
   const updateCartItem = async (itemId: number, quantity: number, booking_date?: string, booking_time?: string) => {
-    if (!isAuthenticated) return
+    const hasToken = typeof window !== 'undefined' && localStorage.getItem('access_token');
+    if (!isAuthenticated && !hasToken) return
 
     setIsLoading(true)
     setError(null)
@@ -204,7 +209,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }
 
   const removeFromCart = async (itemId: number) => {
-    if (!isAuthenticated) return
+    const hasToken = typeof window !== 'undefined' && localStorage.getItem('access_token');
+    if (!isAuthenticated && !hasToken) return
 
     setIsLoading(true)
     setError(null)
@@ -254,7 +260,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }
 
   const clearCart = async () => {
-    if (!isAuthenticated) return
+    const hasToken = typeof window !== 'undefined' && localStorage.getItem('access_token');
+    if (!isAuthenticated && !hasToken) return
 
     setIsLoading(true)
     setError(null)
@@ -287,7 +294,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     customer_phone: string
     special_requests?: string
   }): Promise<OrderDetail | null> => {
-    if (!isAuthenticated || !cart) {
+    const hasToken = typeof window !== 'undefined' && localStorage.getItem('access_token');
+    if ((!isAuthenticated && !hasToken) || !cart) {
       toast({
         title: "Checkout Failed",
         description: "Please log in and add items to your cart before checkout.",
@@ -339,8 +347,19 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   // Computed values
   const items = cart?.items ?? [];
   const subtotal = cart ? parseFloat(cart.subtotal ?? '0') : 0;
-  const vat = cart ? parseFloat(cart.vat ?? '0') : 0;
-  const total = cart ? parseFloat(cart.total ?? '0') : 0;
+
+  // Calculate VAT: use backend value if present, otherwise calculate 5% of subtotal
+  let vat = cart ? parseFloat(cart.vat ?? '0') : 0;
+  if (vat === 0 && subtotal > 0) {
+    vat = subtotal * 0.05; // 5% VAT
+  }
+
+  // Calculate total: use backend value if present, otherwise calculate as subtotal + vat
+  let total = cart ? parseFloat(cart.total ?? '0') : 0;
+  if (total === 0 && subtotal > 0) {
+    total = subtotal + vat;
+  }
+
   const itemCount = items.reduce((sum, item) => sum + (item.quantity || 0), 0);
 
   const value: CartContextType = {

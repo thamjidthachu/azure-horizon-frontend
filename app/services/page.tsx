@@ -17,6 +17,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/components/ui/use-toast'
 import { BookingModal } from '@/components/booking-modal'
 import { BookingConflictModal } from '@/components/booking-conflict-modal'
+import { FavoriteButton } from '@/components/favorite-button'
 
 interface ServiceFile {
   id: number
@@ -35,6 +36,7 @@ interface Service {
   price?: number
   unit?: string
   files?: ServiceFile[]
+  is_favorite?: boolean
 }
 
 export default function ServicesPage() {
@@ -363,6 +365,15 @@ export default function ServicesPage() {
                       {service.category}
                     </Badge>
                   )}
+
+                  {/* Favorite button overlay */}
+                  <div className="absolute top-2 right-2">
+                    <FavoriteButton
+                      serviceId={service.id}
+                      variant="icon-only"
+                      isFavorite={Boolean(service.is_favorite)}
+                    />
+                  </div>
                 </div>
                 <h3 className="font-semibold text-lg mb-2 group-hover:text-teal-600 transition-colors">
                   {service.name}
