@@ -13,6 +13,8 @@ interface LoginFormProps {
 
 export default function LoginForm({ onForgotPassword, onRegister }: LoginFormProps) {
   const [form, setForm] = useState({ username: "", password: "" })
+  const [errors, setErrors] = useState({ username: "", password: "" })
+  const [touched, setTouched] = useState({ username: false, password: false })
   const [loading, setLoading] = useState(false)
   const [remember, setRemember] = useState(false)
   const { toast } = useToast()
@@ -21,12 +23,41 @@ export default function LoginForm({ onForgotPassword, onRegister }: LoginFormPro
   const { checkAuth } = useAuth()
   const redirectUrl = searchParams.get('redirect') || '/'
 
+  const validate = (name: string, value: string) => {
+    if (!value.trim()) {
+      return "This field is required"
+    }
+    return ""
+  }
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm(f => ({ ...f, [e.target.name]: e.target.value }))
+    const { name, value } = e.target
+    setForm(f => ({ ...f, [name]: value }))
+
+    if (touched[name as keyof typeof touched] || errors[name as keyof typeof errors]) {
+      setErrors(prev => ({ ...prev, [name]: validate(name, value) }))
+    }
+  }
+
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    setTouched(prev => ({ ...prev, [name]: true }))
+    setErrors(prev => ({ ...prev, [name]: validate(name, value) }))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    const usernameError = validate("username", form.username)
+    const passwordError = validate("password", form.password)
+
+    setErrors({ username: usernameError, password: passwordError })
+    setTouched({ username: true, password: true })
+
+    if (usernameError || passwordError) {
+      return
+    }
+
     setLoading(true)
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/auth/login/`, {
       method: "POST",
@@ -47,6 +78,9 @@ export default function LoginForm({ onForgotPassword, onRegister }: LoginFormPro
         variant: "success",
         duration: 3000
       })
+
+      // Small delay to ensure auth state propagates before redirecting
+      await new Promise(resolve => setTimeout(resolve, 100))
       router.push(redirectUrl)
     } else {
       const err = await res.json()
@@ -63,14 +97,37 @@ export default function LoginForm({ onForgotPassword, onRegister }: LoginFormPro
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4" noValidate>
       <div className="space-y-0.5">
-        <Label htmlFor="username" className="text-sm font-medium">Email</Label>
-        <Input id="username" name="username" type="email" value={form.username} onChange={handleChange} required autoFocus />
+        <Label htmlFor="username" className="text-sm font-medium">Username/Email</Label>
+        <Input
+          id="username"
+          name="username"
+          type="text"
+          value={form.username}
+          onChange={handleChange}
+          onBlur={handleBlur}
+          className={errors.username ? "border-red-500 focus-visible:ring-red-500" : ""}
+          autoFocus
+        />
+        {errors.username && (
+          <p className="text-xs text-red-500 mt-1">{errors.username}</p>
+        )}
       </div>
       <div className="space-y-0.5">
         <Label htmlFor="password" className="text-sm font-medium">Password</Label>
-        <Input id="password" name="password" type="password" value={form.password} onChange={handleChange} required />
+        <Input
+          id="password"
+          name="password"
+          type="password"
+          value={form.password}
+          onChange={handleChange}
+          onBlur={handleBlur}
+          className={errors.password ? "border-red-500 focus-visible:ring-red-500" : ""}
+        />
+        {errors.password && (
+          <p className="text-xs text-red-500 mt-1">{errors.password}</p>
+        )}
       </div>
       <div className="flex items-center justify-between text-xs text-gray-500">
         <label className="flex items-center gap-2 cursor-pointer select-none">

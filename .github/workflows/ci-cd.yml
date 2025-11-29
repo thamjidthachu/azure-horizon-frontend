@@ -1,5 +1,20 @@
 name: CI/CD Pipeline
 
+env:
+  NEXT_PUBLIC_API_BASE_URL: ${{ secrets.NEXT_PUBLIC_API_BASE_URL }}
+  NEXT_PUBLIC_API_VERSION: ${{ secrets.NEXT_PUBLIC_API_VERSION }}
+  NEXT_PUBLIC_WEBSOCKET_HOST: ${{ secrets.NEXT_PUBLIC_WEBSOCKET_HOST }}
+  NEXT_PUBLIC_WEBSOCKET_PATH: ${{ secrets.NEXT_PUBLIC_WEBSOCKET_PATH }}
+  NEXT_PUBLIC_WEBSOCKET_PING_INTERVAL: ${{ secrets.NEXT_PUBLIC_WEBSOCKET_PING_INTERVAL }}
+  NEXT_PUBLIC_WEBSOCKET_PORT: ${{ secrets.NEXT_PUBLIC_WEBSOCKET_PORT }}
+  NEXT_PUBLIC_WEBSOCKET_PROTOCOL: ${{ secrets.NEXT_PUBLIC_WEBSOCKET_PROTOCOL }}
+  NEXT_PUBLIC_WEBSOCKET_RECONNECT_ATTEMPTS: ${{ secrets.NEXT_PUBLIC_WEBSOCKET_RECONNECT_ATTEMPTS }}
+  NEXT_PUBLIC_WEBSOCKET_RECONNECT_INTERVAL: ${{ secrets.NEXT_PUBLIC_WEBSOCKET_RECONNECT_INTERVAL }}
+  NEXT_PUBLIC_WEBSOCKET_SECURE: ${{ secrets.NEXT_PUBLIC_WEBSOCKET_SECURE }}
+  NEXT_PUBLIC_WEBSOCKET_SSL: ${{ secrets.NEXT_PUBLIC_WEBSOCKET_SSL }}
+  NEXT_PUBLIC_WEBSOCKET_TIMEOUT: ${{ secrets.NEXT_PUBLIC_WEBSOCKET_TIMEOUT }}
+  NEXT_PUBLIC_WEBSOCKET_URL: ${{ secrets.NEXT_PUBLIC_WEBSOCKET_URL }}
+
 on:
   pull_request:
     types: [opened, synchronize, reopened]
@@ -161,6 +176,20 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Validate deploy secrets
+        run: |
+          missing=""
+          [ -z "${{ secrets.SSH_PRIVATE_KEY }}" ] && missing="$missing SSH_PRIVATE_KEY"
+          [ -z "${{ secrets.PRODUCTION_USER }}" ] && missing="$missing PRODUCTION_USER"
+          [ -z "${{ secrets.PRODUCTION_HOST }}" ] && missing="$missing PRODUCTION_HOST"
+          [ -z "${{ secrets.PRODUCTION_PATH }}" ] && missing="$missing PRODUCTION_PATH"
+          
+          if [ -n "$missing" ]; then
+            echo "::error::Missing required deployment secrets:$missing"
+            echo "Add these in your repository settings under Settings > Secrets and variables > Actions."
+            exit 1
+          fi
 
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.9.0

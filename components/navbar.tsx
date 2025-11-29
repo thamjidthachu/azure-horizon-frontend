@@ -63,9 +63,11 @@ export function Navbar() {
 
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center space-x-2">
-            <Button variant="ghost" size="icon" aria-label="Wishlist">
-              <Heart className="h-5 w-5" />
-            </Button>
+            <Link href="/favorites">
+              <Button variant="ghost" size="icon" aria-label="Wishlist">
+                <Heart className="h-5 w-5" />
+              </Button>
+            </Link>
             <Link href="/cart">
               <Button variant="ghost" size="icon" className="relative" aria-label="Cart">
                 <ShoppingCart className="h-5 w-5" />
@@ -128,6 +130,18 @@ export function Navbar() {
                           onClick={() => setIsOpen(false)}
                         >
                           My Bookings
+                        </Link>
+                        <Separator />
+                      </div>
+                    )}
+                    {isAuthenticated && (
+                      <div key="Favorites">
+                        <Link
+                          href="/favorites"
+                          className="block text-foreground dark:text-gray-200 hover:text-primary dark:hover:text-teal-400 px-3 py-2 rounded-md text-base font-medium transition-colors"
+                          onClick={() => setIsOpen(false)}
+                        >
+                          Favorites
                         </Link>
                         <Separator />
                       </div>
@@ -211,6 +225,12 @@ function UserProfileSection({ user, onLogout }: { user: any, onLogout: () => voi
               <Button variant="ghost" className="w-full justify-start">
                 <Calendar className="h-4 w-4 mr-2" />
                 My Bookings
+              </Button>
+            </Link>
+            <Link href="/favorites">
+              <Button variant="ghost" className="w-full justify-start">
+                <Heart className="h-4 w-4 mr-2" />
+                Favorites
               </Button>
             </Link>
             <Button variant="ghost" className="w-full justify-start text-destructive hover:text-destructive" onClick={onLogout}>
